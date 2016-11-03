@@ -1,4 +1,4 @@
-package com.perfectomobile.quantum.utils;
+package com.quantum.utils;
 
 import com.google.common.base.CaseFormat;
 import com.perfectomobile.httpclient.Credentials;
@@ -20,7 +20,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import static com.perfectomobile.quantum.utils.ConfigurationUtils.getBaseBundle;
+import static com.quantum.utils.ConfigurationUtils.getBaseBundle;
 import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 
 /**

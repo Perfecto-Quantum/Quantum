@@ -22,7 +22,7 @@
  *******************************************************************************/
 
 
-package com.perfectomobile.quantum.steps;
+package com.quantum.steps;
 
 import com.qmetry.qaf.automation.ui.WebDriverTestBase;
 import io.appium.java_client.AppiumDriver;

@@ -1,11 +1,11 @@
 /**
  * 
  */
-package com.perfectomobile.quantum.utils;
+package com.quantum.utils;
 
 import com.perfectomobile.httpclient.device.DeviceParameter;
 import com.perfectomobile.httpclient.device.DeviceResult;
-import com.perfectomobile.quantum.steps.PerfectoQAFSteps;
+import com.quantum.steps.PerfectoQAFSteps;
 import com.qmetry.qaf.automation.ui.WebDriverTestBase;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 import com.qmetry.qaf.automation.util.Validator;

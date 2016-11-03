@@ -1,4 +1,4 @@
-package com.perfectomobile.quantum.listerners;
+package com.quantum.listerners;
 
 import com.perfecto.reportium.WebDriverProvider;
 import com.perfecto.reportium.client.ReportiumClient;
@@ -9,7 +9,7 @@ import com.perfecto.reportium.model.Project;
 import com.perfecto.reportium.test.TestContext;
 import com.perfecto.reportium.test.result.TestResultFactory;
 import com.perfecto.reportium.testng.ReportiumTestNgListener;
-import com.perfectomobile.quantum.utils.ConsoleUtils;
+import com.quantum.utils.ConsoleUtils;
 import com.qmetry.qaf.automation.keys.ApplicationProperties;
 import com.qmetry.qaf.automation.step.QAFTestStepListener;
 import com.qmetry.qaf.automation.step.StepExecutionTracker;

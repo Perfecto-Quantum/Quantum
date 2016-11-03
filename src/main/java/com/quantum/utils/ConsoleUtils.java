@@ -1,4 +1,4 @@
-package com.perfectomobile.quantum.utils;
+package com.quantum.utils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.Capabilities;

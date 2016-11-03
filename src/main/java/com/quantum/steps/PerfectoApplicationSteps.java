@@ -1,10 +1,10 @@
 /**
  * 
  */
-package com.perfectomobile.quantum.steps;
+package com.quantum.steps;
 
 
-import com.perfectomobile.quantum.utils.DeviceUtils;
+import com.quantum.utils.DeviceUtils;
 import com.qmetry.qaf.automation.step.QAFTestStepProvider;
 import com.qmetry.qaf.automation.ui.WebDriverTestBase;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
@@ -12,11 +12,11 @@ import cucumber.api.java.en.Then;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.perfectomobile.quantum.utils.DeviceUtils.*;
 import static com.qmetry.qaf.automation.step.CommonStep.*;
+import static com.quantum.utils.DeviceUtils.*;
 
 /**
- * The class PerfectoApplicationSteps provides methods for working with applications, with cucumber steps annotations. 
+ * The class PerfectoApplicationSteps provides methods for working with applications, with cucumber steps annotations.
  * <p>
  * Contexts used for testing:
  * <ul>
@@ -54,7 +54,7 @@ public class PerfectoApplicationSteps {
      */
     @Then("^I start application by name \"(.*?)\"$")
     public static void startAppByName(String name){
-        startApp(getDriver(), name, "name");
+        DeviceUtils.startApp(getDriver(), name, "name");
         // Change to app context after open app 
         switchToContext(getDriver(), "NATIVE_APP");
 

@@ -22,7 +22,7 @@
  *******************************************************************************/
 
 
-package com.perfectomobile.quantum.steps;
+package com.quantum.steps;
 
 import com.google.common.collect.ImmutableMap;
 import com.qmetry.qaf.automation.step.QAFTestStep;

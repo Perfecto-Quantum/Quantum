@@ -1,13 +1,13 @@
-package com.perfectomobile.quantum.steps;
+package com.quantum.steps;
 
-import com.perfectomobile.quantum.utils.DeviceUtils;
+import com.quantum.utils.DeviceUtils;
 import com.qmetry.qaf.automation.step.QAFTestStepProvider;
 import com.qmetry.qaf.automation.ui.WebDriverTestBase;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 import cucumber.api.java.en.Then;
 
 /**
- * The class PerfectoDeviceSteps provides methods for working with a device, with cucumber steps annotations. 
+ * The class PerfectoDeviceSteps provides methods for working with a device, with cucumber steps annotations.
  * <p>
  * Example: Working with a device.
  * <pre>

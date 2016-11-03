@@ -27,12 +27,12 @@
  * support-qaf@infostretch.com
  *******************************************************************************/
 
-package com.perfectomobile.quantum.listerners;
+package com.quantum.listerners;
 
-import com.perfectomobile.quantum.steps.PerfectoQAFSteps;
-import com.perfectomobile.quantum.utils.CloudUtils;
-import com.perfectomobile.quantum.utils.ConfigurationUtils;
-import com.perfectomobile.quantum.utils.ConsoleUtils;
+import com.quantum.steps.PerfectoQAFSteps;
+import com.quantum.utils.CloudUtils;
+import com.quantum.utils.ConfigurationUtils;
+import com.quantum.utils.ConsoleUtils;
 import com.qmetry.qaf.automation.ui.webdriver.CommandTracker;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 import com.qmetry.qaf.automation.ui.webdriver.QAFWebDriverCommandAdapter;

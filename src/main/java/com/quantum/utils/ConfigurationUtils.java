@@ -1,4 +1,4 @@
-package com.perfectomobile.quantum.utils;
+package com.quantum.utils;
 
 import com.perfectomobile.intellij.connector.ConnectorConfiguration;
 import com.perfectomobile.intellij.connector.impl.client.ClientSideLocalFileSystemConnector;
