@@ -144,9 +144,10 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
     }
 
     private void logTestEnd(ITestResult testResult){
+        String endText = "TEST " + (testResult.isSuccess() ? "PASSED" : "FAILED") + ": ";
         addReportLink(testResult, getReportiumClient().getReportUrl());
         ConsoleUtils.logWarningBlocks("REPORTIUM URL: " + getReportiumClient().getReportUrl().replace("[", "%5B").replace("]", "%5D"));
-        ConsoleUtils.surroundWithSquare("TEST FINISHED: " + testResult.getTestName() + (testResult.getParameters().length > 0 ? " [" + testResult.getParameters()[0] + "]" : ""));
+        ConsoleUtils.surroundWithSquare(endText + testResult.getTestName() + (testResult.getParameters().length > 0 ? " [" + testResult.getParameters()[0] + "]" : ""));
     }
 
     @Override

@@ -55,7 +55,7 @@
         </repository>
         <repository>
             <id>ps</id>
-            <url>https://github.com/PerfectoProfessionalServices/qaf-perfecto-support/raw/master/repository</url>
+            <url>https://github.com/Project-Quantum/mvn/raw/master/repository</url>
         </repository>
         <repository>
             <id>perfectomobile</id>
@@ -85,10 +85,10 @@
             <version>${selenium.version}</version>
         </dependency>
         <dependency>
-        <groupId>org.seleniumhq.selenium</groupId>
-        <artifactId>selenium-api</artifactId>
-        <version>${selenium.version}</version>
-    </dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-api</artifactId>
+            <version>${selenium.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
@@ -102,7 +102,13 @@
         <dependency>
             <groupId>com.qmetry</groupId>
             <artifactId>qaf</artifactId>
-            <version>2.1.9-RC3</version>
+            <version>2.1.9-patch1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>info.cukes</groupId>
+                    <artifactId>cucumber-java</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.qmetry</groupId>

@@ -41,9 +41,6 @@ import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.DriverCommand;
 
-/**
- * @author chirag.jayswal (chirag.jayswal@infostretch.com)
- */
 public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 	@Override
 	public void beforeCommand(QAFExtendedWebDriver driver,
