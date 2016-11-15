@@ -378,7 +378,7 @@ public class PerfectoApplicationSteps {
      * @param text the text to wait for to appear
      */
     @Then("^I wait \"(\\d*)\" seconds to see the text \"(.*?)\"$")
-    public static void waitForText(int seconds, String text){
+    public static void waitSeeToSeeText(int seconds, String text){
         waitForPresentTextVisual(getDriver(), text, seconds);
     }
 
