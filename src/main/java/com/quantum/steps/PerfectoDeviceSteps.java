@@ -22,7 +22,7 @@ import cucumber.api.java.en.Then;
  * @see <a href="https://github.com/PerfectoCode/Quantum/wiki/BDD-Implementation">BDD Implementation</a>
  *
  */
-@QAFTestStepProvider
+@QAFTestStepProvider(prefix="cucmber")
 public class PerfectoDeviceSteps {
 
     protected static QAFExtendedWebDriver getDriver(){
