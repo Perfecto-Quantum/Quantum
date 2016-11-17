@@ -38,7 +38,7 @@ import static com.quantum.utils.DeviceUtils.*;
  * @see <a href="https://github.com/PerfectoCode/Quantum/wiki/BDD-Implementation">BDD Implementation</a>
  * @see <a href="https://community.perfectomobile.com/series/20208/posts/1072062">Switching contexts</a>
  */
-@QAFTestStepProvider
+@QAFTestStepProvider(perfix=“cucumber”)
 public class PerfectoApplicationSteps {
 	   //TODO should make new driver every call?
     private static WebDriverTestBase webDriverTestBase = new WebDriverTestBase();
