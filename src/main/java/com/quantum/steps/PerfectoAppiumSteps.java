@@ -26,6 +26,7 @@ package com.quantum.steps;
 
 import com.google.common.base.Function;
 import com.qmetry.qaf.automation.ui.WebDriverTestBase;
+import com.quantum.utils.ConsoleUtils;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.MobileElement;
 import io.appium.java_client.TouchAction;
@@ -42,17 +43,44 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * com.qmetry.qaf.automation.step.AppiumSteps.java
+ * com.qmetry.qaf.automation.step.PerfectoAppiumSteps.java
  * 
  * @author chirag.jayswal
  */
-public final class AppiumSteps {
+public final class PerfectoAppiumSteps {
+
+    public static AppiumDriver getAppiumDriver() {
+        return checkType(AppiumDriver.class);
+    }
+
+    public static IOSDriver getIOSDriver() {
+        return checkType(IOSDriver.class);
+    }
+
+    public static AndroidDriver getAndroidDriver() {
+        return checkType(AndroidDriver.class);
+    }
+
+    private static <T> T checkType(Class<T> expectedClass) {
+            T driver = (T) new WebDriverTestBase().getDriver().getUnderLayingDriver();
+            if (expectedClass.isInstance(driver))
+                return driver;
+            else throw new ClassCastException(driverErrorMsg(expectedClass, driver.getClass()));
+    }
+
+    private static String driverErrorMsg(Class expectedClass, Class driverClass) {
+        String stepWarning = String.format("Underlying driver is an %s.  This step requires an %s.", driverClass.getSimpleName(), expectedClass.getSimpleName());
+        ConsoleUtils.logWarningBlocks("ERROR: " + stepWarning);
+        return String.format(stepWarning + "\n\tSet following properties to use required driver:" +
+                                    "\n\t\tperfecto.capabilities.driverClass=%s" +
+                                    "\n\t\tdriver.name=perfectoDriver", expectedClass.getName());
+    }
 	   /**
      * Swipe from Bottom to Top.
      */
     public static void swipeUp() {
         Point[] points = getXYtoVSwipe();
-        getDriver().swipe(points[0].x, points[0].y, points[1].x, points[1].y, 1);
+        getAppiumDriver().swipe(points[0].x, points[0].y, points[1].x, points[1].y, 1);
     }
     
     /**
@@ -60,7 +88,7 @@ public final class AppiumSteps {
      */
     public static void swipeDown() {
         Point[] points = getXYtoVSwipe();
-        getDriver().swipe(points[1].x, points[1].y, points[0].x, points[0].y, 1);
+        getAppiumDriver().swipe(points[1].x, points[1].y, points[0].x, points[0].y, 1);
     }
     
     /**
@@ -68,7 +96,7 @@ public final class AppiumSteps {
      */
     public static void swipeLeft() {
         Point[] points = getXYtoHSwipe();
-        getDriver().swipe(points[0].x, points[0].y, points[1].x, points[1].y, 1);
+        getAppiumDriver().swipe(points[0].x, points[0].y, points[1].x, points[1].y, 1);
     }
     
     /**
@@ -76,7 +104,7 @@ public final class AppiumSteps {
      */
     public static void swipeRight() {
         Point[] points = getXYtoHSwipe();
-        getDriver().swipe(points[1].x, points[1].y, points[0].x, points[0].y, 1);
+        getAppiumDriver().swipe(points[1].x, points[1].y, points[0].x, points[0].y, 1);
     }
     
     /**
@@ -85,7 +113,7 @@ public final class AppiumSteps {
      */
     private static Point[] getXYtoVSwipe() {
         // Get screen size.
-        Dimension size = getDriver().manage().window().getSize();
+        Dimension size = getAppiumDriver().manage().window().getSize();
         
         // Find x which is in middle of screen width.
         int startEndx = size.width / 2;
@@ -103,7 +131,7 @@ public final class AppiumSteps {
      */
     private static Point[] getXYtoHSwipe() {
         // Get screen size.
-        Dimension size = getDriver().manage().window().getSize();
+        Dimension size = getAppiumDriver().manage().window().getSize();
         
         //Find starting point x which is at right side of screen.
         int startx = (int) (size.width * 0.70);
@@ -123,10 +151,10 @@ public final class AppiumSteps {
     // values you supply
     // For instance Month, Day, Year for a birthday would have this loop 3 times
     // dynamically selecting each scroll wheel
-    public static void scrollKeys(IOSDriver driver, String[] list) {
+    public static void iosScrollKeys(String[] list) {
         System.out.println("Starting the process");
         for (int i = 0; i < list.length; i++) {
-            MobileElement we = (MobileElement) driver.findElementByXPath("//UIAPickerWheel["+(i+1)+"]");
+            MobileElement we = (MobileElement) getIOSDriver().findElementByXPath("//UIAPickerWheel["+(i+1)+"]");
             we.sendKeys(list[i]);
         }
         System.out.println("Ending Process");
@@ -146,10 +174,10 @@ public final class AppiumSteps {
     // based on this i'm telling the scroll code to go up or down searching for
     // the value
     // additionally i'm checking the same for the day and year
-    public static void scrollChecker(IOSDriver driver, String[] list) {
-        System.out.println("Starting the process");
+    public static void iosScrollChecker(String[] list) {
         for (int i = 0; i < list.length; i++) {
 
+            IOSDriver driver = getIOSDriver();
             MobileElement me = (MobileElement) driver.findElement(By.xpath("//UIAPickerWheel["+(i+1)+"]"));
             int mget = getMonthInt(me.getText().split(",")[0]);
 
@@ -167,7 +195,6 @@ public final class AppiumSteps {
                 }
             }
         }
-        System.out.println("Ending Process");
     }
 
     // Used to get the dynamic location of an object
@@ -193,7 +220,7 @@ public final class AppiumSteps {
         Map<String, Object> params1 = new HashMap<>();
         params1.put("location", start + "," + end);
         params1.put("operation", "down");
-        Object result1 = driver.executeScript("mobile:touch:tap", params1);
+        driver.executeScript("mobile:touch:tap", params1);
 
         Map<String, Object> params2 = new HashMap<>();
         List<String> coordinates2 = new ArrayList<>();
@@ -202,12 +229,12 @@ public final class AppiumSteps {
         params2.put("location", coordinates2);
         params2.put("auxiliary", "notap");
         params2.put("duration", "3");
-        Object result2 = driver.executeScript("mobile:touch:drag", params2);
+        driver.executeScript("mobile:touch:drag", params2);
 
         Map<String, Object> params3 = new HashMap<>();
         params3.put("location", direction);
         params3.put("operation", "up");
-        Object result3 = driver.executeScript("mobile:touch:tap", params3);
+        driver.executeScript("mobile:touch:tap", params3);
     }
 
     // Android Implementation
@@ -219,8 +246,8 @@ public final class AppiumSteps {
     // For instance Month, Day, Year for a birthday would have this loop 3 times
     // dynamically selecting each scroll wheel
     // Code here shouldn't be modified
-    public static void scrollKeys(AndroidDriver driver, String[] list) {
-        System.out.println("Starting the process");
+    public static void androidScrollKeys(String[] list) {
+        AndroidDriver driver = getAndroidDriver();
         for (int i = 0; i < list.length; i++) {
 
             By meX = By.xpath("//android.widget.NumberPicker["+(i+1)+"]/android.widget.EditText[1]");
@@ -232,9 +259,7 @@ public final class AppiumSteps {
             driver.performTouchAction(touchAction6);
 
             driver.getKeyboard().pressKey(convertAndroidMonthName(list[i]) + "");
-
         }
-        System.out.println("Ending Process");
     }
 
     // Used to get the integer for a month based on the string of the month
@@ -399,8 +424,4 @@ public final class AppiumSteps {
         return waitElement;
     }
     
-    private static AppiumDriver getDriver() {
-        return (AppiumDriver) new WebDriverTestBase().getDriver().getUnderLayingDriver();
-    }
-
 }
