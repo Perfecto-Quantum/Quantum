@@ -22,11 +22,10 @@
  *******************************************************************************/
 
 
-package com.quantum.steps;
+package com.quantum.utils;
 
 import com.google.common.base.Function;
 import com.qmetry.qaf.automation.ui.WebDriverTestBase;
-import com.quantum.utils.ConsoleUtils;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.MobileElement;
 import io.appium.java_client.TouchAction;
@@ -42,12 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-/**
- * com.qmetry.qaf.automation.step.PerfectoAppiumSteps.java
- * 
- * @author chirag.jayswal
- */
-public final class PerfectoAppiumSteps {
+public final class AppiumUtils {
 
     public static AppiumDriver getAppiumDriver() {
         return checkType(AppiumDriver.class);
@@ -61,20 +55,6 @@ public final class PerfectoAppiumSteps {
         return checkType(AndroidDriver.class);
     }
 
-    private static <T> T checkType(Class<T> expectedClass) {
-            T driver = (T) new WebDriverTestBase().getDriver().getUnderLayingDriver();
-            if (expectedClass.isInstance(driver))
-                return driver;
-            else throw new ClassCastException(driverErrorMsg(expectedClass, driver.getClass()));
-    }
-
-    private static String driverErrorMsg(Class expectedClass, Class driverClass) {
-        String stepWarning = String.format("Underlying driver is an %s.  This step requires an %s.", driverClass.getSimpleName(), expectedClass.getSimpleName());
-        ConsoleUtils.logWarningBlocks("ERROR: " + stepWarning);
-        return String.format(stepWarning + "\n\tSet following properties to use required driver:" +
-                                    "\n\t\tperfecto.capabilities.driverClass=%s" +
-                                    "\n\t\tdriver.name=perfectoDriver", expectedClass.getName());
-    }
 	   /**
      * Swipe from Bottom to Top.
      */
@@ -423,5 +403,19 @@ public final class PerfectoAppiumSteps {
         }
         return waitElement;
     }
-    
+
+    private static <T> T checkType(Class<T> expectedClass) {
+        T driver = (T) new WebDriverTestBase().getDriver().getUnderLayingDriver();
+        if (expectedClass.isInstance(driver))
+            return driver;
+        else throw new ClassCastException(driverErrorMsg(expectedClass, driver.getClass()));
+    }
+
+    private static String driverErrorMsg(Class expectedClass, Class driverClass) {
+        String stepWarning = String.format("Underlying driver is an %s.  This step requires an %s.", driverClass.getSimpleName(), expectedClass.getSimpleName());
+        ConsoleUtils.logWarningBlocks("ERROR: " + stepWarning);
+        return String.format(stepWarning + "\n\tSet following properties to use required driver:" +
+                "\n\t\tperfecto.capabilities.driverClass=%s" +
+                "\n\t\tdriver.name=perfectoDriver", expectedClass.getName());
+    }
 }
