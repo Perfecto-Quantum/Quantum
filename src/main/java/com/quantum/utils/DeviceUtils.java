@@ -5,55 +5,53 @@ package com.quantum.utils;
 
 import com.perfectomobile.httpclient.device.DeviceParameter;
 import com.perfectomobile.httpclient.device.DeviceResult;
-import com.quantum.steps.PerfectoQAFSteps;
 import com.qmetry.qaf.automation.ui.WebDriverTestBase;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 import com.qmetry.qaf.automation.util.Validator;
+import com.quantum.steps.PerfectoQAFSteps;
 import org.hamcrest.Matchers;
 import org.openqa.selenium.remote.DriverCommand;
 import org.openqa.selenium.remote.RemoteExecuteMethod;
-import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 
-/**
- * @author chirag.jayswal
- */
 public class DeviceUtils {
 
 	private static final String REPOSITORY_KEY = "perfecto.repository.folder";
 
-	public static boolean verifyVisualText(RemoteWebDriver driver, String text) {
-		return Validator.verifyThat(isText(driver, text, null), Matchers.equalTo("true"));
+	public static QAFExtendedWebDriver getQAFDriver() {
+		return new WebDriverTestBase().getDriver();
 	}
 
-	public static void assertVisualText(RemoteWebDriver driver, String text) {
+	public static boolean verifyVisualText(String text) {
+		return Validator.verifyThat(isText(text, null), Matchers.equalTo("true"));
+	}
+
+	public static void assertVisualText(String text) {
 		Validator.assertThat("Text: \"" + text + "\" should be present",
-				isText(driver, text, null), Matchers.equalTo("true"));
+				isText(text, null), Matchers.equalTo("true"));
 	}
 
-	public static void installApp(String filePath, RemoteWebDriver d,
-			boolean shouldInstrument) {
+	public static void installApp(String filePath, boolean shouldInstrument) {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("file", filePath);
 		if (shouldInstrument) {
 			params.put("instrument", "instrument");
 		}
-		d.executeScript("mobile:application:install", params);
+		getQAFDriver().executeScript("mobile:application:install", params);
 	}
 
 	public void installAppOnDevice(DeviceResult device) {
-		getBundle().setProperty("driver.name", "appiumRemoteDriver");
+		getBundle().setProperty("getQAFDriver().name", "appiumRemotegetQAFDriver()");
 
-		getBundle().setProperty("driver.capabilities.deviceName", device.getResponseValue(DeviceParameter.DEVICE_ID));
-		QAFExtendedWebDriver driver = new WebDriverTestBase().getDriver();
+		getBundle().setProperty("getQAFDriver().capabilities.deviceName", device.getResponseValue(DeviceParameter.DEVICE_ID));
 
 		PerfectoQAFSteps.installApp(REPOSITORY_KEY,
 				getBundle().getString("app.instrumentation", "noinstrument"));
-		driver.quit();
+		getQAFDriver().quit();
 	}
 
 	private static Map<String, String> getAppParams(String app, String by) {
@@ -63,65 +61,65 @@ public class DeviceUtils {
 	}
 
 	// by = "name" or "identifier"
-	public static void startApp(RemoteWebDriver driver, String app, String by) {
-		driver.executeScript("mobile:application:open", getAppParams(app, by));
+	public static void startApp(String app, String by) {
+		getQAFDriver().executeScript("mobile:application:open", getAppParams(app, by));
 	}
 	// by = "name" or "identifier"
-	public static void closeApp(RemoteWebDriver driver, String app, String by) {
-		driver.executeScript("mobile:application:close", getAppParams(app, by));
+	public static void closeApp(String app, String by) {
+		getQAFDriver().executeScript("mobile:application:close", getAppParams(app, by));
 	}
 	// by = "name" or "identifier"
-	public static void cleanApp(RemoteWebDriver driver, String app, String by) {
-		driver.executeScript("mobile:application:clean", getAppParams(app, by));
+	public static void cleanApp(String app, String by) {
+		getQAFDriver().executeScript("mobile:application:clean", getAppParams(app, by));
 	}
 	// by = "name" or "identifier"
-	public static void uninstallApp(RemoteWebDriver driver, String app, String by) {
-		driver.executeScript("mobile:application:uninstall", getAppParams(app, by));
+	public static void uninstallApp(String app, String by) {
+		getQAFDriver().executeScript("mobile:application:uninstall", getAppParams(app, by));
 	}
 
-	public static void uninstallAllApps(RemoteWebDriver driver) {
+	public static void uninstallAllApps() {
 		Map<String, String> params = new HashMap<String, String>();
-		driver.executeScript("mobile:application:reset", params);
+		getQAFDriver().executeScript("mobile:application:reset", params);
 	}
 
-	public static String getAppInfo(RemoteWebDriver driver, String property) {
+	public static String getAppInfo(String property) {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("property", property);
-		return (String) driver.executeScript("mobile:application:info", params);
+		return (String) getQAFDriver().executeScript("mobile:application:info", params);
 	}
 
-	public static boolean verifyAppInfo(RemoteWebDriver driver, String propertyName,
+	public static boolean verifyAppInfo(String propertyName,
 			String propertyValue) {
-		return Validator.verifyThat(getAppInfo(driver, propertyName),
+		return Validator.verifyThat(getAppInfo(propertyName),
 				Matchers.equalTo(propertyValue));
 	}
 
-	public static void assertAppInfo(RemoteWebDriver driver, String propertyName,
+	public static void assertAppInfo(String propertyName,
 			String propertyValue) {
-		String appOrientation = getAppInfo(driver, propertyName);
+		String appOrientation = getAppInfo(propertyName);
 		Validator.assertThat(appOrientation, Matchers.equalTo(propertyValue));
 	}
 
-	public static void switchToContext(RemoteWebDriver driver, String context) {
-		RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(driver);
+	public static void switchToContext(String context) {
+		RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(getQAFDriver());
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("name", context);
 		executeMethod.execute(DriverCommand.SWITCH_TO_CONTEXT, params);
 	}
 
-	public static void waitForPresentTextVisual(RemoteWebDriver driver, String text,
+	public static void waitForPresentTextVisual(String text,
 			int seconds) {
-		isText(driver, text, seconds);
+		isText(text, seconds);
 	}
 
-	public static void waitForPresentImageVisual(RemoteWebDriver driver, String image,
+	public static void waitForPresentImageVisual(String image,
 			int seconds) {
-		isImg(driver, image, seconds);
+		isImg(image, seconds);
 	}
 
-	private static String isImg(RemoteWebDriver driver, String img, Integer timeout) {
-		String context = getCurrentContext(driver);
-		switchToContext(driver, "VISUAL");
+	private static String isImg(String img, Integer timeout) {
+		String context = getCurrentContext();
+		switchToContext("VISUAL");
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("content", img);
 		params.put("measurement", "accurate");
@@ -130,39 +128,38 @@ public class DeviceUtils {
 		params.put("timeout", timeout);
 		params.put("match", "bounded");
 		params.put("imageBounds.needleBound", 25);
-		Object result = driver.executeScript("mobile:checkpoint:image", params);
-		switchToContext(driver, context);
+		Object result = getQAFDriver().executeScript("mobile:checkpoint:image", params);
+		switchToContext(context);
 		return result.toString();
 	}
 
-	public static void assertVisualImg(RemoteWebDriver driver, String img) {
+	public static void assertVisualImg(String img) {
 		Validator.assertThat("Image " + img + " should be visible",
-				isImg(driver, img, 180), Matchers.equalTo("true"));
+				isImg(img, 180), Matchers.equalTo("true"));
 	}
 
-	public static boolean verifyVisualImg(RemoteWebDriver driver, String img) {
-		return Validator.verifyThat(isImg(driver, img, 180), Matchers.equalTo("true"));
+	public static boolean verifyVisualImg(String img) {
+		return Validator.verifyThat(isImg(img, 180), Matchers.equalTo("true"));
 	}
 
-	private static String isText(RemoteWebDriver driver, String text, Integer timeout) {
-		String context = getCurrentContext(driver);
-		switchToContext(driver, "VISUAL");
+	private static String isText(String text, Integer timeout) {
+		String context = getCurrentContext();
+		switchToContext("VISUAL");
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("content", text);
 		if (timeout != null) {
 			params.put("timeout", timeout);
 		}
-		Object result = driver.executeScript("mobile:checkpoint:text", params);
-		switchToContext(driver, context);
+		Object result = getQAFDriver().executeScript("mobile:checkpoint:text", params);
+		switchToContext(context);
 		return result.toString();
 	}
 
 	/**
-	 * @param driver
 	 * @return the current context - "NATIVE_APP", "WEBVIEW", "VISUAL"
 	 */
-	public static String getCurrentContext(RemoteWebDriver driver) {
-		RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(driver);
+	public static String getCurrentContext() {
+		RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(getQAFDriver());
 		return (String) executeMethod.execute(DriverCommand.GET_CURRENT_CONTEXT_HANDLE,
 				null);
 	}
@@ -180,15 +177,13 @@ public class DeviceUtils {
 	 * The listed keys are not necessarily supported by all devices. The
 	 * available keys depend on the device.
 	 *
-	 * @param driver
-	 *            the RemoteWebDriver
 	 * @param keySequence
 	 *            the single or sequence of keys to click
 	 */
-	public static void pressKey(RemoteWebDriver driver, String keySequence) {
+	public static void pressKey(String keySequence) {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("keySequence", keySequence);
-		driver.executeScript("mobile:presskey", params);
+		getQAFDriver().executeScript("mobile:presskey", params);
 	}
 
 	/**
@@ -197,8 +192,6 @@ public class DeviceUtils {
 	 * Example swipe left:<br/>
 	 * start: 60%,50% end: 10%,50%
 	 *
-	 * @param driver
-	 *            the RemoteWebDriver
 	 * @param start
 	 *            write in format of x,y. can be in pixels or
 	 *            percentage(recommended).
@@ -206,141 +199,135 @@ public class DeviceUtils {
 	 *            write in format of x,y. can be in pixels or
 	 *            percentage(recommended).
 	 */
-	public static void swipe(RemoteWebDriver driver, String start, String end) {
+	public static void swipe(String start, String end) {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("start", start);
 		params.put("end", end);
 
-		driver.executeScript("mobile:touch:swipe", params);
+		getQAFDriver().executeScript("mobile:touch:swipe", params);
 
 	}
 
 	/**
 	 * Performs the touch gesture according to the point coordinates.
 	 * 
-	 * @param driver
-	 *            the RemoteWebDriver
 	 * @param point
 	 *            write in format of x,y. can be in pixels or
 	 *            percentage(recommended).
 	 */
-	public static void touch(RemoteWebDriver driver, String point) {
+	public static void touch(String point) {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("location", point); // 50%,50%
 
-		driver.executeScript("mobile:touch:tap", params);
+		getQAFDriver().executeScript("mobile:touch:tap", params);
 	}
 
 	/**
 	 * Hides the virtual keyboard display.
 	 * 
-	 * @param driver
-	 *            the RemoteWebDriver
 	 */
-	public static void hideKeyboard(RemoteWebDriver driver) {
+	public static void hideKeyboard() {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("mode", "off");
 
-		driver.executeScript("mobile:keyboard:display", params);
+		getQAFDriver().executeScript("mobile:keyboard:display", params);
 
 	}
 
 	/**
 	 * Rotates the device to landscape, portrait, or its next state.
 	 * 
-	 * @param driver
-	 *            the RemoteWebDriver
 	 * @param restValue
 	 *            the "next" operation, or the "landscape" or "portrait" state.
 	 * @param by
 	 *            the "state" or "operation"
 	 */
 	// TODO: need additional description.
-	public static void rotateDevice(RemoteWebDriver driver, String restValue, String by) {
+	public static void rotateDevice(String restValue, String by) {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put(by, restValue);
-		driver.executeScript("mobile:handset:rotate", params);
+		getQAFDriver().executeScript("mobile:handset:rotate", params);
 	}
 
 	// by = "address" or "coordinates"
-	public static void setLocation(RemoteWebDriver driver, String location, String by) {
+	public static void setLocation(String location, String by) {
 
 		Map<String, String> params = new HashMap<String, String>();
 		params.put(by, location);
 
-		driver.executeScript("mobile:location:set", params);
+		getQAFDriver().executeScript("mobile:location:set", params);
 	}
 
-	public static void assertLocation(RemoteWebDriver driver, String location) {
-		String deviceLocation = getDeviceLocation(driver);
+	public static void assertLocation(String location) {
+		String deviceLocation = getDeviceLocation();
 		Validator.assertThat("The device location", deviceLocation,
 				Matchers.equalTo(location));
 
 	}
 
-	public static boolean verifyLocation(RemoteWebDriver driver, String location) {
-		String deviceLocation = getDeviceLocation(driver);
+	public static boolean verifyLocation(String location) {
+		String deviceLocation = getDeviceLocation();
 		return Validator.verifyThat(deviceLocation, Matchers.equalTo(location));
 	}
 
-	public static String getDeviceLocation(RemoteWebDriver driver) {
+	public static String getDeviceLocation() {
 		Map<String, String> params = new HashMap<String, String>();
-		return (String) driver.executeScript("mobile:location:get", params);
+		return (String) getQAFDriver().executeScript("mobile:location:get", params);
 	}
 
-	public static void resetLocation(RemoteWebDriver driver) {
+	public static void resetLocation() {
 		Map<String, String> params = new HashMap<String, String>();
-		driver.executeScript("mobile:location:reset", params);
+		getQAFDriver().executeScript("mobile:location:reset", params);
 	}
 
-	public static void goToHomeScreen(RemoteWebDriver driver) {
+	public static void goToHomeScreen() {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("target", "All");
 
-		driver.executeScript("mobile:handset:ready", params);
+		getQAFDriver().executeScript("mobile:handset:ready", params);
 	}
 
-	public static void lockDevice(RemoteWebDriver driver, int sec) {
+	public static void lockDevice(int sec) {
 		Map<String, Integer> params = new HashMap<String, Integer>();
 		params.put("timeout", sec);
 
-		driver.executeScript("mobile:screen:lock", params);
+		getQAFDriver().executeScript("mobile:screen:lock", params);
 	}
 
-	public static void setTimezone(RemoteWebDriver driver, String timezone) {
+	public static void setTimezone(String timezone) {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("timezone", timezone);
 
-		driver.executeScript("mobile:timezone:set", params);
+		getQAFDriver().executeScript("mobile:timezone:set", params);
 	}
 
-	public static String getTimezone(RemoteWebDriver driver) {
+	public static String getTimezone() {
 		Map<String, String> params = new HashMap<String, String>();
 
-		return (String) driver.executeScript("mobile:timezone:get", params);
+		return (String) getQAFDriver().executeScript("mobile:timezone:get", params);
 	}
 
-	public static void assertTimezone(RemoteWebDriver driver, String timezone) {
-		String deviceTimezone = getTimezone(driver);
+	public static void assertTimezone(String timezone) {
+		String deviceTimezone = getTimezone();
 		Validator.assertThat("The device timezone", deviceTimezone,
 				Matchers.equalTo(timezone));
 	}
 
-	public static boolean verifyTimezone(RemoteWebDriver driver, String timezone) {
-		return Validator.verifyThat(getTimezone(driver), Matchers.equalTo(timezone));
+	public static boolean verifyTimezone(String timezone) {
+		return Validator.verifyThat(getTimezone(), Matchers.equalTo(timezone));
 	}
 
-	public static void resetTimezone(RemoteWebDriver driver) {
+	public static void resetTimezone() {
 		Map<String, String> params = new HashMap<String, String>();
-		driver.executeScript("mobile:timezone:reset", params);
+		getQAFDriver().executeScript("mobile:timezone:reset", params);
 	}
 
-	public static void takeScreenshot(RemoteWebDriver driver, String repositoryPath,
+	public static void takeScreenshot(String repositoryPath,
 			boolean shouldSave) {
 		Map<String, String> params = new HashMap<String, String>();
 		if (shouldSave) {
 			params.put("key", repositoryPath);
 		}
-		driver.executeScript("mobile:screen:image", params);
+		getQAFDriver().executeScript("mobile:screen:image", params);
 	}
 }

@@ -1,9 +1,7 @@
 package com.quantum.steps;
 
-import com.quantum.utils.DeviceUtils;
 import com.qmetry.qaf.automation.step.QAFTestStepProvider;
-import com.qmetry.qaf.automation.ui.WebDriverTestBase;
-import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
+import com.quantum.utils.DeviceUtils;
 import cucumber.api.java.en.Then;
 
 /**
@@ -25,16 +23,12 @@ import cucumber.api.java.en.Then;
 @QAFTestStepProvider(prefix="cucmber")
 public class PerfectoDeviceSteps {
 
-    protected static QAFExtendedWebDriver getDriver(){
-        return new WebDriverTestBase().getDriver();
-    }
-
     /**
      * Rotates the device to landscape mode.
      */
     @Then("^I rotate the device to landscape$")
     public void rotateToLandscape(){
-        DeviceUtils.rotateDevice(getDriver(), "landscape", "state");
+        DeviceUtils.rotateDevice("landscape", "state");
     }
 
     /**
@@ -42,7 +36,7 @@ public class PerfectoDeviceSteps {
      */
     @Then("^I rotate the device to portrait$")
     public void rotateToPortrait() {
-        DeviceUtils.rotateDevice(getDriver(), "portrait", "state");
+        DeviceUtils.rotateDevice("portrait", "state");
     }
 
     /**
@@ -50,7 +44,7 @@ public class PerfectoDeviceSteps {
      */
     @Then("^I rotate the device$")
     public void rotateDevice() {
-        DeviceUtils.rotateDevice(getDriver(), "next", "operation");
+        DeviceUtils.rotateDevice("next", "operation");
     }
 
     /**
@@ -65,7 +59,7 @@ public class PerfectoDeviceSteps {
      */
     @Then("^I set the device location to the coordinates \"(.*?)\"$")
     public void setLocationByCoordinates(String coordinates) {
-        DeviceUtils.setLocation(getDriver(), coordinates, "coordinates");
+        DeviceUtils.setLocation(coordinates, "coordinates");
     }
 
     /**
@@ -80,7 +74,7 @@ public class PerfectoDeviceSteps {
      */
     @Then("^I set the device location to the address \"(.*?)\"$")
     public void setLocationByAddress(String address){
-        DeviceUtils.setLocation(getDriver(), address, "address");
+        DeviceUtils.setLocation(address, "address");
     }
 
     /**
@@ -92,7 +86,7 @@ public class PerfectoDeviceSteps {
      */
     @Then("^the device coordinates must be \"(.*?)\"$")
     public void assertLocationCoordinates(String coordinates) {
-        DeviceUtils.assertLocation(getDriver(), coordinates);
+        DeviceUtils.assertLocation(coordinates);
     }
 
     /**
@@ -105,7 +99,7 @@ public class PerfectoDeviceSteps {
      */
     @Then("^the device coordinates should be \"(.*?)\"$")
     public boolean verifyLocationCoordinates(String coordinates) {
-        return DeviceUtils.verifyLocation(getDriver(), coordinates);
+        return DeviceUtils.verifyLocation(coordinates);
     }
 
     /**
@@ -115,7 +109,7 @@ public class PerfectoDeviceSteps {
      */
     @Then("^I reset the device location$")
     public void resetLocation(){
-        DeviceUtils.resetLocation(getDriver());
+        DeviceUtils.resetLocation();
     }
 
     /**
@@ -127,7 +121,7 @@ public class PerfectoDeviceSteps {
      */
     @Then("^I go to the device home screen$")
     public void goToHomeScreen(){
-        DeviceUtils.goToHomeScreen(getDriver());
+        DeviceUtils.goToHomeScreen();
     }
 
     /**
@@ -135,7 +129,7 @@ public class PerfectoDeviceSteps {
      */
     @Then("^I swipe left$")
     public void swipeLeft(){
-        DeviceUtils.swipe(getDriver(), "60%,50%", "10%,50%");
+        DeviceUtils.swipe("60%,50%", "10%,50%");
     }
 
     /**
@@ -143,7 +137,7 @@ public class PerfectoDeviceSteps {
      */
     @Then("^I swipe right")
     public void swipeRight(){
-        DeviceUtils.swipe(getDriver(), "40%,50%", "90%,50%");
+        DeviceUtils.swipe("40%,50%", "90%,50%");
     }
 
     /**
@@ -151,7 +145,7 @@ public class PerfectoDeviceSteps {
      */
     @Then("^I scroll up$")
     public void scrollUp(){
-        DeviceUtils.swipe(getDriver(), "50%,40%", "50%,60%");
+        DeviceUtils.swipe("50%,40%", "50%,60%");
     }
 
     /**
@@ -159,7 +153,7 @@ public class PerfectoDeviceSteps {
      */
     @Then("^I scroll down$")
     public void scrollDown(){
-        DeviceUtils.swipe(getDriver(), "50%,60%", "50%,40%");
+        DeviceUtils.swipe("50%,60%", "50%,40%");
     }
 
     /**
@@ -169,7 +163,7 @@ public class PerfectoDeviceSteps {
      */
     @Then("^I lock the device for \"(\\d*\\.?\\d*)\" seconds$")
     public void lockDevice(int seconds){
-        DeviceUtils.lockDevice(getDriver(), seconds);
+        DeviceUtils.lockDevice(seconds);
     }
 
     /**
@@ -179,7 +173,7 @@ public class PerfectoDeviceSteps {
      */
     @Then("^I set timezone to \"(.*?)\"")
     public void setTimezone(String timezone){
-        DeviceUtils.setTimezone(getDriver(), timezone);
+        DeviceUtils.setTimezone(timezone);
     }
 
     /**
@@ -189,7 +183,7 @@ public class PerfectoDeviceSteps {
      */
     @Then("^the device timezone must be \"(.*?)\"")
     public void assertTimezone(String timezone){
-        DeviceUtils.assertTimezone(getDriver(), timezone);
+        DeviceUtils.assertTimezone(timezone);
     }
 
     /**
@@ -200,7 +194,7 @@ public class PerfectoDeviceSteps {
      */
     @Then("^the device timezone should be \"(.*?)\"")
     public boolean verifyTimezone(String timezone){
-        return DeviceUtils.verifyTimezone(getDriver(), timezone);
+        return DeviceUtils.verifyTimezone(timezone);
     }
 
     /**
@@ -208,7 +202,7 @@ public class PerfectoDeviceSteps {
      */
     @Then("^I reset the device timezone$")
     public void resetTimezone(){
-        DeviceUtils.resetTimezone(getDriver());
+        DeviceUtils.resetTimezone();
     }
 
     /**
@@ -216,7 +210,7 @@ public class PerfectoDeviceSteps {
      */
     @Then("^I take a screenshot$")
     public void takeScreenshot(){
-        DeviceUtils.takeScreenshot(getDriver(), null, false);
+        DeviceUtils.takeScreenshot(null, false);
     }
 
     /**
@@ -226,7 +220,7 @@ public class PerfectoDeviceSteps {
      */
     @Then("^I take a screenshot and save to \"(.*?)\"$")
     public void takeScreenshot(String repositoryPath){
-        DeviceUtils.takeScreenshot(getDriver(), repositoryPath, true);
+        DeviceUtils.takeScreenshot(repositoryPath, true);
     }
 
     /**
@@ -234,7 +228,7 @@ public class PerfectoDeviceSteps {
      */
     @Then("^I hide keyboard$")
     public void hideKeyboard(){
-        DeviceUtils.hideKeyboard(getDriver());
+        DeviceUtils.hideKeyboard();
     }
 
 

@@ -404,6 +404,7 @@ public final class AppiumUtils {
         return waitElement;
     }
 
+    @SuppressWarnings(value = "Unchecked")
     private static <T> T checkType(Class<T> expectedClass) {
         T driver = (T) new WebDriverTestBase().getDriver().getUnderLayingDriver();
         if (expectedClass.isInstance(driver))

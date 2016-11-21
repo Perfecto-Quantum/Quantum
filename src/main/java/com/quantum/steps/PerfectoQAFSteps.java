@@ -102,7 +102,6 @@ public final class PerfectoQAFSteps {
 	 * <p>
 	 * The listed keys are not necessarily supported by all devices. The available keys depend on the device.
 	 *
-     * @param driver the RemoteWebDriver
      * @param keySequence the single or sequence of keys to click
      */
 	@QAFTestStep(description="press {keySequence} keys on mobile")
@@ -113,10 +112,9 @@ public final class PerfectoQAFSteps {
     /**
      * Performs the swipe gesture according to the start and end coordinates.
      * <p>
-     * Example swipe left:<br/>
+     * Example swipe left:<br>
      * start: 60%,50% end: 10%,50%
      *
-     * @param driver the RemoteWebDriver
      * @param start write in format of x,y. can be in pixels or percentage(recommended).
      * @param end write in format of x,y. can be in pixels or percentage(recommended).
      */
@@ -133,7 +131,6 @@ public final class PerfectoQAFSteps {
     /**
      * Performs the touch gesture according to the point coordinates.
      * 
-     * @param driver the RemoteWebDriver
      * @param point write in format of x,y. can be in pixels or percentage(recommended) for example 50%,50%.
      */
 	@QAFTestStep(description="touch at {point} point")
@@ -143,8 +140,6 @@ public final class PerfectoQAFSteps {
 
     /**
      * Hides the virtual keyboard display.
-     * 
-     * @param driver the RemoteWebDriver
      */
 	@QAFTestStep(description="hide mobile keyboard")
     public static void hideKeyboard() {
@@ -154,7 +149,6 @@ public final class PerfectoQAFSteps {
     /**
      * Rotates the device to landscape, portrait, or its next state.
      * 
-     * @param driver the RemoteWebDriver
      * @param restValue the "next" operation, or the "landscape" or "portrait" state.
      * @param by the "state" or "operation"
      */

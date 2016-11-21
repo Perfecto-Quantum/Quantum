@@ -4,13 +4,9 @@
 package com.quantum.steps;
 
 
-import com.quantum.utils.DeviceUtils;
 import com.qmetry.qaf.automation.step.QAFTestStepProvider;
-import com.qmetry.qaf.automation.ui.WebDriverTestBase;
-import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
+import com.quantum.utils.DeviceUtils;
 import cucumber.api.java.en.Then;
-
-import java.util.concurrent.TimeUnit;
 
 import static com.qmetry.qaf.automation.step.CommonStep.*;
 import static com.quantum.utils.DeviceUtils.*;
@@ -40,13 +36,6 @@ import static com.quantum.utils.DeviceUtils.*;
  */
 @QAFTestStepProvider(prefix="cucmber")
 public class PerfectoApplicationSteps {
-	   //TODO should make new driver every call?
-    private static WebDriverTestBase webDriverTestBase = new WebDriverTestBase();
-
-    private static QAFExtendedWebDriver getDriver(){
-        return webDriverTestBase.getDriver();
-    }
-
     /**
      * Opens a native application with the application name. 
      * 
@@ -54,9 +43,9 @@ public class PerfectoApplicationSteps {
      */
     @Then("^I start application by name \"(.*?)\"$")
     public static void startAppByName(String name){
-        DeviceUtils.startApp(getDriver(), name, "name");
+        DeviceUtils.startApp(name, "name");
         // Change to app context after open app 
-        switchToContext(getDriver(), "NATIVE_APP");
+        switchToContext("NATIVE_APP");
 
     }
 
@@ -68,9 +57,9 @@ public class PerfectoApplicationSteps {
      */
     @Then("^I start application by id \"(.*?)\"$")
     public static void startAppById(String id){
-        startApp(getDriver(), id, "identifier");
+        startApp(id, "identifier");
         // Change to app context after open app 
-        switchToContext(getDriver(), "NATIVE_APP");
+        switchToContext("NATIVE_APP");
 
     }
 
@@ -81,7 +70,7 @@ public class PerfectoApplicationSteps {
      */
     @Then("^I close application by name \"(.*?)\"$")
     public static void closeAppByName(String name){
-        closeApp(getDriver(), name, "name");
+        closeApp(name, "name");
     }
     
     /**
@@ -92,7 +81,7 @@ public class PerfectoApplicationSteps {
      */
     @Then("^I close application by id \"(.*?)\"$")
     public static void closeAppById(String id){
-        closeApp(getDriver(), id, "identifier");
+        closeApp(id, "identifier");
     }
 
     /**
@@ -102,7 +91,7 @@ public class PerfectoApplicationSteps {
      */
     @Then("^I clean application by name \"(.*?)\"$")
     public static void cleanAppByName(String name){
-        cleanApp(getDriver(), name, "name");
+        cleanApp(name, "name");
     }
 
     /**
@@ -113,7 +102,7 @@ public class PerfectoApplicationSteps {
      */
     @Then("^I clean application by id \"(.*?)\"$")
     public static void cleanAppById(String id){
-        cleanApp(getDriver(), id, "identifier");
+        cleanApp(id, "identifier");
     }
 
     /**
@@ -123,7 +112,7 @@ public class PerfectoApplicationSteps {
      */
     @Then("^I uninstall application by name \"(.*?)\"$")
     public static void uninstallAppByName(String name){
-        uninstallApp(getDriver(), name, "name");
+        uninstallApp(name, "name");
     }
 
     /**
@@ -134,7 +123,7 @@ public class PerfectoApplicationSteps {
      */
     @Then("^I uninstall application by id \"(.*?)\"$")
     public static void uninstallAppById(String id){
-        uninstallApp(getDriver(), id, "identifier");
+        uninstallApp(id, "identifier");
     }
 
     /**
@@ -150,7 +139,7 @@ public class PerfectoApplicationSteps {
      */
     @Then("^I install application \"(.*?)\"$")
     public static void installApp(String application){
-        DeviceUtils.installApp(application, getDriver(), false);
+        DeviceUtils.installApp(application, false);
     }
 
     /**
@@ -166,7 +155,7 @@ public class PerfectoApplicationSteps {
      */
     @Then("^I install instrumented application \"(.*?)\"$")
     public static void installInstrumentApp(String application){
-    	DeviceUtils.installApp(application, getDriver(), true);
+    	DeviceUtils.installApp(application, true);
     }
 
     /**
@@ -174,7 +163,7 @@ public class PerfectoApplicationSteps {
 	 */
     @Then("^I uninstall all applications$")
     public static void resetApplications(){
-        uninstallAllApps(getDriver());
+        uninstallAllApps();
     }
 
     /**
@@ -185,7 +174,7 @@ public class PerfectoApplicationSteps {
      */
     @Then("^application version should be \"(.*?)\"$")
     public static boolean verifyAppVersion(String version){
-        return verifyAppInfo(getDriver(), "version", version);
+        return verifyAppInfo("version", version);
     }
 
     /**
@@ -195,7 +184,7 @@ public class PerfectoApplicationSteps {
      */
     @Then("^application version must be \"(.*?)\"$")
     public static void assertAppVersion(String version){
-        assertAppInfo(getDriver(), "version", version);
+        assertAppInfo("version", version);
     }
 
     /**
@@ -206,7 +195,7 @@ public class PerfectoApplicationSteps {
      */
     @Then("^application orientation should be \"(.*?)\"$")
     public static boolean verifyAppOrientation(String orientation) {
-        return verifyAppInfo(getDriver(), "orientation", orientation);
+        return verifyAppInfo("orientation", orientation);
     }
 
     /**
@@ -216,7 +205,7 @@ public class PerfectoApplicationSteps {
      */
     @Then("^application orientation must be \"(.*?)\"$")
     public static void assertAppOrientation(String orientation) {
-        assertAppInfo(getDriver(), "orientation", orientation);
+        assertAppInfo("orientation", orientation);
     }
 
     /**
@@ -275,7 +264,7 @@ public class PerfectoApplicationSteps {
      */
     @Then("^I should see text \"(.*?)\"$")
     public static boolean verifyVisualText(String text){
-        return DeviceUtils.verifyVisualText(getDriver(),text);
+        return DeviceUtils.verifyVisualText(text);
     }
 
     /**
@@ -285,7 +274,7 @@ public class PerfectoApplicationSteps {
      */
     @Then("^I must see text \"(.*?)\"$")
     public static void asserVisualText(String text){
-        assertVisualText(getDriver(), text);
+        assertVisualText(text);
     }
 
     /**
@@ -295,7 +284,7 @@ public class PerfectoApplicationSteps {
      */
     @Then("^I must see image \"(.*?)\"$")
     public static void assertVisualImg(String img){
-    	DeviceUtils.assertVisualImg(getDriver(), img);
+    	DeviceUtils.assertVisualImg(img);
     }
 
     /**
@@ -310,7 +299,7 @@ public class PerfectoApplicationSteps {
      */
     @Then("^I should see image \"(.*?)\"$")
     public static void verifyVisualImg(String img){
-    	DeviceUtils.verifyVisualImg(getDriver(), img);
+    	DeviceUtils.verifyVisualImg(img);
     }
 
     /**
@@ -320,7 +309,7 @@ public class PerfectoApplicationSteps {
      */
     @Then("^I switch to native context$")
     public static void switchNativeContext(){
-        switchToContext(getDriver(), "NATIVE_APP");
+        switchToContext("NATIVE_APP");
     }
 
     /**
@@ -330,7 +319,7 @@ public class PerfectoApplicationSteps {
      */
     @Then("^I switch to webview context$")
     public static void switchWebviewContext(){
-        switchToContext(getDriver(), "WEBVIEW");
+        switchToContext("WEBVIEW");
     }
 
     /**
@@ -340,7 +329,7 @@ public class PerfectoApplicationSteps {
      */
     @Then("^I switch to visual context$")
     public static void switchVisualContext(){
-        switchToContext(getDriver(), "VISUAL");
+        switchToContext("VISUAL");
     }
 
 
@@ -379,7 +368,7 @@ public class PerfectoApplicationSteps {
      */
     @Then("^I wait \"(\\d*)\" seconds to see the text \"(.*?)\"$")
     public static void waitSeeToSeeText(int seconds, String text){
-        waitForPresentTextVisual(getDriver(), text, seconds);
+        waitForPresentTextVisual(text, seconds);
     }
 
     /**
@@ -390,17 +379,7 @@ public class PerfectoApplicationSteps {
      */
     @Then("^I wait \"(\\d*)\" seconds to see the image \"(.*?)\"$")
     public static void waitForImg(int seconds, String image){
-        waitForPresentImageVisual(getDriver(), image, seconds);
-    }
-
-    /**
-     * Sets the wait period.
-     * 
-     * @param seconds the wait duration
-     */
-    @Then("^I wait \"(\\d*\\.?\\d*)\" seconds for elements to appear$")
-    public static void waitToAppear(long seconds){
-        getDriver().manage().timeouts().implicitlyWait(seconds, TimeUnit.SECONDS);
+        waitForPresentImageVisual(image, seconds);
     }
 
     /**

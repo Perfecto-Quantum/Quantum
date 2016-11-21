@@ -7,6 +7,9 @@ import org.testng.Reporter;
 import java.util.Arrays;
 import java.util.Iterator;
 
+/**
+ *
+ */
 public class ConsoleUtils {
 
 	/*219 DB  U+2588      █   full block
@@ -21,9 +24,7 @@ public class ConsoleUtils {
 	public static final String right_block = new String(Character.toChars(0x2590));
 	public static final String left_block = new String(Character.toChars(0x258C));
 	public static final String WARNING_PADDING = upper_block + lower_block;
-	/**
-	 * The device description as it's stored on the Perfecto Mobile cloud
-	 */
+
 	public static String getDeviceDesc(Capabilities caps) {
 		if (ConfigurationUtils.isDevice(caps))
 			return ("" + caps.getCapability("model")).replace(" ", "") + " " + getDeviceName(caps);
@@ -54,9 +55,6 @@ public class ConsoleUtils {
 				: caps.getCapability("platformVersion") + "";
 	}
 	
-	/**
-	 * The name of the test function
-	 */
 	public static String getTestName(Capabilities caps) {
 		return caps.getCapability("scriptName") == null ? "" : caps.getCapability("scriptName") + "";
 	}
