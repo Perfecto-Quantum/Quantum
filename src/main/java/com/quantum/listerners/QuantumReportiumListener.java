@@ -55,8 +55,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
             }
 
             if (getBundle().getBoolean("perfecto.default.driver.listener", true)) {
-                List<String> driverListeners = getBundle()
-                        .getList(ApplicationProperties.WEBDRIVER_COMMAND_LISTENERS.key);
+                List<String> driverListeners = getBundle().getList(ApplicationProperties.WEBDRIVER_COMMAND_LISTENERS.key);
                 if (!driverListeners.contains(PerfectoDriverListener.class.getName())) {
                     driverListeners.add(PerfectoDriverListener.class.getName());
                     getBundle().setProperty(
@@ -78,7 +77,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
     public void beforeInvocation(IInvokedMethod method, ITestResult testResult) {
         if (method.isTestMethod()) {
             // Before execution of test method
-            ConsoleUtils.surroundWithSquare("TEST STARTED: " + testResult.getTestName() + (testResult.getParameters().length > 0 ? " [" + testResult.getParameters()[0] + "]" : ""));
+            ConsoleUtils.surroundWithSquare("TEST STARTED: " + getTestName(testResult) + (testResult.getParameters().length > 0 ? " [" + testResult.getParameters()[0] + "]" : ""));
         }
     }
 
@@ -147,12 +146,13 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
         String endText = "TEST " + (testResult.isSuccess() ? "PASSED" : "FAILED") + ": ";
         addReportLink(testResult, getReportiumClient().getReportUrl());
         ConsoleUtils.logWarningBlocks("REPORTIUM URL: " + getReportiumClient().getReportUrl().replace("[", "%5B").replace("]", "%5D"));
-        ConsoleUtils.surroundWithSquare(endText + testResult.getTestName() + (testResult.getParameters().length > 0 ? " [" + testResult.getParameters()[0] + "]" : ""));
+        ConsoleUtils.surroundWithSquare(endText + getTestName(testResult) + (testResult.getParameters().length > 0 ? " [" + testResult.getParameters()[0] + "]" : ""));
     }
 
     @Override
     protected String getTestName(ITestResult result) {
-        return result.getName();
+
+        return result.getTestName()== null? result.getMethod().getMethodName() : result.getTestName();
     }
 
     /**
