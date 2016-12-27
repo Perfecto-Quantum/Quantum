@@ -8,7 +8,6 @@ import com.perfectomobile.httpclient.device.DeviceResult;
 import com.qmetry.qaf.automation.ui.WebDriverTestBase;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 import com.qmetry.qaf.automation.util.Validator;
-import com.quantum.steps.PerfectoQAFSteps;
 import org.hamcrest.Matchers;
 import org.openqa.selenium.remote.DriverCommand;
 import org.openqa.selenium.remote.RemoteExecuteMethod;
@@ -49,10 +48,22 @@ public class DeviceUtils {
 
 		getBundle().setProperty("getQAFDriver().capabilities.deviceName", device.getResponseValue(DeviceParameter.DEVICE_ID));
 
-		PerfectoQAFSteps.installApp(REPOSITORY_KEY,
+		installApp(REPOSITORY_KEY,
 				getBundle().getString("app.instrumentation", "noinstrument"));
+
 		getQAFDriver().quit();
+
 	}
+
+	public void installApp(String repoKey, String instrument) {
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("file", getBundle().getString(repoKey,repoKey));
+		params.put("instrument", getBundle().getString(instrument, instrument));
+
+		String resultStr = (String) getQAFDriver().executeScript("mobile:application:install", params);
+		System.out.println(resultStr);
+	}
+
 
 	private static Map<String, String> getAppParams(String app, String by) {
 		Map<String, String> params = new HashMap<String, String>();

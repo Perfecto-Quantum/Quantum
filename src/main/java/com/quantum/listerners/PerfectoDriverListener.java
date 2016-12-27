@@ -29,7 +29,6 @@
 
 package com.quantum.listerners;
 
-import com.quantum.steps.PerfectoQAFSteps;
 import com.quantum.utils.CloudUtils;
 import com.quantum.utils.ConfigurationUtils;
 import com.quantum.utils.ConsoleUtils;
@@ -37,6 +36,7 @@ import com.qmetry.qaf.automation.ui.webdriver.CommandTracker;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 import com.qmetry.qaf.automation.ui.webdriver.QAFWebDriverCommandAdapter;
 import com.qmetry.qaf.automation.util.StringUtil;
+import com.quantum.utils.DeviceUtils;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.DriverCommand;
@@ -52,7 +52,7 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 				if (StringUtil.isNotBlank(appName) && StringUtil.isBlank((String) driver
 						.getCapabilities().getCapability("eclipseExecutionId"))) {
 					try {
-						PerfectoQAFSteps.closeApplication(appName);
+						DeviceUtils.closeApp(appName, "name");
 					} catch (Exception e) {
 					}
 				}

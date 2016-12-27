@@ -232,4 +232,20 @@ public class PerfectoDeviceSteps {
     }
 
 
+    @Then("^I press mobile \"(.*?)\" key$")
+    public static void pressMobileKeys(String keySequence) {
+        DeviceUtils.pressKey(keySequence);
+    }
+
+    /**
+     * Performs the touch gesture according to the point coordinates.
+     *
+     * @param point write in format of x,y. can be in pixels or percentage(recommended) for example 50%,50%.
+     */
+    @Then("^I touch on \"(.*?)\" point$")
+    public static void touch(String point) {
+        DeviceUtils.touch(point);
+    }
+
+
 }
