@@ -247,5 +247,15 @@ public class PerfectoDeviceSteps {
         DeviceUtils.touch(point);
     }
 
+    /**
+     * Performs the double touch gesture according to the point coordinates.
+     *
+     * @param locator write in format of x,y. can be in pixels or percentage(recommended) for example 50%,50%.
+     */
+    @Then("^I double click on \"(.*?)\" point$")
+    public static void doubleClick (String locator) {
+        DeviceUtils.doubleTouch(locator);
+    }
+
 
 }

@@ -302,6 +302,18 @@ public class PerfectoApplicationSteps {
     	DeviceUtils.verifyVisualImg(img);
     }
 
+
+    /**
+     * Switch to context.
+     *
+     * @see <a href="https://community.perfectomobile.com/series/20208/posts/1072062">Switching contexts</a>
+     */
+    @Then("^I switch to \"(.*?) context$")
+    public static void switchToContext(String context){
+        switchToContext(context);
+    }
+
+
     /**
      * Switch to native context (NATIVE_APP).
      * 

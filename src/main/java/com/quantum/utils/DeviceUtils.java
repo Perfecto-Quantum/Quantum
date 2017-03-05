@@ -48,8 +48,7 @@ public class DeviceUtils {
 
 		getBundle().setProperty("getQAFDriver().capabilities.deviceName", device.getResponseValue(DeviceParameter.DEVICE_ID));
 
-		installApp(REPOSITORY_KEY,
-				getBundle().getString("app.instrumentation", "noinstrument"));
+		installApp(REPOSITORY_KEY, getBundle().getString("app.instrumentation", "noinstrument"));
 
 		getQAFDriver().quit();
 
@@ -154,15 +153,12 @@ public class DeviceUtils {
 	}
 
 	private static String isText(String text, Integer timeout) {
-		String context = getCurrentContext();
-		switchToContext("VISUAL");
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("content", text);
 		if (timeout != null) {
 			params.put("timeout", timeout);
 		}
 		Object result = getQAFDriver().executeScript("mobile:checkpoint:text", params);
-		switchToContext(context);
 		return result.toString();
 	}
 
@@ -230,6 +226,20 @@ public class DeviceUtils {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("location", point); // 50%,50%
 
+		getQAFDriver().executeScript("mobile:touch:tap", params);
+	}
+
+	/**
+	 * Performs the double touch gesture according to the point coordinates.
+	 *
+	 * @param point
+	 *            write in format of x,y. can be in pixels or
+	 *            percentage(recommended).
+	 */
+	public static void doubleTouch(String point) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("location",point);
+		params.put("operation", "double");
 		getQAFDriver().executeScript("mobile:touch:tap", params);
 	}
 
