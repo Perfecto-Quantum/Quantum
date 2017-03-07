@@ -1,5 +1,6 @@
 /**
- * 
+/**
+ *
  */
 package com.quantum.utils;
 
@@ -26,11 +27,12 @@ public class DeviceUtils {
 	}
 
 	public static boolean verifyVisualText(String text) {
-		return Validator.verifyThat(isText(text, null), Matchers.equalTo("true"));
+		return Validator.verifyThat("Text: \"" + text + "\" should be present",
+				isText(text, null), Matchers.equalTo("true"));
 	}
 
 	public static void assertVisualText(String text) {
-		Validator.assertThat("Text: \"" + text + "\" should be present",
+		Validator.assertThat("Text: \"" + text + "\" must be present",
 				isText(text, null), Matchers.equalTo("true"));
 	}
 
@@ -100,14 +102,15 @@ public class DeviceUtils {
 
 	public static boolean verifyAppInfo(String propertyName,
 			String propertyValue) {
-		return Validator.verifyThat(getAppInfo(propertyName),
-				Matchers.equalTo(propertyValue));
+		return Validator.verifyThat(propertyName + " should be " + propertyValue,
+				getAppInfo(propertyName), Matchers.equalTo(propertyValue));
 	}
 
 	public static void assertAppInfo(String propertyName,
 			String propertyValue) {
 		String appOrientation = getAppInfo(propertyName);
-		Validator.assertThat(appOrientation, Matchers.equalTo(propertyValue));
+		Validator.assertThat(propertyName + " must be " + propertyValue,
+				appOrientation, Matchers.equalTo(propertyValue));
 	}
 
 	public static void switchToContext(String context) {
@@ -144,12 +147,13 @@ public class DeviceUtils {
 	}
 
 	public static void assertVisualImg(String img) {
-		Validator.assertThat("Image " + img + " should be visible",
+		Validator.assertThat("Image " + img + " must be visible",
 				isImg(img, 180), Matchers.equalTo("true"));
 	}
 
 	public static boolean verifyVisualImg(String img) {
-		return Validator.verifyThat(isImg(img, 180), Matchers.equalTo("true"));
+		return Validator.verifyThat("Image " + img + " should be visible",
+				isImg(img, 180), Matchers.equalTo("true"));
 	}
 
 	private static String isText(String text, Integer timeout) {
@@ -244,6 +248,20 @@ public class DeviceUtils {
 	}
 
 	/**
+	 * Performs the long touch gesture according to the point coordinates.
+	 *
+	 * @param point
+	 *            write in format of x,y. can be in pixels or
+	 *            percentage(recommended).
+	 */
+	public static void longTouch(String point) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("location",point);
+		params.put("operation", "double");
+		getQAFDriver().executeScript("mobile:touch:tap", params);
+	}
+
+	/**
 	 * Hides the virtual keyboard display.
 	 * 
 	 */
@@ -288,7 +306,8 @@ public class DeviceUtils {
 
 	public static boolean verifyLocation(String location) {
 		String deviceLocation = getDeviceLocation();
-		return Validator.verifyThat(deviceLocation, Matchers.equalTo(location));
+		return Validator.verifyThat("The device location",
+				deviceLocation, Matchers.equalTo(location));
 	}
 
 	public static String getDeviceLocation() {
@@ -335,7 +354,8 @@ public class DeviceUtils {
 	}
 
 	public static boolean verifyTimezone(String timezone) {
-		return Validator.verifyThat(getTimezone(), Matchers.equalTo(timezone));
+		return Validator.verifyThat("The device timezone should be " + timezone,
+				getTimezone(), Matchers.equalTo(timezone));
 	}
 
 	public static void resetTimezone() {

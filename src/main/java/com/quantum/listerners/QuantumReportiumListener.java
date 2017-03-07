@@ -9,6 +9,9 @@ import com.perfecto.reportium.model.Project;
 import com.perfecto.reportium.test.TestContext;
 import com.perfecto.reportium.test.result.TestResultFactory;
 import com.perfecto.reportium.testng.ReportiumTestNgListener;
+import com.qmetry.qaf.automation.core.CheckpointResultBean;
+import com.qmetry.qaf.automation.core.MessageTypes;
+import com.qmetry.qaf.automation.core.TestBaseProvider;
 import com.quantum.utils.ConsoleUtils;
 import com.qmetry.qaf.automation.keys.ApplicationProperties;
 import com.qmetry.qaf.automation.step.QAFTestStepListener;
@@ -24,6 +27,7 @@ import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
 
+import java.awt.*;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -113,9 +117,26 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
     public void onTestFailure(ITestResult testResult) {
         ReportiumClient client = getReportiumClient();
         if (null != client) {
-            client.testStop(TestResultFactory.createFailure("An error occurred",
+
+            String failMsg = "";
+            List<CheckpointResultBean> checkpointsList = TestBaseProvider.instance().get().getCheckPointResults();
+            for (CheckpointResultBean result : checkpointsList) {
+                if (result.getType().equals(MessageTypes.TestStepFail.toString())){
+                    failMsg += "Step:" + result.getMessage() + " failed" + "\n";
+//                    List<CheckpointResultBean> subList = result.getSubCheckPoints();
+//                    for (CheckpointResultBean sub : subList) {
+//                        if (sub.getType().equals(MessageTypes.Fail.toString())){
+//                            failMsg += sub.getMessage() + "\n";
+//                        }
+//                    }
+                }
+
+            }
+            client.testStop(TestResultFactory.createFailure(failMsg.isEmpty()?"An error occurred":failMsg,
                     testResult.getThrowable()));
+
             logTestEnd(testResult);
+
         }
     }
 

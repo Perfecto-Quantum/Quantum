@@ -1,8 +1,11 @@
 package com.quantum.steps;
 
 import com.qmetry.qaf.automation.step.QAFTestStepProvider;
+import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebElement;
 import com.quantum.utils.DeviceUtils;
 import cucumber.api.java.en.Then;
+import org.openqa.selenium.*;
+
 
 /**
  * The class PerfectoDeviceSteps provides methods for working with a device, with cucumber steps annotations.
@@ -250,11 +253,34 @@ public class PerfectoDeviceSteps {
     /**
      * Performs the double touch gesture according to the point coordinates.
      *
-     * @param locator write in format of x,y. can be in pixels or percentage(recommended) for example 50%,50%.
+     * @param point write in format of x,y. can be in pixels or percentage(recommended) for example 50%,50%.
      */
     @Then("^I double click on \"(.*?)\" point$")
-    public static void doubleClick (String locator) {
-        DeviceUtils.doubleTouch(locator);
+    public static void doubleTouch (String point) {
+        DeviceUtils.doubleTouch(point);
+    }
+
+
+    /**
+     * Performs the double touch gesture according to the point coordinates.
+     *
+     * @param locator write in format of x,y. can be in pixels or percentage(recommended) for example 50%,50%.
+     */
+    @Then("^I double click on \"(.*?)\"")
+    public static void doubleClickElement(String locator) {
+
+        QAFExtendedWebElement myElement = new QAFExtendedWebElement(locator);
+
+        Point location = myElement.getLocation();
+        Dimension size = myElement.getSize();
+
+        // determine location to click and convert to an appropriate string
+        int xToClick = location.getX()+(size.getWidth()/2);
+        int yToClick = location.getY()+(size.getHeight()/2);
+        String clickLocation = xToClick + "," + yToClick;
+
+        DeviceUtils.doubleTouch(clickLocation);
+
     }
 
 
