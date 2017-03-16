@@ -16,6 +16,8 @@
         <testng.version>6.9.10</testng.version>
         <cukes.version>1.2.5</cukes.version>
         <org.json.version>20160810</org.json.version>
+        <perfectomobile.version>9.8.0.0</perfectomobile.version>
+        <qaf.version>2.1.10-RC2</qaf.version>     
     </properties>
 
     <scm>
@@ -125,12 +127,12 @@
         <dependency>
             <groupId>com.perfectomobile</groupId>
             <artifactId>http-client</artifactId>
-            <version>9.2.0.1</version>
+            <version>{perfectomobile.version}</version>
         </dependency>
         <dependency>
             <groupId>com.qmetry</groupId>
             <artifactId>qaf</artifactId>
-            <version>2.1.10-RC2</version>
+            <version>{qaf.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>info.cukes</groupId>
@@ -141,17 +143,17 @@
         <dependency>
             <groupId>com.qmetry</groupId>
             <artifactId>qaf-support</artifactId>
-            <version>2.1.10-RC2</version>
+            <version>{qaf.version}</version>
         </dependency>
         <dependency>
             <groupId>com.perfectomobile</groupId>
             <artifactId>pm-webdriver</artifactId>
-            <version>9.2.0.1</version>
+            <version>{perfectomobile.version}</version>
         </dependency>
         <dependency>
             <groupId>com.perfectomobile</groupId>
             <artifactId>intellij-connector</artifactId>
-            <version>9.2.0.0</version>
+            <version>{perfectomobile.version}</version>
         </dependency>
         <dependency>
             <groupId>com.perfecto.reporting-sdk</groupId>
