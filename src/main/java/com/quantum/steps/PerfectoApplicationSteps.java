@@ -310,7 +310,7 @@ public class PerfectoApplicationSteps {
      */
     @Then("^I switch to \"(.*?) context$")
     public static void switchToContext(String context){
-        switchToContext(context);
+        DeviceUtils.switchToContext(context);
     }
 
 
