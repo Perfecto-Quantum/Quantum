@@ -77,8 +77,21 @@ public class DeviceUtils {
 		getQAFDriver().executeScript("mobile:application:open", getAppParams(app, by));
 	}
 	// by = "name" or "identifier"
-	public static void closeApp(String app, String by) {
-		getQAFDriver().executeScript("mobile:application:close", getAppParams(app, by));
+	public static void closeApp(String app, String by) { closeApp(app, by, false);
+	}
+	// by = "name" or "identifier"
+	public static void closeApp(String app, String by, boolean ignoreExceptions) {
+
+		try {
+			getQAFDriver().executeScript("mobile:application:close", getAppParams(app, by));
+		} catch (Exception e){
+			if (!ignoreExceptions) {
+
+				throw e;
+			}
+
+
+		}
 	}
 	// by = "name" or "identifier"
 	public static void cleanApp(String app, String by) {
@@ -122,12 +135,14 @@ public class DeviceUtils {
 
 	public static void waitForPresentTextVisual(String text,
 			int seconds) {
-		isText(text, seconds);
+		 Validator.verifyThat("Text: \"" + text + "\" should be present after " + seconds + "seconds",
+				isText(text, seconds), Matchers.equalTo("true"));
 	}
 
 	public static void waitForPresentImageVisual(String image,
 			int seconds) {
-		isImg(image, seconds);
+		Validator.verifyThat("Image: \"" + image + "\" should be visible after " + seconds + "seconds",
+				isImg(image, seconds), Matchers.equalTo("true"));
 	}
 
 	private static String isImg(String img, Integer timeout) {

@@ -68,14 +68,35 @@ public class PerfectoApplicationSteps {
      * 
      * @param name the application name as it is displayed on the device screen
      */
-    @Then("^I close application by name \"(.*?)\"$")
-    public static void closeAppByName(String name){
-        closeApp(name, "name");
+    @Then("^I try to close application by name \"(.*?)\"$")
+    public static void closeAppByNameIgnoreExceptions(String name){
+        closeApp(name, "name", true);
     }
     
     /**
      * Closes a native application with the applicaiton id.
      * 
+     * @param id the identifier of the application
+     * @see <a href="https://community.perfectomobile.com/series/21760/posts/995065">Application Identifier</a>
+     */
+    @Then("^I try to close application by id \"(.*?)\"$")
+    public static void closeAppByIdIgnoreExceptions(String id){
+        closeApp(id, "identifier", true);
+    }
+
+    /**
+     * Closes a native application with the applicaiton name.
+     *
+     * @param name the application name as it is displayed on the device screen
+     */
+    @Then("^I close application by name \"(.*?)\"$")
+    public static void closeAppByName(String name){
+        closeApp(name, "name");
+    }
+
+    /**
+     * Closes a native application with the applicaiton id.
+     *
      * @param id the identifier of the application
      * @see <a href="https://community.perfectomobile.com/series/21760/posts/995065">Application Identifier</a>
      */
