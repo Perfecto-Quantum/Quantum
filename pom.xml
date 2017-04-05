@@ -17,7 +17,7 @@
         <cukes.version>1.2.5</cukes.version>
         <org.json.version>20160810</org.json.version>
         <perfectomobile.version>9.8.0.0</perfectomobile.version>
-        <qaf.version>2.1.10-RC2</qaf.version>     
+        <qaf.version>2.1.11-RC1</qaf.version>     
     </properties>
 
     <scm>
