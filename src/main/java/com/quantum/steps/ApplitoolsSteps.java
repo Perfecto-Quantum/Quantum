@@ -29,3 +29,4 @@ public class ApplitoolsSteps {
         //TODO: Implement - get the element from the locator (or element repository) and send it to CheckRegion function.
     }
 }
+
