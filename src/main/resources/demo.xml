@@ -1,0 +1,87 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Web Demo Suite" verbose="0" parallel="tests" thread-count="100">
+	<listeners>
+		<listener class-name="com.quantum.listerners.PerfectoDriverListener" />
+		<listener class-name="com.quantum.listerners.QuantumReportiumListener"/>
+		<listener class-name="com.quantum.listerners.ApplitoolsEyeListener"/>
+	</listeners>
+	<test name="Web Scenarios Android Test" enabled="false" thread-count="10">
+		<!-- <parameter name="driver.capabilities.deviceName" value="900E4DDB"></parameter> -->
+		<parameter name="driver.capabilities.model" value="Galaxy S.*"></parameter>
+		<groups>
+			<run>
+				<include name="test" />
+			</run>
+		</groups>
+		<classes>
+			<class
+					name="  " />
+		</classes>
+	</test>
+	<test name="Target-ios" enabled="false" thread-count="10">
+		<!--<parameter name="driver.capabilities.deviceName" value="1005AE54187C09D51375DA1700E4E0537782FF23"></parameter> -->
+		<parameter name="driver.capabilities.model" value="iPhone.*"></parameter>
+		<groups>
+			<run>
+				<include name="test" />
+			</run>
+		</groups>
+		<classes>
+			<class name="com.qmetry.qaf.automation.step.client.gherkin.GherkinScenarioFactory" />
+		</classes>
+	</test>
+
+
+
+	<test name="Target-S7" enabled="false" thread-count="10">
+		<!--<parameter name="driver.capabilities.deviceName" value="988667325047395643"></parameter>-->
+		<parameter name="driver.capabilities.model" value="Galaxy S7.*"></parameter>
+
+		<groups>
+			<run>
+				<include name="test" />
+			</run>
+		</groups>
+		<classes>
+			<class name="com.qmetry.qaf.automation.step.client.gherkin.GherkinScenarioFactory" />
+		</classes>
+	</test>
+
+
+
+
+	<test name="web" enabled="true" >
+		<parameter name="driver.capabilities.platformName" value="Windows"></parameter>
+		<parameter name="driver.capabilities.platformVersion" value="10"></parameter>
+		<parameter name="driver.capabilities.browserName" value="Chrome"></parameter>
+		<parameter name="driver.capabilities.browserVersion" value="latest"></parameter>
+
+
+		<groups>
+			<run>
+				<include name="test" />
+			</run>
+		</groups>
+		<classes>
+			<class name="com.qmetry.qaf.automation.step.client.gherkin.GherkinScenarioFactory" />
+		</classes>
+	</test>
+
+	<test name="web1" enabled="true" >
+		<parameter name="driver.capabilities.platformName" value="Windows"></parameter>
+		<parameter name="driver.capabilities.platformVersion" value="8.1"></parameter>
+		<parameter name="driver.capabilities.browserVersion" value="latest"></parameter>
+		<parameter name="driver.capabilities.browserName" value="Chrome"></parameter>
+
+		<groups>
+			<run>
+				<include name="test" />
+			</run>
+		</groups>
+		<classes>
+			<class
+					name="com.qmetry.qaf.automation.step.client.gherkin.GherkinScenarioFactory" />
+		</classes>
+	</test>
+
+</suite>

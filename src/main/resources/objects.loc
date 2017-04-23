@@ -1,0 +1,4 @@
+#locator repository for search page
+search.text.box = {\"locator\":\"name=q\",\"desc\":\"Search Text Box\"}
+search.button = {\"locator\":\"name=btnG\",\"desc\":\"Search Button\"}
+googlsearch.button = {\"locator\":\"name=btnK\",\"desc\":\"Search Button\"}

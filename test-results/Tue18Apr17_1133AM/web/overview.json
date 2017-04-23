@@ -1,0 +1,35 @@
+{
+  "total": 0,
+  "pass": 0,
+  "fail": 0,
+  "skip": 0,
+  "envInfo": {
+    "browser-actual-capabilities": {},
+    "isfw-build-info": {
+      "qaf-Type": "core",
+      "qaf-Revision": "10-RC2",
+      "qaf-Version": "2.1",
+      "qaf-Build-Time": "30-Nov-2016 00:39:15"
+    },
+    "run-parameters": {
+      "driver.capabilities.platformVersion": "10",
+      "resources": "src/main/resources/common",
+      "baseurl": "",
+      "driver.capabilities.browserVersion": "latest",
+      "driver.capabilities.platformName": "Windows",
+      "driver.capabilities.browserName": "Chrome"
+    },
+    "execution-env-info": {
+      "java.arch": "64",
+      "java.vendor": "Oracle Corporation",
+      "java.version": "1.8.0_121",
+      "os.arch": "x86_64",
+      "host": "nb-lirona-macosx.local",
+      "os.name": "Mac OS X",
+      "user.name": "lirona",
+      "os.version": "10.12.3"
+    }
+  },
+  "startTime": 1492504399089,
+  "endTime": 0
+}

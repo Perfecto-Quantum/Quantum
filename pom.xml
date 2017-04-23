@@ -180,5 +180,40 @@
             <artifactId>slf4j-log4j12</artifactId>
             <version>1.7.7</version>
         </dependency>
+        <dependency>
+            <groupId>com.applitools</groupId>
+            <artifactId>eyes-common-java</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.applitools</groupId>
+            <artifactId>eyes-sdk-java</artifactId>
+            <version>2.24</version>
+        </dependency>
+        <dependency>
+            <groupId>com.applitools</groupId>
+            <artifactId>eyes-selenium-java</artifactId>
+            <version>2.28</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-server</artifactId>
+            <version>1.18.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-json</artifactId>
+            <version>1.8</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>1.8</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.7.2</version>
+        </dependency>
     </dependencies>
 </project>
