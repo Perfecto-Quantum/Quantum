@@ -15,9 +15,8 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import java.util.Arrays;
 import java.util.Map;
 
-/**
- * Created by mitchellw on 9/27/2016.
- */
+/** Created by mitchellw on 9/27/2016 **/
+
 public class ConfigurationUtils {
 
     public static PropertyUtil getBaseBundle() {

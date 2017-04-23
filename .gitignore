@@ -1,2 +1,5 @@
 target/
 .idea/
+img/
+resources/
+test-results/
