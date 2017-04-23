@@ -1,4 +1,5 @@
 target/
 .idea/
+img/
 test-results/
-resources/application.properties
+resources/application.propertiesit
