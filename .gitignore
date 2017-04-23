@@ -2,4 +2,5 @@ target/
 .idea/
 img/
 test-results/
-resources/application.propertiesit
+resources/
+src/main/resources/
