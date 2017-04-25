@@ -10,50 +10,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: com.applitools:eyes-common-java:1.0" level="project" />
-    <orderEntry type="library" name="Maven: org.imgscalr:imgscalr-lib:4.2" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.5.1" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.5.0" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.5.1" level="project" />
-    <orderEntry type="library" name="Maven: com.applitools:eyes-sdk-java:2.24" level="project" />
-    <orderEntry type="library" name="Maven: com.applitools:eyes-connectivity-java-jersey1x:1.0" level="project" />
-    <orderEntry type="library" name="Maven: com.applitools:eyes-selenium-java:2.28" level="project" />
-    <orderEntry type="library" name="Maven: com.sun.jersey:jersey-server:1.18.1" level="project" />
-    <orderEntry type="library" name="Maven: com.sun.jersey:jersey-json:1.8" level="project" />
-    <orderEntry type="library" name="Maven: org.codehaus.jettison:jettison:1.1" level="project" />
-    <orderEntry type="library" name="Maven: stax:stax-api:1.0.1" level="project" />
-    <orderEntry type="library" name="Maven: com.sun.xml.bind:jaxb-impl:2.2.3-1" level="project" />
-    <orderEntry type="library" name="Maven: javax.xml.bind:jaxb-api:2.2.2" level="project" />
-    <orderEntry type="library" name="Maven: javax.xml.stream:stax-api:1.0-2" level="project" />
-    <orderEntry type="library" name="Maven: javax.activation:activation:1.1" level="project" />
-    <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-core-asl:1.7.1" level="project" />
-    <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-mapper-asl:1.7.1" level="project" />
-    <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-jaxrs:1.7.1" level="project" />
-    <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-xc:1.7.1" level="project" />
-    <orderEntry type="library" name="Maven: com.sun.jersey:jersey-client:1.8" level="project" />
-    <orderEntry type="library" name="Maven: org.jsoup:jsoup:1.7.2" level="project" />
-    <orderEntry type="library" name="Maven: com.applitools:eyes-common-java:1.0" level="project" />
-    <orderEntry type="library" name="Maven: org.imgscalr:imgscalr-lib:4.2" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.5.1" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.5.0" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.5.1" level="project" />
-    <orderEntry type="library" name="Maven: com.applitools:eyes-sdk-java:2.24" level="project" />
-    <orderEntry type="library" name="Maven: com.applitools:eyes-connectivity-java-jersey1x:1.0" level="project" />
-    <orderEntry type="library" name="Maven: com.applitools:eyes-selenium-java:2.28" level="project" />
-    <orderEntry type="library" name="Maven: com.sun.jersey:jersey-server:1.18.1" level="project" />
-    <orderEntry type="library" name="Maven: com.sun.jersey:jersey-json:1.8" level="project" />
-    <orderEntry type="library" name="Maven: org.codehaus.jettison:jettison:1.1" level="project" />
-    <orderEntry type="library" name="Maven: stax:stax-api:1.0.1" level="project" />
-    <orderEntry type="library" name="Maven: com.sun.xml.bind:jaxb-impl:2.2.3-1" level="project" />
-    <orderEntry type="library" name="Maven: javax.xml.bind:jaxb-api:2.2.2" level="project" />
-    <orderEntry type="library" name="Maven: javax.xml.stream:stax-api:1.0-2" level="project" />
-    <orderEntry type="library" name="Maven: javax.activation:activation:1.1" level="project" />
-    <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-core-asl:1.7.1" level="project" />
-    <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-mapper-asl:1.7.1" level="project" />
-    <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-jaxrs:1.7.1" level="project" />
-    <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-xc:1.7.1" level="project" />
-    <orderEntry type="library" name="Maven: com.sun.jersey:jersey-client:1.8" level="project" />
-    <orderEntry type="library" name="Maven: org.jsoup:jsoup:1.7.2" level="project" />
     <orderEntry type="library" name="Maven: org.testng:testng:6.9.10" level="project" />
     <orderEntry type="library" name="Maven: com.beust:jcommander:1.48" level="project" />
     <orderEntry type="library" name="Maven: org.beanshell:bsh:2.0b4" level="project" />

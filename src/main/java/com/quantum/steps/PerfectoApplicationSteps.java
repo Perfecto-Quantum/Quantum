@@ -306,6 +306,7 @@ public class PerfectoApplicationSteps {
     /**
      * Switch to context.
      *
+     * @param context
      * @see <a href="https://community.perfectomobile.com/series/20208/posts/1072062">Switching contexts</a>
      */
     @Then("^I switch to \"(.*?) context$")

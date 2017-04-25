@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.quantum</groupId>
     <artifactId>quantum-support</artifactId>
-    <version>1.7-SNAPSHOT</version>
+    <version>1.9-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -17,12 +15,13 @@
         <cukes.version>1.2.5</cukes.version>
         <org.json.version>20160810</org.json.version>
         <perfectomobile.version>9.8.0.0</perfectomobile.version>
-        <qaf.version>2.1.10-RC2</qaf.version>     
+        <qaf.version>2.1.10-RC2</qaf.version>
     </properties>
 
     <scm>
         <developerConnection>scm:git:https://github.com/Project-Quantum/Quantum</developerConnection>
-    </scm>
+      <tag>HEAD</tag>
+  </scm>
 
     <build>
         <resources>
