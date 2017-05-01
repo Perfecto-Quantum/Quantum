@@ -36,10 +36,13 @@ import com.qmetry.qaf.automation.ui.webdriver.CommandTracker;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 import com.qmetry.qaf.automation.ui.webdriver.QAFWebDriverCommandAdapter;
 import com.qmetry.qaf.automation.util.StringUtil;
+import com.qmetry.qaf.automation.core.ConfigurationManager;
 import com.quantum.utils.DeviceUtils;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.DriverCommand;
+
+import java.util.concurrent.TimeUnit;
 
 public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 	@Override
@@ -81,6 +84,9 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 		DesiredCapabilities dcaps = CloudUtils.getDeviceProperties((DesiredCapabilities) driver.getCapabilities());
 		ConfigurationUtils.setActualDeviceCapabilities(dcaps.asMap());
 		ConsoleUtils.logWarningBlocks("DEVICE PROPERTIES: " + dcaps.toString());
+
+		Long implicitWait = ConfigurationManager.getBundle().getLong("seleniun.wait.implicit", 0);
+		driver.manage().timeouts().implicitlyWait(implicitWait, TimeUnit.MILLISECONDS);
 	}
 
 }

@@ -6,7 +6,7 @@
 
     <groupId>com.quantum</groupId>
     <artifactId>quantum-support</artifactId>
-    <version>1.9-RC</version>
+    <version>1.10</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -17,7 +17,7 @@
         <cukes.version>1.2.5</cukes.version>
         <org.json.version>20160810</org.json.version>
         <perfectomobile.version>9.8.0.0</perfectomobile.version>
-        <qaf.version>2.1.11-RC1</qaf.version>     
+        <qaf.version>2.1.11</qaf.version>
     </properties>
 
     <scm>
