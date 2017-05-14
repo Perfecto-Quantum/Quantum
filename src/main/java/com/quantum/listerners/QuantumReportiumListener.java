@@ -89,11 +89,12 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
     public void beforExecute(StepExecutionTracker stepExecutionTracker) {
         String msg = "BEGIN STEP: " + stepExecutionTracker.getStep().getDescription();
         ConsoleUtils.logInfoBlocks(msg, ConsoleUtils.lower_block + " ", 10);
-        logTestStep(stepExecutionTracker.getStep().getDescription());
+        logStepStart(stepExecutionTracker.getStep().getDescription());
     }
 
     @Override
     public void afterExecute(StepExecutionTracker stepExecutionTracker) {
+        logStepEnd();
         String msg = "END STEP: " + stepExecutionTracker.getStep().getDescription();
         ConsoleUtils.logInfoBlocks(msg, ConsoleUtils.upper_block + " ", 10);
     }
@@ -158,6 +159,21 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
     public static void logTestStep(String message) {
         try {
             getReportiumClient().testStep(message);
+        } catch (Exception e) {
+            // ignore...
+        }
+    }
+
+    public static void logStepStart(String message) {
+        try {
+            getReportiumClient().stepStart(message);
+        } catch (Exception e) {
+            // ignore...
+        }
+    }
+    public static void logStepEnd() {
+        try {
+            getReportiumClient().stepEnd();
         } catch (Exception e) {
             // ignore...
         }
