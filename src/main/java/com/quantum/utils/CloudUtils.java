@@ -114,7 +114,7 @@ public class CloudUtils {
     }
 
     public static String getHostName() {
-        return getBaseBundle().getPropertyValue("remote.server").replace("https://", "")
+        return getBaseBundle().getPropertyValue("remote.server").replace(HTTPS, "")
                 .replace("/nexperience/perfectomobile/wd/hub", "");
     }
 
