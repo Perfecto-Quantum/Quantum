@@ -93,6 +93,22 @@ public class DeviceUtils {
 
 		}
 	}
+
+	// by = "name" or "identifier" with driver
+	public static void closeApp(String app, String by, boolean ignoreExceptions, QAFExtendedWebDriver driver) {
+
+		try {
+			driver.executeScript("mobile:application:close", getAppParams(app, by));
+		} catch (Exception e){
+			if (!ignoreExceptions) {
+
+				throw e;
+			}
+
+
+		}
+	}
+
 	// by = "name" or "identifier"
 	public static void cleanApp(String app, String by) {
 		getQAFDriver().executeScript("mobile:application:clean", getAppParams(app, by));
@@ -232,6 +248,26 @@ public class DeviceUtils {
 
 		getQAFDriver().executeScript("mobile:touch:swipe", params);
 
+	}
+
+	/**
+	 * Performs the tap gesture according to location coordinates with durations in seconds.
+	 * <p>
+	 *
+	 * @param point
+	 *            write in format of x,y. can be in pixels or
+	 *            percentage(recommended).
+	 *
+	 * @param seconds
+	 *            The duration, in seconds, for performing the touch operation.
+	 */
+	public static void longTouch(String point, int seconds) {
+
+		Map<String, Object> params = new HashMap<>();
+		params.put("location", point);
+		params.put("operation", "single");
+		params.put("duration", seconds);
+		new WebDriverTestBase().getDriver().executeScript("mobile:touch:tap", params);
 	}
 
 	/**
@@ -386,4 +422,52 @@ public class DeviceUtils {
 		}
 		getQAFDriver().executeScript("mobile:screen:image", params);
 	}
+
+	// by = "name" or "identifier"
+	public static void startImageInjection(String repositoryFile, String app, String by) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("repositoryFile", repositoryFile);
+		params.put(by, app);
+		getQAFDriver().executeScript("mobile:image.injection:start", params);
+
+	}
+
+	public static void stopImageInjection() {
+		Map<String, Object> params = new HashMap<>();
+		new WebDriverTestBase().getDriver().executeScript("mobile:image.injection:stop", params);
+	}
+
+	public static void setFingerprint(String by, String identifier, String resultAuth, String errorType) {
+
+		Map<String, Object> params = new HashMap<>();
+		params.put(by, identifier);
+		params.put("resultAuth", resultAuth);
+		params.put("errorType", errorType);
+		Object result2 = getQAFDriver().executeScript("mobile:fingerprint:set", params);
+	}
+
+
+	public static void generateHAR()
+	{
+		Map<String, Object> params = new HashMap<>();
+		params.put("generateHarFile", "true");
+		getQAFDriver().executeScript("mobile:vnetwork:start", params);
+
+	}
+
+	public static void stopGenerateHAR()
+	{
+		Map<String, Object> params = new HashMap<>();
+		getQAFDriver().executeScript("mobile:vnetwork:stop", params);
+
+	}
+
+	public static void audioInject(String file)
+	{
+		Map<String, Object> params = new HashMap<>();
+		params.put("key", file);
+		getQAFDriver().executeScript("mobile:audio:inject", params);
+
+	}
+
 }

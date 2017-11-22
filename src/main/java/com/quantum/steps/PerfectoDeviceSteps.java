@@ -283,5 +283,50 @@ public class PerfectoDeviceSteps {
 
     }
 
+    /**
+     * Performs the lo touch gesture according to the point coordinates.
+     *
+     * @param locator write in format of x,y. can be in pixels or percentage(recommended) for example 50%,50%.
+     */
+    @Then("^I tap on \"(.*?)\" for \"(\\d*\\.?\\d*)\" seconds$")
+    public static void tapElement(String locator, int seconds) {
+
+        QAFExtendedWebElement myElement = new QAFExtendedWebElement(locator);
+
+        Point location = myElement.getLocation();
+        Dimension size = myElement.getSize();
+
+        // determine location to click and convert to an appropriate string
+        int xToClick = location.getX()+(size.getWidth()/2);
+        int yToClick = location.getY()+(size.getHeight()/2);
+        String clickLocation = xToClick + "," + yToClick;
+
+        DeviceUtils.longTouch(clickLocation, seconds);
+
+
+    }
+
+
+    /**
+     * Generate Har file. The HAR file will be included in the Reporting artifacts for the automation report.
+     *
+      */
+    @Then("^Start generate Har file$")
+    public static void generateHar() {
+
+        DeviceUtils.generateHAR();
+
+    }
+
+    /**
+     * Stop generatimg Har file.
+     *
+     */
+    @Then("^Stop generate Har file$")
+    public static void stopGenerateHar() {
+
+        DeviceUtils.stopGenerateHAR();;
+
+    }
 
 }

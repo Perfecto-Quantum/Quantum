@@ -41,7 +41,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
     public static final String PERFECTO_REPORT_CLIENT = "perfecto.report.client";
 
-    public static ReportiumClient getReportiumClient() {
+    public static ReportiumClient getReportClient() {
         return (ReportiumClient) getBundle().getObject(PERFECTO_REPORT_CLIENT);
     }
 
@@ -106,7 +106,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
     @Override
     public void onTestSuccess(ITestResult testResult) {
-        ReportiumClient client = getReportiumClient();
+        ReportiumClient client = getReportClient();
         if (null != client) {
             client.testStop(TestResultFactory.createSuccess());
             logTestEnd(testResult);
@@ -116,7 +116,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
     @Override
     public void onTestFailure(ITestResult testResult) {
-        ReportiumClient client = getReportiumClient();
+        ReportiumClient client = getReportClient();
         if (null != client) {
 
             String failMsg = "";
@@ -158,7 +158,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
     public static void logTestStep(String message) {
         try {
-            getReportiumClient().testStep(message);
+            getReportClient().stepStart(message);
         } catch (Exception e) {
             // ignore...
         }
@@ -166,14 +166,22 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
     public static void logStepStart(String message) {
         try {
-            getReportiumClient().stepStart(message);
+            getReportClient().stepStart(message);
         } catch (Exception e) {
             // ignore...
         }
     }
     public static void logStepEnd() {
         try {
-            getReportiumClient().stepEnd();
+            getReportClient().stepEnd();
+        } catch (Exception e) {
+            // ignore...
+        }
+    }
+
+    public static void logAssert(String message, boolean status) {
+        try {
+            getReportClient().reportiumAssert(message, status);
         } catch (Exception e) {
             // ignore...
         }
@@ -181,8 +189,8 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
     private void logTestEnd(ITestResult testResult){
         String endText = "TEST " + (testResult.isSuccess() ? "PASSED" : "FAILED") + ": ";
-        addReportLink(testResult, getReportiumClient().getReportUrl());
-        ConsoleUtils.logWarningBlocks("REPORTIUM URL: " + getReportiumClient().getReportUrl().replace("[", "%5B").replace("]", "%5D"));
+        addReportLink(testResult, getReportClient().getReportUrl());
+        ConsoleUtils.logWarningBlocks("REPORTIUM URL: " + getReportClient().getReportUrl().replace("[", "%5B").replace("]", "%5D"));
         ConsoleUtils.surroundWithSquare(endText + getTestName(testResult) + (testResult.getParameters().length > 0 ? " [" + testResult.getParameters()[0] + "]" : ""));
     }
 

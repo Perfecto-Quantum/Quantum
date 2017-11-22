@@ -6,18 +6,19 @@
 
     <groupId>com.quantum</groupId>
     <artifactId>quantum-support</artifactId>
-    <version>1.11</version>
+    <version>RC-1.12</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <reportium-sdk.version>1.1.15</reportium-sdk.version>
+        <reportium-sdk.version>1.1.22</reportium-sdk.version>
         <selenium.version>2.53.1</selenium.version>
         <testng.version>6.9.10</testng.version>
         <cukes.version>1.2.5</cukes.version>
         <org.json.version>20160810</org.json.version>
-        <perfectomobile.version>9.8.0.0</perfectomobile.version>
-        <qaf.version>2.1.11</qaf.version>
+        <perfectomobile.version>10.11.0.0</perfectomobile.version>
+        <qaf.version>2.1.12</qaf.version>
+        <qafsupport.version>2.1.11</qafsupport.version>
     </properties>
 
     <scm>
@@ -143,7 +144,7 @@
         <dependency>
             <groupId>com.qmetry</groupId>
             <artifactId>qaf-support</artifactId>
-            <version>${qaf.version}</version>
+            <version>${qafsupport.version}</version>
         </dependency>
         <dependency>
             <groupId>com.perfectomobile</groupId>

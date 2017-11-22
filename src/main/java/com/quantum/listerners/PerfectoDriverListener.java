@@ -55,7 +55,8 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 				if (StringUtil.isNotBlank(appName) && StringUtil.isBlank((String) driver
 						.getCapabilities().getCapability("eclipseExecutionId"))) {
 					try {
-						DeviceUtils.closeApp(appName, "name");
+						DeviceUtils.closeApp(appName, "name", true, driver);
+
 					} catch (Exception e) {
 					}
 				}

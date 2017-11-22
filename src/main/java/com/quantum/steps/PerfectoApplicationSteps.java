@@ -243,10 +243,23 @@ public class PerfectoApplicationSteps {
     }
 
     /**
+     * Clear element.
+     * 
+     * Identify the edit field object using the <i>Object Repository</i> or an XPath expression.
+     *
+     * @param locator the object identifier
+     * @see <a href="https://github.com/PerfectoCode/Quantum/wiki/Object%20Repository">Object Repository</a>
+     */
+    @Then("^I clear \"(.*?)\"$")
+    public static void iClear(String locator){
+        clear(locator);
+    }
+
+    /**
      * Sets the text of a application element. Use the text parameter to specify the text to set.
-     * 
-     * Identify the edit field object using the <i>Object Repository</i> or an XPath expression. 
-     * 
+     *
+     * Identify the edit field object using the <i>Object Repository</i> or an XPath expression.
+     *
      * @param text the text to insert in the edit field
      * @param locator the object identifier
      * @see <a href="https://github.com/PerfectoCode/Quantum/wiki/Object%20Repository">Object Repository</a>
@@ -255,6 +268,7 @@ public class PerfectoApplicationSteps {
     public static void iSet(String text, String locator){
         sendKeys(text, locator);
     }
+
 
     /**
      * Verifies whether an element exists in the application. The test will continue to run in case of failure.
@@ -426,4 +440,88 @@ public class PerfectoApplicationSteps {
     public  static void navigateToURL(String url){
         get(url);
     }
+
+
+
+    /**
+     * Start image injection to the device camera to application using application name.
+     *
+     * @param repositoryFile the image repository file location
+     * @param name the application name as it is displayed on the device screen
+     */
+    @Then("^I start inject \"(.*?)\" image to application name \"(.*?)\"$")
+    public static void startAppByName(String repositoryFile, String name){
+        DeviceUtils.startApp(name, "name");
+        // Change to app context after open app
+        switchToContext("NATIVE_APP");
+        DeviceUtils.startImageInjection(repositoryFile, name, "name");
+
+    }
+
+    /**
+     * Start image injection to the device camera to application using application name.
+     *
+     * @param repositoryFile the image repository file location
+     * @param id the identifier of the application
+     * @see <a href="https://community.perfectomobile.com/series/21760/posts/995065">Application Identifier</a>
+     */
+    @Then("^I start inject \"(.*?)\" image to application id \"(.*?)\"$")
+    public static void startImageInejection(String repositoryFile, String id){
+
+        DeviceUtils.startImageInjection(repositoryFile, id, "id");
+    }
+
+    /**
+     * Stop image injection.
+     *
+     */
+    @Then("^I stop image injection")
+    public static void stopImageInejection(){
+
+        DeviceUtils.stopImageInjection();
+    }
+
+
+    /**
+     * Send fingerprint with success result to application with the applicaiton id.
+     *
+     * @param id the identifier of the application
+     */
+    @Then("^I set fingerprint with success result to application by id \"(.*?)\"$")
+    public static void setSuccessFingerprinttoAppById(String id){
+        DeviceUtils.setFingerprint("identifier", id,  "success", "");
+    }
+
+    /**
+     * Send fingerprint with success result to application with the applicaiton name.
+     *
+     * @param name the name of the application
+     */
+    @Then("^I set fingerprint with success result to application by name \"(.*?)\"$")
+    public static void setSuccessFingerprinttoAppByName(String name){
+        DeviceUtils.setFingerprint("name", name,  "success", "");
+    }
+
+    /**
+     * Send fingerprint with fail result to application with the applicaiton id.
+     *
+     * @param errorType indicates why the authentication failed. May be authFailed, userCancel, userFallback, systemCancel, or lockout
+     * @param id the identifier of the application
+     */
+    @Then("^I set fingerprint with error type \"(.*?)\" result to application by id \"(.*?)\"$")
+    public static void setFailFingerprinttoAppById(String errorType, String id){
+        DeviceUtils.setFingerprint("identifier", id,  "fail", errorType);
+    }
+
+    /**
+     * Send fingerprint with fail result to application with the applicaiton name.
+     *
+     * @param errorType indicates  why the authentication failed. May be authFailed, userCancel, userFallback, systemCancel, or lockout
+     * @param name the name of the application
+     */
+    @Then("^I set fingerprint with error type \"(.*?)\" result to application by name \"(.*?)\"$")
+    public static void setFailFingerprinttoAppByName(String errorType, String name){
+        DeviceUtils.setFingerprint("name", name,  "fail", errorType);
+    }
+
 }
