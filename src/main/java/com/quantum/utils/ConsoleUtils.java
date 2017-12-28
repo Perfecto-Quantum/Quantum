@@ -1,11 +1,14 @@
 package com.quantum.utils;
 
+import com.qmetry.qaf.automation.ui.WebDriverTestBase;
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.Capabilities;
 import org.testng.Reporter;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  *
@@ -54,7 +57,9 @@ public class ConsoleUtils {
 						caps.getBrowserName() : caps.getVersion())
 				: caps.getCapability("platformVersion") + "";
 	}
-	
+
+
+
 	public static String getTestName(Capabilities caps) {
 		return caps.getCapability("scriptName") == null ? "" : caps.getCapability("scriptName") + "";
 	}

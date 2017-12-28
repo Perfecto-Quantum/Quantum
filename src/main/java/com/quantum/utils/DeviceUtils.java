@@ -470,4 +470,12 @@ public class DeviceUtils {
 
 	}
 
+	public static String getDeviceProperty(String property) {
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("property",property);
+		return  (String) getQAFDriver().executeScript("mobile:handset:info", params);
+
+	}
+
+
 }

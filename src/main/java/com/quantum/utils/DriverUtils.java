@@ -40,9 +40,10 @@ public class DriverUtils {
 
 	public static boolean isRunningOnAndroid() {
 		return (null != getDriver().getCapabilities().getCapability("platformName")) && (ConfigurationManager.getBundle()
-				.getString("driver.capabilities.platformName").toLowerCase().contains("android")|| ConfigurationManager.getBundle()
+				.getString("driver.capabilities.platformName").toLowerCase().contains("android") || ConfigurationManager.getBundle()
 				.getString("perfecto.capabilities.platformName").toLowerCase().contains("android"));
 
 	}
+
 
 }
