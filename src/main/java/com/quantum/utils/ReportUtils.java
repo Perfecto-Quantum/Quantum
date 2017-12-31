@@ -74,29 +74,11 @@ public class ReportUtils {
 		// Retrieve a list of the test executions in your lab (as a json)
 		JsonObject executions = retrieveTestExecutions(accessToken, executionId);
 
-		// for (int i = 0; i < executions.getAsJsonArray("resources").size(); i++) {
 		JsonObject resources = executions.getAsJsonArray("resources").get(0).getAsJsonObject();
 		JsonObject platforms = resources.getAsJsonArray("platforms").get(0).getAsJsonObject();
 		String deviceId = platforms.get("deviceId").getAsString();
 		downloadExecutionSummaryReport(deviceId, executionId, accessToken);
-		// }
 
-		// Retrieves a list of commands of a single test (as a json)
-		// retrieveTestCommands(testId, accessToken);
-
-		// Download an execution summary report of an execution (may contain
-		// several tests)
-
-		// Download a report of a single test
-		// String testId = testExecution.get("name").getAsString();
-		// downloadTestReport(testId, accessToken);
-
-		// Download video
-		// downloadVideo(testExecution);
-
-		// Download attachments such as device logs, vitals or network files
-		// (relevant for Mobile tests only)
-		// downloadAttachments(testExecution);
 	}
 
 	public static void generateTestReport(String executionId) throws Exception {
