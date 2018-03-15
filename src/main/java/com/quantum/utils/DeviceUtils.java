@@ -33,7 +33,7 @@ public class DeviceUtils {
 
 	public static void assertVisualText(String text) {
 		Validator.assertThat("Text: \"" + text + "\" must be present",
-				isText(text, null), Matchers.equalTo("true"));
+				isText(text, 60), Matchers.equalTo("true"));
 	}
 
 	public static void installApp(String filePath, boolean shouldInstrument) {
@@ -186,13 +186,19 @@ public class DeviceUtils {
 		return Validator.verifyThat("Image " + img + " should be visible",
 				isImg(img, 180), Matchers.equalTo("true"));
 	}
-
+	/**
+	 * Visual Text Checkpoint based on the text sent in and a threshold of 100
+	 * @param text - Text to compare
+	 * @param timeout - timeout amount to search
+	 * @return true if found or false if not found
+	 */
 	private static String isText(String text, Integer timeout) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("content", text);
 		if (timeout != null) {
 			params.put("timeout", timeout);
 		}
+		params.put("threshold", "100");
 		Object result = getQAFDriver().executeScript("mobile:checkpoint:text", params);
 		return result.toString();
 	}
