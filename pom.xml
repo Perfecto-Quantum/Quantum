@@ -6,19 +6,20 @@
 
     <groupId>com.quantum</groupId>
     <artifactId>quantum-support</artifactId>
-    <version>1.12-RC2</version>
+    <version>1.13-RC1</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <reportium-sdk.version>1.1.22</reportium-sdk.version>
-        <selenium.version>2.53.1</selenium.version>
+        <reportium-sdk.version>1.2.0</reportium-sdk.version>
+        <selenium.version>3.6.0</selenium.version>
         <testng.version>6.9.10</testng.version>
         <cukes.version>1.2.5</cukes.version>
         <org.json.version>20160810</org.json.version>
-        <perfectomobile.version>10.11.0.0</perfectomobile.version>
-        <qaf.version>2.1.12</qaf.version>
-        <qafsupport.version>2.1.11</qafsupport.version>
+        <perfectomobile.version>18.3.0.3</perfectomobile.version>
+        <intellij.perfectomobile.version>18.4.0.0 </intellij.perfectomobile.version>
+        <qaf.version>2.1.13</qaf.version>
+        <qafsupport.version>2.1.13</qafsupport.version>
     </properties>
 
     <scm>
@@ -154,7 +155,7 @@
         <dependency>
             <groupId>com.perfectomobile</groupId>
             <artifactId>intellij-connector</artifactId>
-            <version>${perfectomobile.version}</version>
+            <version>${intellij.perfectomobile.version}</version>
         </dependency>
         <dependency>
             <groupId>com.perfecto.reporting-sdk</groupId>
@@ -177,9 +178,8 @@
             <version>1.7.7</version>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.7</version>
-        </dependency>
-    </dependencies>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>r05</version>
+        </dependency>    </dependencies>
 </project>
