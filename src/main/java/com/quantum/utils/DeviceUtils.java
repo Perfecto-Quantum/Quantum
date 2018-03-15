@@ -446,6 +446,14 @@ public class DeviceUtils {
 		Object result2 = getQAFDriver().executeScript("mobile:fingerprint:set", params);
 	}
 
+	public static void setSensorAuthentication(String by, String identifier, String resultAuth, String errorType) {
+
+		Map<String, Object> params = new HashMap<>();
+		params.put(by, identifier);
+		params.put("resultAuth", resultAuth);
+		params.put("errorType", errorType);
+		Object result2 = getQAFDriver().executeScript("mobile:sensorAuthentication:set", params);
+	}
 
 	public static void generateHAR()
 	{

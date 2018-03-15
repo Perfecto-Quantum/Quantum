@@ -523,5 +523,46 @@ public class PerfectoApplicationSteps {
     public static void setFailFingerprinttoAppByName(String errorType, String name){
         DeviceUtils.setFingerprint("name", name,  "fail", errorType);
     }
+    /**
+     * Send fingerprint with success result to application with the applicaiton id.
+     *
+     * @param id the identifier of the application
+     */
+    @Then("^I set sensor authentication with success result to application by id \"(.*?)\"$")
+    public static void setSuccessSensorAuthenticationtoAppById(String id){
+        DeviceUtils.setSensorAuthentication("identifier", id,  "success", "");
+    }
+
+    /**
+     * Send fingerprint with success result to application with the applicaiton name.
+     *
+     * @param name the name of the application
+     */
+    @Then("^I set sensor authentication with success result to application by name \"(.*?)\"$")
+    public static void setSuccessSensorAuthenticationtoAppByName(String name){
+        DeviceUtils.setSensorAuthentication("name", name,  "success", "");
+    }
+
+    /**
+     * Send fingerprint with fail result to application with the applicaiton id.
+     *
+     * @param errorType indicates why the authentication failed. May be authFailed, userCancel, userFallback, systemCancel, or lockout
+     * @param id the identifier of the application
+     */
+    @Then("^I set sensor authentication with error type \"(.*?)\" result to application by id \"(.*?)\"$")
+    public static void setFailSensorAuthenticationtoAppById(String errorType, String id){
+        DeviceUtils.setSensorAuthentication("identifier", id,  "fail", errorType);
+    }
+
+    /**
+     * Send fingerprint with fail result to application with the applicaiton name.
+     *
+     * @param errorType indicates  why the authentication failed. May be authFailed, userCancel, userFallback, systemCancel, or lockout
+     * @param name the name of the application
+     */
+    @Then("^I set sensor authentication with error type \"(.*?)\" result to application by name \"(.*?)\"$")
+    public static void setFailSensorAuthenticationtoAppByName(String errorType, String name){
+        DeviceUtils.setSensorAuthentication("name", name,  "fail", errorType);
+    }
 
 }

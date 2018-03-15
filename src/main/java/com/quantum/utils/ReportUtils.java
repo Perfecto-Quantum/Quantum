@@ -39,7 +39,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.qmetry.qaf.automation.core.ConfigurationManager;
-import com.quantum.listerners.QuantumReportiumListener;
+import com.quantum.listeners.QuantumReportiumListener;
 
 public class ReportUtils {
 
