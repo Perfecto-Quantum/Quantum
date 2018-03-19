@@ -12,7 +12,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <reportium-sdk.version>1.2.0</reportium-sdk.version>
-        <selenium.version>3.6.0</selenium.version>
+        <selenium.version>2.53.1</selenium.version>
         <testng.version>6.9.10</testng.version>
         <cukes.version>1.2.5</cukes.version>
         <org.json.version>20160810</org.json.version>
