@@ -26,6 +26,7 @@ import org.testng.IInvokedMethod;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
+import com.google.gson.internal.LinkedTreeMap;
 
 import java.util.List;
 import java.util.Objects;
@@ -72,7 +73,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
     @Override
     public void onTestStart(ITestResult testResult) {
         if (getBundle().getString("remote.server", "").contains("perfecto")) {
-            createReportiumClient(testResult).testStart(testResult.getMethod().getMethodName(), new TestContext(testResult.getMethod().getGroups()));
+            createReportiumClient(testResult).testStart(testResult.getMethod().getMethodName() + getDataDrivenText(testResult), new TestContext(testResult.getMethod().getGroups()));
         }
     }
 
@@ -261,6 +262,27 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
     private void addReportLink(ITestResult result, String url) {
         ((TestNGScenario) result.getMethod()).getMetaData().put("Perfecto-report",
                 "<a href=\"" + url + "\" target=\"_blank\">view</a>");
+    }
+
+    private String getDataDrivenText(ITestResult testResult){
+
+        String result = "";
+        if (testResult.getParameters().length > 0 ) {
+
+            LinkedTreeMap map = (LinkedTreeMap)testResult.getParameters()[0];
+            if (getBundle().getBoolean("addFullDataToReport", false)) {
+                result = " [" + testResult.getParameters()[0] + "]";
+            } else {
+                if (map.containsKey("recDescription"))
+                {
+                    result =  " [" + map.get("recDescription") + "]";
+                } else if (map.containsKey("recId"))
+                {
+                    result = " [" + map.get("recId") + "]";
+                }
+            }
+        }
+        return result;
     }
 
 }
