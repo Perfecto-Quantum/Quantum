@@ -36,6 +36,7 @@ import com.qmetry.qaf.automation.ui.webdriver.QAFWebDriverCommandAdapter;
 import com.qmetry.qaf.automation.util.StringUtil;
 import com.qmetry.qaf.automation.core.ConfigurationManager;
 import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.DriverCommand;
 
@@ -87,7 +88,7 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 
 	@Override
 	public void onInitialize(QAFExtendedWebDriver driver) {
-		DesiredCapabilities dcaps = CloudUtils.getDeviceProperties((DesiredCapabilities) driver.getCapabilities());
+		MutableCapabilities dcaps = CloudUtils.getDeviceProperties((MutableCapabilities) driver.getCapabilities());
 		ConfigurationUtils.setActualDeviceCapabilities(dcaps.asMap());
 		ConsoleUtils.logWarningBlocks("DEVICE PROPERTIES: " + dcaps.toString());
 
