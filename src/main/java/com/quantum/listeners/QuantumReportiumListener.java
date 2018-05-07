@@ -17,7 +17,10 @@ import com.qmetry.qaf.automation.keys.ApplicationProperties;
 import com.qmetry.qaf.automation.step.QAFTestStepListener;
 import com.qmetry.qaf.automation.step.StepExecutionTracker;
 import com.qmetry.qaf.automation.step.client.TestNGScenario;
+import com.qmetry.qaf.automation.step.TestStep;
 import com.qmetry.qaf.automation.ui.WebDriverTestCase;
+import com.qmetry.qaf.automation.step.client.text.BDDDefinitionHelper;
+import com.qmetry.qaf.automation.step.client.text.BDDDefinitionHelper.ParamType;
 import cucumber.runtime.RuntimeOptions;
 import cucumber.runtime.RuntimeOptionsFactory;
 import org.apache.commons.lang3.ArrayUtils;
@@ -26,11 +29,14 @@ import org.testng.IInvokedMethod;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
-import com.google.gson.internal.LinkedTreeMap;
+
+import com.google.gson.Gson;
+import org.apache.commons.lang.text.StrSubstitutor;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.Map;
 
 import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 
@@ -87,9 +93,10 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
     @Override
     public void beforExecute(StepExecutionTracker stepExecutionTracker) {
-        String msg = "BEGIN STEP: " + stepExecutionTracker.getStep().getDescription();
+        String stepDescription = getProcessStepDescription(stepExecutionTracker.getStep());
+        String msg = "BEGIN STEP: " + stepDescription;
         ConsoleUtils.logInfoBlocks(msg, ConsoleUtils.lower_block + " ", 10);
-        logStepStart(stepExecutionTracker.getStep().getDescription());
+        logStepStart(stepDescription);
     }
 
     @Override
@@ -269,7 +276,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
         String result = "";
         if (testResult.getParameters().length > 0 ) {
 
-            LinkedTreeMap map = (LinkedTreeMap)testResult.getParameters()[0];
+            Map map = (Map)testResult.getParameters()[0];
             if (getBundle().getBoolean("addFullDataToReport", false)) {
                 result = " [" + testResult.getParameters()[0] + "]";
             } else {
@@ -283,6 +290,76 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
             }
         }
         return result;
+    }
+
+    private String getProcessStepDescription(TestStep step) {
+        // process parameters in step;
+
+        String description = step.getDescription();
+
+        //if (step instanceof CustomStep) {
+
+            Object[] actualArgs = step.getActualArgs();
+            String def = step.getDescription();
+
+            if ((actualArgs != null) && (actualArgs.length > 0)) {
+                Map<String, Object> paramMap = step.getStepExecutionTracker().getContext();
+                List<String> paramNames = BDDDefinitionHelper.getArgNames(def);
+
+
+                System.out.println(paramNames);
+
+                if ((paramNames != null) && (!paramNames.isEmpty())) {
+
+                    for (int i = 0; i < actualArgs.length; i++) {
+                        String paramName = paramNames.get(i).trim();
+                        // remove starting { and ending } from parameter name
+                        paramName = paramName.substring(1, paramName.length() - 1).split(":", 2)[0];
+
+                        // in case of data driven test args[0] should not be overriden
+                        // with steps args[0]
+                        if ((actualArgs[i] instanceof String)) {
+
+                            String pstr = (String) actualArgs[i];
+
+                            if (pstr.startsWith("${") && pstr.endsWith("}")) {
+                                String pname = pstr.substring(2, pstr.length() - 1);
+                                actualArgs[i] = paramMap.containsKey(pstr) ? paramMap.get(pstr)
+                                        : paramMap.containsKey(pname) ? paramMap.get(pname)
+                                        : getBundle().containsKey(pstr) ? getBundle().getObject(pstr)
+                                        : getBundle().getObject(pname);
+                            } else if (pstr.indexOf("$") >= 0) {
+                                pstr = getBundle().getSubstitutor().replace(pstr);
+                                actualArgs[i] = StrSubstitutor.replace(pstr, paramMap);
+                            }
+                            // continue;
+                            ParamType ptype = ParamType.getType(pstr);
+                            if (ptype.equals(ParamType.MAP)) {
+                                Map<String, Object> kv = new Gson().fromJson(pstr, Map.class);
+                                paramMap.put(paramName, kv);
+                                for (String key : kv.keySet()) {
+                                    paramMap.put(paramName + "." + key, kv.get(key));
+                                }
+                            } else if (ptype.equals(ParamType.LIST)) {
+                                List<Object> lst = new Gson().fromJson(pstr, List.class);
+                                paramMap.put(paramName, lst);
+                                for (int li = 0; li < lst.size(); li++) {
+                                    paramMap.put(paramName + "[" + li + "]", lst.get(li));
+                                }
+                            }
+                        }
+
+                        paramMap.put("${args[" + i + "]}", actualArgs[i]);
+                        paramMap.put("args[" + i + "]", actualArgs[i]);
+                        paramMap.put(paramName, actualArgs[i]);
+
+                    }
+
+                    description = StrSubstitutor.replace(description, paramMap);
+                }
+            }
+//        }
+        return description;
     }
 
 }
