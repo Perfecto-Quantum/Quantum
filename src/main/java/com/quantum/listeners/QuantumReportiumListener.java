@@ -38,229 +38,244 @@ import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
  */
 public class QuantumReportiumListener extends ReportiumTestNgListener implements QAFTestStepListener, ITestListener {
 
-    public static final String PERFECTO_REPORT_CLIENT = "perfecto.report.client";
+	public static final String PERFECTO_REPORT_CLIENT = "perfecto.report.client";
 
-    public static ReportiumClient getReportClient() {
-        return (ReportiumClient) getBundle().getObject(PERFECTO_REPORT_CLIENT);
-    }
+	public static ReportiumClient getReportClient() {
+		return (ReportiumClient) getBundle().getObject(PERFECTO_REPORT_CLIENT);
+	}
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public void onStart(ITestContext context) {
-        if (getBundle().getString("remote.server", "").contains("perfecto")) {
+	@Override
+	@SuppressWarnings("unchecked")
+	public void onStart(ITestContext context) {
+		if (getBundle().getString("remote.server", "").contains("perfecto")) {
 
-            List<String> stepListeners =
-                    getBundle().getList(ApplicationProperties.TESTSTEP_LISTENERS.key);
-            if (!stepListeners.contains(this.getClass().getName())) {
-                stepListeners.add(this.getClass().getName());
-                getBundle().setProperty(ApplicationProperties.TESTSTEP_LISTENERS.key,
-                        stepListeners);
-            }
+			List<String> stepListeners = getBundle().getList(ApplicationProperties.TESTSTEP_LISTENERS.key);
+			if (!stepListeners.contains(this.getClass().getName())) {
+				stepListeners.add(this.getClass().getName());
+				getBundle().setProperty(ApplicationProperties.TESTSTEP_LISTENERS.key, stepListeners);
+			}
 
-            if (getBundle().getBoolean("perfecto.default.driver.listener", true)) {
-                List<String> driverListeners = getBundle().getList(ApplicationProperties.WEBDRIVER_COMMAND_LISTENERS.key);
-                if (!driverListeners.contains(PerfectoDriverListener.class.getName())) {
-                    driverListeners.add(PerfectoDriverListener.class.getName());
-                    getBundle().setProperty(
-                            ApplicationProperties.WEBDRIVER_COMMAND_LISTENERS.key,
-                            driverListeners);
-                }
-            }
-        }
-    }
+			if (getBundle().getBoolean("perfecto.default.driver.listener", true)) {
+				List<String> driverListeners = getBundle()
+						.getList(ApplicationProperties.WEBDRIVER_COMMAND_LISTENERS.key);
+				if (!driverListeners.contains(PerfectoDriverListener.class.getName())) {
+					driverListeners.add(PerfectoDriverListener.class.getName());
+					getBundle().setProperty(ApplicationProperties.WEBDRIVER_COMMAND_LISTENERS.key, driverListeners);
+				}
+			}
+		}
+	}
 
-    @Override
-    public void onTestStart(ITestResult testResult) {
-        if (getBundle().getString("remote.server", "").contains("perfecto")) {
-            createReportiumClient(testResult).testStart(testResult.getMethod().getMethodName(), new TestContext(testResult.getMethod().getGroups()));
-        }
-    }
+	@Override
+	public void onTestStart(ITestResult testResult) {
+		if (getBundle().getString("remote.server", "").contains("perfecto")) {
+			createReportiumClient(testResult).testStart(testResult.getMethod().getMethodName(),
+					new TestContext(testResult.getMethod().getGroups()));
+		}
+	}
 
-    @Override
-    public void beforeInvocation(IInvokedMethod method, ITestResult testResult) {
-        if (method.isTestMethod()) {
-            // Before execution of test method
-            ConsoleUtils.surroundWithSquare("TEST STARTED: " + getTestName(testResult) + (testResult.getParameters().length > 0 ? " [" + testResult.getParameters()[0] + "]" : ""));
-        }
-    }
+	@Override
+	public void beforeInvocation(IInvokedMethod method, ITestResult testResult) {
+		if (method.isTestMethod()) {
+			// Before execution of test method
+			ConsoleUtils.surroundWithSquare("TEST STARTED: " + getTestName(testResult)
+					+ (testResult.getParameters().length > 0 ? " [" + testResult.getParameters()[0] + "]" : ""));
+		}
+	}
 
-    @Override
-    public void beforExecute(StepExecutionTracker stepExecutionTracker) {
-        String msg = "BEGIN STEP: " + stepExecutionTracker.getStep().getDescription();
-        ConsoleUtils.logInfoBlocks(msg, ConsoleUtils.lower_block + " ", 10);
-        logStepStart(stepExecutionTracker.getStep().getDescription());
-    }
+	@Override
+	public void beforExecute(StepExecutionTracker stepExecutionTracker) {
+		String msg = "BEGIN STEP: " + stepExecutionTracker.getStep().getDescription();
+		ConsoleUtils.logInfoBlocks(msg, ConsoleUtils.lower_block + " ", 10);
+		logStepStart(stepExecutionTracker.getStep().getDescription());
+	}
 
-    @Override
-    public void afterExecute(StepExecutionTracker stepExecutionTracker) {
-        logStepEnd();
-        String msg = "END STEP: " + stepExecutionTracker.getStep().getDescription();
-        ConsoleUtils.logInfoBlocks(msg, ConsoleUtils.upper_block + " ", 10);
-    }
+	@Override
+	public void afterExecute(StepExecutionTracker stepExecutionTracker) {
+		logStepEnd();
+		String msg = "END STEP: " + stepExecutionTracker.getStep().getDescription();
+		ConsoleUtils.logInfoBlocks(msg, ConsoleUtils.upper_block + " ", 10);
+	}
 
-    @Override
-    public void onFailure(StepExecutionTracker stepExecutionTracker) {
+	@Override
+	public void onFailure(StepExecutionTracker stepExecutionTracker) {
 
-    }
+	}
 
-    @Override
-    public void onTestSuccess(ITestResult testResult) {
-        ReportiumClient client = getReportClient();
-        if (null != client) {
-            client.testStop(TestResultFactory.createSuccess());
-            logTestEnd(testResult);
-        }
+	@Override
+	public void onTestSuccess(ITestResult testResult) {
+		ReportiumClient client = getReportClient();
+		if (null != client) {
+			client.testStop(TestResultFactory.createSuccess());
+			logTestEnd(testResult);
+		}
 
-    }
+	}
 
-    @Override
-    public void onTestFailure(ITestResult testResult) {
-        ReportiumClient client = getReportClient();
-        if (null != client) {
+	@Override
+	public void onTestFailure(ITestResult testResult) {
+		ReportiumClient client = getReportClient();
+		if (null != client) {
 
-            String failMsg = "";
-            List<CheckpointResultBean> checkpointsList = TestBaseProvider.instance().get().getCheckPointResults();
-            for (CheckpointResultBean result : checkpointsList) {
-                if (result.getType().equals(MessageTypes.TestStepFail.toString())){
-                    failMsg += "Step:" + result.getMessage() + " failed" + "\n";
-//                    List<CheckpointResultBean> subList = result.getSubCheckPoints();
-//                    for (CheckpointResultBean sub : subList) {
-//                        if (sub.getType().equals(MessageTypes.Fail.toString())){
-//                            failMsg += sub.getMessage() + "\n";
-//                        }
-//                    }
-                }
+			String failMsg = "";
+			List<CheckpointResultBean> checkpointsList = TestBaseProvider.instance().get().getCheckPointResults();
+			for (CheckpointResultBean result : checkpointsList) {
+				if (result.getType().equals(MessageTypes.TestStepFail.toString())) {
+					failMsg += "Step:" + result.getMessage() + " failed" + "\n";
+					// List<CheckpointResultBean> subList = result.getSubCheckPoints();
+					// for (CheckpointResultBean sub : subList) {
+					// if (sub.getType().equals(MessageTypes.Fail.toString())){
+					// failMsg += sub.getMessage() + "\n";
+					// }
+					// }
+				}
 
-            }
-            client.testStop(TestResultFactory.createFailure(failMsg.isEmpty()?"An error occurred":failMsg,
-                    testResult.getThrowable()));
+			}
+			client.testStop(TestResultFactory.createFailure(failMsg.isEmpty() ? "An error occurred" : failMsg,
+					testResult.getThrowable()));
 
-            logTestEnd(testResult);
+			logTestEnd(testResult);
 
-        }
-    }
+		}
+	}
 
-    @Override
-    public void onTestSkipped(ITestResult result) {
+	@Override
+	public void onTestSkipped(ITestResult result) {
 
-    }
+	}
 
-    @Override
-    public void onTestFailedButWithinSuccessPercentage(ITestResult result) {
+	@Override
+	public void onTestFailedButWithinSuccessPercentage(ITestResult result) {
 
-    }
+	}
 
-    @Override
-    public void onFinish(ITestContext context) {
+	@Override
+	public void onFinish(ITestContext context) {
 
-    }
+	}
 
-    public static void logTestStep(String message) {
-        try {
-            getReportClient().stepStart(message);
-        } catch (Exception e) {
-            // ignore...
-        }
-    }
+	public static void logTestStep(String message) {
+		try {
+			getReportClient().stepStart(message);
+		} catch (Exception e) {
+			// ignore...
+		}
+	}
 
-    public static void logStepStart(String message) {
-        try {
-            getReportClient().stepStart(message);
-        } catch (Exception e) {
-            // ignore...
-        }
-    }
-    public static void logStepEnd() {
-        try {
-            getReportClient().stepEnd();
-        } catch (Exception e) {
-            // ignore...
-        }
-    }
+	public static void logStepStart(String message) {
+		try {
+			getReportClient().stepStart(message);
+		} catch (Exception e) {
+			// ignore...
+		}
+	}
 
-    public static void logAssert(String message, boolean status) {
-        try {
-            getReportClient().reportiumAssert(message, status);
-        } catch (Exception e) {
-            // ignore...
-        }
-    }
+	public static void logStepEnd() {
+		try {
+			getReportClient().stepEnd();
+		} catch (Exception e) {
+			// ignore...
+		}
+	}
 
-    private void logTestEnd(ITestResult testResult){
-        String endText = "TEST " + (testResult.isSuccess() ? "PASSED" : "FAILED") + ": ";
-        addReportLink(testResult, getReportClient().getReportUrl());
-        ConsoleUtils.logWarningBlocks("REPORTIUM URL: " + getReportClient().getReportUrl().replace("[", "%5B").replace("]", "%5D"));
-        ConsoleUtils.surroundWithSquare(endText + getTestName(testResult) + (testResult.getParameters().length > 0 ? " [" + testResult.getParameters()[0] + "]" : ""));
-    }
+	public static void logAssert(String message, boolean status) {
+		try {
+			getReportClient().reportiumAssert(message, status);
+		} catch (Exception e) {
+			// ignore...
+		}
+	}
 
-    @Override
-    protected String getTestName(ITestResult result) {
+	private void logTestEnd(ITestResult testResult) {
+		String endText = "TEST " + (testResult.isSuccess() ? "PASSED" : "FAILED") + ": ";
+		addReportLink(testResult, getReportClient().getReportUrl());
+		ConsoleUtils.logWarningBlocks(
+				"REPORTIUM URL: " + getReportClient().getReportUrl().replace("[", "%5B").replace("]", "%5D"));
+		ConsoleUtils.surroundWithSquare(endText + getTestName(testResult)
+				+ (testResult.getParameters().length > 0 ? " [" + testResult.getParameters()[0] + "]" : ""));
+	}
 
-        return result.getTestName()== null? result.getMethod().getMethodName() : result.getTestName();
-    }
+	@Override
+	protected String getTestName(ITestResult result) {
 
-    /**
-     * Creates client and set into configuration for later use during test
-     * execution using {@link #getReportiumClient()}.
-     *
-     * param testResult
-     * @return newly created {@link ReportiumClient} object
-     */
-    @Override
-    protected ReportiumClient createReportiumClient(ITestResult testResult) {
-        ReportiumClient reportiumClient = new ReportiumClientFactory().createLoggerClient();
+		return result.getTestName() == null ? result.getMethod().getMethodName() : result.getTestName();
+	}
 
-        String suiteName = testResult.getTestContext().getSuite().getName();
-        String prjName = getBundle().getString("project.name", suiteName);
-        String prjVer = getBundle().getString("project.ver", "1.0");
-        String xmlTestName = testResult.getTestContext().getName();
+	/**
+	 * Creates client and set into configuration for later use during test execution
+	 * using {@link #getReportiumClient()}.
+	 *
+	 * param testResult
+	 * 
+	 * @return newly created {@link ReportiumClient} object
+	 */
+	@Override
+	protected ReportiumClient createReportiumClient(ITestResult testResult) {
+		ReportiumClient reportiumClient = new ReportiumClientFactory().createLoggerClient();
 
-        Object testInstance = testResult.getInstance();
-        WebDriver driver = null;
-        if (testInstance instanceof WebDriverTestCase)
-            driver = ((WebDriverTestCase) testInstance).getDriver();
-        else if (testInstance instanceof WebDriverProvider)
-            driver = ((WebDriverProvider) testInstance).getWebDriver();
-        if (driver != null) {
-            PerfectoExecutionContext perfectoExecutionContext =
-                    new PerfectoExecutionContext.PerfectoExecutionContextBuilder()
-                            .withProject(new Project(prjName, prjVer))
-                            .withContextTags(suiteName, xmlTestName)
-                            .withJob(new Job(getBundle().getString("JOB_NAME"),
-                                    getBundle().getInt("BUILD_NUMBER", 0)))
-                            .withWebDriver(driver).build();
+		String suiteName = testResult.getTestContext().getSuite().getName();
+		String prjName = getBundle().getString("project.name", suiteName);
+		String prjVer = getBundle().getString("project.ver", "1.0");
+		String xmlTestName = testResult.getTestContext().getName();
+		String allTags = xmlTestName + "," + suiteName + (System.getProperty("reportium-tags") == null ? ""
+				: "," + System.getProperty("reportium-tags"));
 
-            reportiumClient = new ReportiumClientFactory()
-                    .createPerfectoReportiumClient(perfectoExecutionContext);
-        }
-        getBundle().setProperty(PERFECTO_REPORT_CLIENT, reportiumClient);
+		Object testInstance = testResult.getInstance();
+		WebDriver driver = null;
+		if (testInstance instanceof WebDriverTestCase)
+			driver = ((WebDriverTestCase) testInstance).getDriver();
+		else if (testInstance instanceof WebDriverProvider)
+			driver = ((WebDriverProvider) testInstance).getWebDriver();
+		if (driver != null) {
+			PerfectoExecutionContext perfectoExecutionContext = new PerfectoExecutionContext.PerfectoExecutionContextBuilder()
+					.withProject(new Project(prjName, prjVer)).withContextTags(allTags.split(","))
+					.withJob(new Job(getBundle().getString("JOB_NAME", System.getProperty("reportium-job-name")),
+							getBundle().getInt("BUILD_NUMBER",
+									System.getProperty("reportium-job-number") == null ? 0
+											: Integer.parseInt(System.getProperty("reportium-job-number"))))
+													.withBranch(System.getProperty("reportium-job-branch")))
+					.withWebDriver(driver).build();
 
-        return reportiumClient;
-    }
+			reportiumClient = new ReportiumClientFactory().createPerfectoReportiumClient(perfectoExecutionContext);
+		}
+		getBundle().setProperty(PERFECTO_REPORT_CLIENT, reportiumClient);
 
-    @Override
-    protected String[] getTags(ITestResult testResult) {
+		return reportiumClient;
+	}
+	
+	public static void main(String[] args) {
+		String sysProp = "@JenkinsTag1,@JenkinsTag2";
+		String jenkinsTags = sysProp == null ? ""
+				: "," + sysProp;
+		String allTag = "XMLTest Name" + "," + "SuiteName" + (sysProp == null ? ""
+				: "," + sysProp);
+		System.out.println(allTag);
+	}
 
-        RuntimeOptions cucumberOptions = getCucumberOptions(testResult);
-        List<String> optionsList =  cucumberOptions.getFilters().stream().map(object -> Objects.toString(object, null)).collect(Collectors.toList());
-        optionsList.addAll(cucumberOptions.getFeaturePaths());
-        optionsList.addAll(cucumberOptions.getGlue());
+	@Override
+	protected String[] getTags(ITestResult testResult) {
 
-        return ArrayUtils.addAll(super.getTags(testResult), optionsList.toArray(new String[optionsList.size()]));
-    }
+		RuntimeOptions cucumberOptions = getCucumberOptions(testResult);
+		List<String> optionsList = cucumberOptions.getFilters().stream().map(object -> Objects.toString(object, null))
+				.collect(Collectors.toList());
+		optionsList.addAll(cucumberOptions.getFeaturePaths());
+		optionsList.addAll(cucumberOptions.getGlue());
 
-    private RuntimeOptions getCucumberOptions(ITestResult testResult) {
-        try {
-            return new RuntimeOptionsFactory(Class.forName(testResult.getTestClass().getName())).create();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+		return ArrayUtils.addAll(super.getTags(testResult), optionsList.toArray(new String[optionsList.size()]));
+	}
 
-    private void addReportLink(ITestResult result, String url) {
-        ((TestNGScenario) result.getMethod()).getMetaData().put("Perfecto-report",
-                "<a href=\"" + url + "\" target=\"_blank\">view</a>");
-    }
+	private RuntimeOptions getCucumberOptions(ITestResult testResult) {
+		try {
+			return new RuntimeOptionsFactory(Class.forName(testResult.getTestClass().getName())).create();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	private void addReportLink(ITestResult result, String url) {
+		((TestNGScenario) result.getMethod()).getMetaData().put("Perfecto-report",
+				"<a href=\"" + url + "\" target=\"_blank\">view</a>");
+	}
 
 }

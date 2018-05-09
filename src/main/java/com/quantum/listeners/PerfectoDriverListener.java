@@ -34,32 +34,34 @@ import com.qmetry.qaf.automation.ui.webdriver.CommandTracker;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 import com.qmetry.qaf.automation.ui.webdriver.QAFWebDriverCommandAdapter;
 import com.qmetry.qaf.automation.util.StringUtil;
+import com.perfecto.reportium.model.Job;
+import com.perfecto.reportium.model.PerfectoExecutionContext;
+import com.perfecto.reportium.model.Project;
 import com.qmetry.qaf.automation.core.ConfigurationManager;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.DriverCommand;
 
+import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
+
 import java.util.concurrent.TimeUnit;
 
 public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 	@Override
-	public void beforeCommand(QAFExtendedWebDriver driver,
-			CommandTracker commandTracker) {
+	public void beforeCommand(QAFExtendedWebDriver driver, CommandTracker commandTracker) {
 		if (commandTracker.getCommand().equalsIgnoreCase(DriverCommand.CLOSE)) {
-			if (ConfigurationManager.getBundle().getString("remote.server").toLowerCase().contains(".perfectomobile.com"))
-			{
-				ConfigurationManager.getBundle().addProperty("executionId", driver.getCapabilities().getCapability("executionId"));
+			if (ConfigurationManager.getBundle().getString("remote.server").toLowerCase()
+					.contains(".perfectomobile.com")) {
+				ConfigurationManager.getBundle().addProperty("executionId",
+						driver.getCapabilities().getCapability("executionId"));
 			}
-		}
-		else if (commandTracker.getCommand().equalsIgnoreCase(DriverCommand.QUIT)) {
-
+		} else if (commandTracker.getCommand().equalsIgnoreCase(DriverCommand.QUIT)) {
 
 			try {
-				String appName = (String) driver.getCapabilities()
-						.getCapability("applicationName");
-				if (StringUtil.isNotBlank(appName) && StringUtil.isBlank((String) driver
-						.getCapabilities().getCapability("eclipseExecutionId"))) {
+				String appName = (String) driver.getCapabilities().getCapability("applicationName");
+				if (StringUtil.isNotBlank(appName)
+						&& StringUtil.isBlank((String) driver.getCapabilities().getCapability("eclipseExecutionId"))) {
 					try {
 						DeviceUtils.closeApp(appName, "name", true, driver);
 
@@ -73,17 +75,33 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 		}
 	}
 
-
 	@Override
 	public void beforeInitialize(Capabilities desiredCapabilities) {
 		if (ConfigurationUtils.getBaseBundle().getString("remote.server", "").contains("perfecto")) {
 			String eclipseExecutionId = ConfigurationUtils.getExecutionIdCapability();
 
 			if (StringUtil.isNotBlank(eclipseExecutionId)) {
-				((DesiredCapabilities) desiredCapabilities)
-						.setCapability("eclipseExecutionId", eclipseExecutionId);
+				((DesiredCapabilities) desiredCapabilities).setCapability("eclipseExecutionId", eclipseExecutionId);
 			}
 		}
+
+		String jobName = getBundle().getString("JOB_NAME", System.getProperty("reportium-job-name"));
+		int jobNumber = getBundle().getInt("BUILD_NUMBER", System.getProperty("reportium-job-number") == null ? 0
+				: Integer.parseInt(System.getProperty("reportium-job-number")));
+		String jobBranch = System.getProperty("reportium-job-branch");
+		String tags = System.getProperty("reportium-tags");
+
+		if (jobName != null) {
+			((DesiredCapabilities) desiredCapabilities).setCapability("report.jobName", jobName);
+			((DesiredCapabilities) desiredCapabilities).setCapability("report.jobNumber", jobNumber);
+		}
+		if (jobBranch != null) {
+			((DesiredCapabilities) desiredCapabilities).setCapability("report.jobBranch", jobBranch);
+		}
+		if (tags != null) {
+			((DesiredCapabilities) desiredCapabilities).setCapability("report.tags", tags);
+		}
+
 	}
 
 	@Override
@@ -96,17 +114,16 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 		driver.manage().timeouts().implicitlyWait(implicitWait, TimeUnit.MILLISECONDS);
 	}
 
-
 	@Override
 	public void afterCommand(QAFExtendedWebDriver driver, CommandTracker commandTracker) {
 
-
 		if (commandTracker.getCommand().equalsIgnoreCase(DriverCommand.CLOSE)) {
-			 {
-				if (ConfigurationManager.getBundle().getString("remote.server").toLowerCase().contains(".perfectomobile.com"))
-				{
+			{
+				if (ConfigurationManager.getBundle().getString("remote.server").toLowerCase()
+						.contains(".perfectomobile.com")) {
 
-					if(ConfigurationManager.getBundle().getString("perfecto.download.reports","false").toLowerCase().equals("true")) {
+					if (ConfigurationManager.getBundle().getString("perfecto.download.reports", "false").toLowerCase()
+							.equals("true")) {
 						try {
 							ReportUtils.generateTestReport(ConfigurationManager.getBundle().getString("executionId"));
 						} catch (Exception e) {
@@ -114,10 +131,12 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 							ConsoleUtils.logError(e.toString());
 						}
 					}
-					if(ConfigurationManager.getBundle().getString("perfecto.download.summaryReports","false").toLowerCase().equals("true")) {
+					if (ConfigurationManager.getBundle().getString("perfecto.download.summaryReports", "false")
+							.toLowerCase().equals("true")) {
 
 						try {
-							ReportUtils.generateSummaryReports(ConfigurationManager.getBundle().getString("executionId"));
+							ReportUtils
+									.generateSummaryReports(ConfigurationManager.getBundle().getString("executionId"));
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							ConsoleUtils.logError(e.toString());
