@@ -1,5 +1,21 @@
 package com.quantum.listeners;
 
+import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.text.StrSubstitutor;
+import org.apache.commons.lang3.ArrayUtils;
+import org.openqa.selenium.WebDriver;
+import org.testng.IInvokedMethod;
+import org.testng.ITestContext;
+import org.testng.ITestListener;
+import org.testng.ITestResult;
+
+import com.google.gson.Gson;
 import com.perfecto.reportium.WebDriverProvider;
 import com.perfecto.reportium.client.ReportiumClient;
 import com.perfecto.reportium.client.ReportiumClientFactory;
@@ -12,33 +28,18 @@ import com.perfecto.reportium.testng.ReportiumTestNgListener;
 import com.qmetry.qaf.automation.core.CheckpointResultBean;
 import com.qmetry.qaf.automation.core.MessageTypes;
 import com.qmetry.qaf.automation.core.TestBaseProvider;
-import com.quantum.utils.ConsoleUtils;
 import com.qmetry.qaf.automation.keys.ApplicationProperties;
 import com.qmetry.qaf.automation.step.QAFTestStepListener;
 import com.qmetry.qaf.automation.step.StepExecutionTracker;
-import com.qmetry.qaf.automation.step.client.TestNGScenario;
 import com.qmetry.qaf.automation.step.TestStep;
-import com.qmetry.qaf.automation.ui.WebDriverTestCase;
+import com.qmetry.qaf.automation.step.client.TestNGScenario;
 import com.qmetry.qaf.automation.step.client.text.BDDDefinitionHelper;
 import com.qmetry.qaf.automation.step.client.text.BDDDefinitionHelper.ParamType;
+import com.qmetry.qaf.automation.ui.WebDriverTestCase;
+import com.quantum.utils.ConsoleUtils;
+
 import cucumber.runtime.RuntimeOptions;
 import cucumber.runtime.RuntimeOptionsFactory;
-import org.apache.commons.lang3.ArrayUtils;
-import org.openqa.selenium.WebDriver;
-import org.testng.IInvokedMethod;
-import org.testng.ITestContext;
-import org.testng.ITestListener;
-import org.testng.ITestResult;
-
-import com.google.gson.Gson;
-import org.apache.commons.lang.text.StrSubstitutor;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.Map;
-
-import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 
 /**
  * Created by mitchellw on 9/27/2016.
@@ -256,13 +257,6 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 		return reportiumClient;
 	}
 
-	public static void main(String[] args) {
-		String sysProp = "@JenkinsTag1,@JenkinsTag2";
-		String jenkinsTags = sysProp == null ? "" : "," + sysProp;
-		String allTag = "XMLTest Name" + "," + "SuiteName" + (sysProp == null ? "" : "," + sysProp);
-		System.out.println(allTag);
-	}
-
 	@Override
 	protected String[] getTags(ITestResult testResult) {
 
@@ -289,6 +283,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 				"<a href=\"" + url + "\" target=\"_blank\">view</a>");
 	}
 
+	@SuppressWarnings("rawtypes")
 	private String getDataDrivenText(ITestResult testResult) {
 
 		String result = "";
@@ -308,6 +303,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 		return result;
 	}
 
+	@SuppressWarnings("unchecked")
 	private String getProcessStepDescription(TestStep step) {
 		// process parameters in step;
 

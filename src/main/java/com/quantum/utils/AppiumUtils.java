@@ -1,33 +1,42 @@
 package com.quantum.utils;
 
-import com.google.common.base.Function;
-import com.qmetry.qaf.automation.core.QAFTestBase;
-import com.qmetry.qaf.automation.ui.WebDriverTestBase;
-import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.MobileElement;
-import io.appium.java_client.TouchAction;
-import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.ios.IOSDriver;
-import org.openqa.selenium.*;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.support.ui.FluentWait;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.openqa.selenium.By;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.Point;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.ui.FluentWait;
+
+import com.google.common.base.Function;
+import com.qmetry.qaf.automation.ui.WebDriverTestBase;
+
+import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.MobileElement;
+import io.appium.java_client.TouchAction;
+import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.ios.IOSDriver;
+
 public final class AppiumUtils {
 
+	@SuppressWarnings("rawtypes")
 	public static AppiumDriver getAppiumDriver() {
 		return checkType(AppiumDriver.class);
 	}
 
+	@SuppressWarnings("rawtypes")
 	public static IOSDriver getIOSDriver() {
 		return checkType(IOSDriver.class);
 	}
 
+	@SuppressWarnings("rawtypes")
 	public static AndroidDriver getAndroidDriver() {
 		return checkType(AndroidDriver.class);
 	}
@@ -41,12 +50,7 @@ public final class AppiumUtils {
 	 */
 	public static void swipeUp() {
 		Point[] points = getXYtoVSwipe();
-		// getAppiumDriver().swipe(points[0].x, points[0].y, points[1].x, points[1].y,
-		// 1);
-		System.out.println("Pressing on coordinate - " + points[0].x + "," + points[0].y);
-		System.out.println("Moving to coordinate - " + points[1].x + "," + points[1].y);
 		getTouchAction().press(points[0].x, points[0].y).moveTo(points[1].x, points[1].y).release().perform();
-		QAFTestBase.pause(1000);
 	}
 
 	/**
@@ -54,8 +58,6 @@ public final class AppiumUtils {
 	 */
 	public static void swipeDown() {
 		Point[] points = getXYtoVSwipe();
-		// getAppiumDriver().swipe(points[1].x, points[1].y, points[0].x, points[0].y,
-		// 1);
 		getTouchAction().press(points[1].x, points[1].y).moveTo(points[0].x, points[0].y).release().perform();
 	}
 
@@ -64,8 +66,6 @@ public final class AppiumUtils {
 	 */
 	public static void swipeLeft() {
 		Point[] points = getXYtoHSwipe();
-		// getAppiumDriver().swipe(points[0].x, points[0].y, points[1].x, points[1].y,
-		// 1);
 		getTouchAction().press(points[0].x, points[0].y).moveTo(points[1].x, points[1].y).release().perform();
 	}
 
@@ -74,8 +74,6 @@ public final class AppiumUtils {
 	 */
 	public static void swipeRight() {
 		Point[] points = getXYtoHSwipe();
-		// getAppiumDriver().swipe(points[1].x, points[1].y, points[0].x, points[0].y,
-		// 1);
 		getTouchAction().press(points[1].x, points[1].y).moveTo(points[0].x, points[0].y).release().perform();
 	}
 
@@ -145,6 +143,7 @@ public final class AppiumUtils {
 	// based on this i'm telling the scroll code to go up or down searching for
 	// the value
 	// additionally i'm checking the same for the day and year
+	@SuppressWarnings("rawtypes")
 	public static void iosScrollChecker(String[] list) {
 		for (int i = 0; i < list.length; i++) {
 
@@ -170,6 +169,7 @@ public final class AppiumUtils {
 
 	// Used to get the dynamic location of an object
 	// Code here shouldn't be modified
+	@SuppressWarnings("rawtypes")
 	private static void scrollAndSearch(IOSDriver driver, String value, MobileElement me, Boolean direction) {
 		String x = getLocationX(me);
 		String y = getLocationY(me);
@@ -180,6 +180,7 @@ public final class AppiumUtils {
 
 	// Performs the swipe and search operation
 	// Code here shouldn't be modified
+	@SuppressWarnings("rawtypes")
 	private static void swipe(IOSDriver driver, String start, String end, Boolean up) {
 		String direction;
 		if (up) {
@@ -217,6 +218,7 @@ public final class AppiumUtils {
 	// For instance Month, Day, Year for a birthday would have this loop 3 times
 	// dynamically selecting each scroll wheel
 	// Code here shouldn't be modified
+	@SuppressWarnings("rawtypes")
 	public static void androidScrollKeys(String[] list) {
 		AndroidDriver driver = getAndroidDriver();
 		for (int i = 0; i < list.length; i++) {
@@ -377,6 +379,7 @@ public final class AppiumUtils {
 	}
 
 	// performs a wait command on a web element
+	@SuppressWarnings("rawtypes")
 	private static MobileElement fluentWait(AppiumDriver driver, By xpath) {
 		MobileElement waitElement = null;
 
@@ -395,7 +398,7 @@ public final class AppiumUtils {
 		return waitElement;
 	}
 
-	@SuppressWarnings(value = "Unchecked")
+	@SuppressWarnings(value = "unchecked")
 	private static <T> T checkType(Class<T> expectedClass) {
 		T driver = (T) new WebDriverTestBase().getDriver().getUnderLayingDriver();
 		if (expectedClass.isInstance(driver))
@@ -404,6 +407,7 @@ public final class AppiumUtils {
 			throw new ClassCastException(driverErrorMsg(expectedClass, driver.getClass()));
 	}
 
+	@SuppressWarnings("rawtypes")
 	private static String driverErrorMsg(Class expectedClass, Class driverClass) {
 		String stepWarning = String.format("Underlying driver is an %s.  This step requires an %s.",
 				driverClass.getSimpleName(), expectedClass.getSimpleName());

@@ -29,23 +29,25 @@
 
 package com.quantum.listeners;
 
-import com.quantum.utils.*;
-import com.qmetry.qaf.automation.ui.webdriver.CommandTracker;
-import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
-import com.qmetry.qaf.automation.ui.webdriver.QAFWebDriverCommandAdapter;
-import com.qmetry.qaf.automation.util.StringUtil;
-import com.perfecto.reportium.model.Job;
-import com.perfecto.reportium.model.PerfectoExecutionContext;
-import com.perfecto.reportium.model.Project;
-import com.qmetry.qaf.automation.core.ConfigurationManager;
+import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
+
+import java.util.concurrent.TimeUnit;
+
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.DriverCommand;
 
-import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
-
-import java.util.concurrent.TimeUnit;
+import com.qmetry.qaf.automation.core.ConfigurationManager;
+import com.qmetry.qaf.automation.ui.webdriver.CommandTracker;
+import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
+import com.qmetry.qaf.automation.ui.webdriver.QAFWebDriverCommandAdapter;
+import com.qmetry.qaf.automation.util.StringUtil;
+import com.quantum.utils.CloudUtils;
+import com.quantum.utils.ConfigurationUtils;
+import com.quantum.utils.ConsoleUtils;
+import com.quantum.utils.DeviceUtils;
+import com.quantum.utils.ReportUtils;
 
 public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 	@Override

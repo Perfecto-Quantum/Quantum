@@ -4,19 +4,20 @@
  */
 package com.quantum.utils;
 
+import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.hamcrest.Matchers;
+import org.openqa.selenium.remote.DriverCommand;
+import org.openqa.selenium.remote.RemoteExecuteMethod;
+
 import com.perfectomobile.httpclient.device.DeviceParameter;
 import com.perfectomobile.httpclient.device.DeviceResult;
 import com.qmetry.qaf.automation.ui.WebDriverTestBase;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 import com.qmetry.qaf.automation.util.Validator;
-import org.hamcrest.Matchers;
-import org.openqa.selenium.remote.DriverCommand;
-import org.openqa.selenium.remote.RemoteExecuteMethod;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 
 public class DeviceUtils {
 
@@ -449,7 +450,7 @@ public class DeviceUtils {
 		params.put(by, identifier);
 		params.put("resultAuth", resultAuth);
 		params.put("errorType", errorType);
-		Object result2 = getQAFDriver().executeScript("mobile:fingerprint:set", params);
+		getQAFDriver().executeScript("mobile:fingerprint:set", params);
 	}
 
 	public static void setSensorAuthentication(String by, String identifier, String resultAuth, String errorType) {
@@ -458,7 +459,7 @@ public class DeviceUtils {
 		params.put(by, identifier);
 		params.put("resultAuth", resultAuth);
 		params.put("errorType", errorType);
-		Object result2 = getQAFDriver().executeScript("mobile:sensorAuthentication:set", params);
+		getQAFDriver().executeScript("mobile:sensorAuthentication:set", params);
 	}
 
 	public static void generateHAR()
