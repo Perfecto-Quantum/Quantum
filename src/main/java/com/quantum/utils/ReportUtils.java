@@ -12,6 +12,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHost;
@@ -39,6 +41,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.qmetry.qaf.automation.core.ConfigurationManager;
+import com.qmetry.qaf.automation.util.StringUtil;
 import com.quantum.listeners.QuantumReportiumListener;
 
 public class ReportUtils {
@@ -55,8 +58,7 @@ public class ReportUtils {
 	// See
 	// http://developers.perfectomobile.com/display/PD/Using+the+Reporting+Public+API
 	// on how to obtain an Offline Token
-	public static final String OFFLINE_TOKEN = ConfigurationManager.getBundle()
-			.getString("perfecto.offlineToken");
+	public static final String OFFLINE_TOKEN = ConfigurationManager.getBundle().getString("perfecto.offlineToken");
 
 	// The reporting Server address depends on the location of the lab. Please
 	// refer to the documentation at
@@ -88,10 +90,11 @@ public class ReportUtils {
 		for (int i = 0; i < executions.getAsJsonArray("resources").size(); i++) {
 			JsonObject testExecution = executions.getAsJsonArray("resources").get(i).getAsJsonObject();
 			String testId = testExecution.get("id").getAsString();
-			String testName = testExecution.get("name").getAsString();
+			String testName = testExecution.get("name").getAsString().replace(" ", "_");
 			JsonObject platforms = testExecution.getAsJsonArray("platforms").get(0).getAsJsonObject();
 			String deviceName = platforms.get("deviceId").getAsString();
-			downloadTestReport(testId, deviceName + "_" + testName.replace(" ", "_"), accessToken);
+			downloadTestReport(testId,
+					deviceName + "_" + (testName.length() >= 100 ? testName.substring(1, 100) : testName), accessToken);
 		}
 
 	}
@@ -312,7 +315,7 @@ public class ReportUtils {
 	}
 
 	private static void downloadFileAuthenticated(String fileName, URI uri, String suffix, String description,
-												  String accessToken) throws IOException {
+			String accessToken) throws IOException {
 		HttpGet httpGet = new HttpGet(uri);
 		addDefaultRequestHeaders(httpGet, accessToken);
 		downloadFileToFS(httpGet, fileName, suffix, description);
@@ -376,7 +379,9 @@ public class ReportUtils {
 
 				DateFormat dateFormat = new SimpleDateFormat("MMddyyyyHHmmss");
 				Date date = new Date();
-
+				if (!new File(dir).exists()) {
+					new File(dir).mkdir();
+				}
 				File file = new File(dir, fileName + "_" + dateFormat.format(date) + suffix);
 				fileOutputStream = new FileOutputStream(file);
 				IOUtils.copy(response.getEntity().getContent(), fileOutputStream);
@@ -394,6 +399,12 @@ public class ReportUtils {
 
 	private static void addDefaultRequestHeaders(HttpRequestBase request, String accessToken) {
 		request.addHeader("Authorization", "Bearer " + accessToken);
+	}
+
+	public static void reportComment(String message) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("text", message);
+		DeviceUtils.getQAFDriver().executeScript("mobile:comment", params);
 	}
 
 	public static void main(String[] args) throws URISyntaxException, IOException {

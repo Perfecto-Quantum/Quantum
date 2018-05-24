@@ -37,6 +37,7 @@ import com.qmetry.qaf.automation.step.client.text.BDDDefinitionHelper;
 import com.qmetry.qaf.automation.step.client.text.BDDDefinitionHelper.ParamType;
 import com.qmetry.qaf.automation.ui.WebDriverTestCase;
 import com.quantum.utils.ConsoleUtils;
+import com.quantum.utils.ReportUtils;
 
 import cucumber.runtime.RuntimeOptions;
 import cucumber.runtime.RuntimeOptionsFactory;
@@ -80,7 +81,11 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 			createReportiumClient(testResult).testStart(
 					testResult.getMethod().getMethodName() + getDataDrivenText(testResult),
 					new TestContext(testResult.getMethod().getGroups()));
-
+			if (testResult.getParameters().length > 0 && getBundle().getBoolean("addFullDataToReport", false)) {
+				logStepStart("Test Data used");
+				ReportUtils.reportComment(testResult.getParameters()[0].toString());
+				logStepEnd();
+			}
 		}
 	}
 
@@ -290,14 +295,10 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 		if (testResult.getParameters().length > 0) {
 
 			Map map = (Map) testResult.getParameters()[0];
-			if (getBundle().getBoolean("addFullDataToReport", false)) {
-				result = " [" + testResult.getParameters()[0] + "]";
-			} else {
-				if (map.containsKey("recDescription")) {
-					result = " [" + map.get("recDescription") + "]";
-				} else if (map.containsKey("recId")) {
-					result = " [" + map.get("recId") + "]";
-				}
+			if (map.containsKey("recDescription")) {
+				result = " [" + map.get("recDescription") + "]";
+			} else if (map.containsKey("recId")) {
+				result = " [" + map.get("recId") + "]";
 			}
 		}
 		return result;
@@ -322,7 +323,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 			if ((paramNames != null) && (!paramNames.isEmpty())) {
 
-				for (int i = 0; i < actualArgs.length; i++) {
+				for (int i = 0; i < paramNames.size(); i++) {
 					String paramName = paramNames.get(i).trim();
 					// remove starting { and ending } from parameter name
 					paramName = paramName.substring(1, paramName.length() - 1).split(":", 2)[0];
