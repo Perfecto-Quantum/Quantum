@@ -103,7 +103,7 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 		if (tags != null) {
 			((DesiredCapabilities) desiredCapabilities).setCapability("report.tags", tags);
 		}
-
+		System.out.println("Test CI setup");
 	}
 
 	@Override
