@@ -40,6 +40,7 @@ import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.DriverCommand;
+import org.testng.Assert;
 import org.testng.TestNGException;
 
 import com.google.common.base.Strings;
@@ -131,16 +132,14 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
                 Node ndInuse = (Node) xPath.evaluate("handset/inUse", dDoc, XPathConstants.NODE);
                 Node ndavailable = (Node) xPath.evaluate("handset/available", dDoc, XPathConstants.NODE);
                 Node ndStatus = (Node) xPath.evaluate("handset/status", dDoc, XPathConstants.NODE);
-                if (Boolean.valueOf(ndInuse.getTextContent()) || !Boolean.valueOf(ndavailable.getTextContent())
-                		||ndStatus.getTextContent()!="Connected")
-                    throw new AutomationError("Device is unavailable or having error...");
-            }catch (AutomationError se)
-            {
-                throw se;
+                if (!Boolean.valueOf(ndavailable.getTextContent()) || Boolean.valueOf(ndInuse.getTextContent()) 
+                		|| ndStatus.getTextContent()!="Connected")
+//                    throw new AutomationError("Device is unavailable or having error...");
+                	Assert.fail("Device is unavailable or having error...");
             }
             catch(Exception e)
             {
-                //ignore
+                //ignore other exceptions
             }
         }
 
