@@ -33,11 +33,18 @@ import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 
 import java.util.concurrent.TimeUnit;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.DriverCommand;
+import org.testng.Assert;
+import org.testng.TestNGException;
 
+import com.google.common.base.Strings;
+import com.qmetry.qaf.automation.core.AutomationError;
 import com.qmetry.qaf.automation.core.ConfigurationManager;
 import com.qmetry.qaf.automation.ui.webdriver.CommandTracker;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
@@ -48,6 +55,15 @@ import com.quantum.utils.ConfigurationUtils;
 import com.quantum.utils.ConsoleUtils;
 import com.quantum.utils.DeviceUtils;
 import com.quantum.utils.ReportUtils;
+import com.quantum.utils.RestAPIUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
+
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
+import java.io.StringReader;
 
 public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 	@Override
@@ -103,6 +119,29 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 		if (tags != null) {
 			((DesiredCapabilities) desiredCapabilities).setCapability("report.tags", tags);
 		}
+		if(!Strings.isNullOrEmpty(((DesiredCapabilities)desiredCapabilities).getCapability("deviceName").toString()))
+        {
+            try {
+                String res=RestAPIUtils.retrieveDeviceInfo(((DesiredCapabilities) desiredCapabilities).getCapability("deviceName").toString());
+                DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
+
+                DocumentBuilder builder = domFactory.newDocumentBuilder();
+                Document dDoc = builder.parse(new InputSource((new StringReader(res))));
+
+                XPath xPath = XPathFactory.newInstance().newXPath();
+                Node ndInuse = (Node) xPath.evaluate("handset/inUse", dDoc, XPathConstants.NODE);
+                Node ndavailable = (Node) xPath.evaluate("handset/available", dDoc, XPathConstants.NODE);
+                Node ndStatus = (Node) xPath.evaluate("handset/status", dDoc, XPathConstants.NODE);
+                if (!Boolean.valueOf(ndavailable.getTextContent()) || Boolean.valueOf(ndInuse.getTextContent()) 
+                		|| ndStatus.getTextContent()!="Connected")
+//                    throw new AutomationError("Device is unavailable or having error...");
+                	Assert.fail("Device is unavailable or having error...");
+            }
+            catch(Exception e)
+            {
+                //ignore other exceptions
+            }
+        }
 
 	}
 
