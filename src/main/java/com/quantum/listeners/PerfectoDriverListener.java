@@ -119,7 +119,10 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 		if (tags != null) {
 			((DesiredCapabilities) desiredCapabilities).setCapability("report.tags", tags);
 		}
-		if(!Strings.isNullOrEmpty(((DesiredCapabilities)desiredCapabilities).getCapability("deviceName").toString()))
+		
+		if(null!=ConfigurationManager.getBundle().getString("driver_availability_check") &&
+				ConfigurationManager.getBundle().getString("driver_availability_check").toLowerCase().equals("yes") &&
+				!Strings.isNullOrEmpty(((DesiredCapabilities)desiredCapabilities).getCapability("deviceName").toString()))
         {
             try {
                 String res=RestAPIUtils.retrieveDeviceInfo(((DesiredCapabilities) desiredCapabilities).getCapability("deviceName").toString());
@@ -133,7 +136,7 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
                 Node ndavailable = (Node) xPath.evaluate("handset/available", dDoc, XPathConstants.NODE);
                 Node ndStatus = (Node) xPath.evaluate("handset/status", dDoc, XPathConstants.NODE);
                 if (!Boolean.valueOf(ndavailable.getTextContent()) || Boolean.valueOf(ndInuse.getTextContent()) 
-                		|| ndStatus.getTextContent()!="Connected")
+                		|| !ndStatus.getTextContent().toLowerCase().trim().equals("connected"))
 //                    throw new AutomationError("Device is unavailable or having error...");
                 	Assert.fail("Device is unavailable or having error...");
             }
