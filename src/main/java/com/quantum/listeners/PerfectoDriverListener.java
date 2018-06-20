@@ -103,7 +103,6 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 		if (tags != null) {
 			((DesiredCapabilities) desiredCapabilities).setCapability("report.tags", tags);
 		}
-		System.out.println("Test CI setup");
 	}
 
 	@Override
@@ -118,7 +117,6 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 
 	@Override
 	public void afterCommand(QAFExtendedWebDriver driver, CommandTracker commandTracker) {
-
 		if (commandTracker.getCommand().equalsIgnoreCase(DriverCommand.CLOSE)) {
 			{
 				if (ConfigurationManager.getBundle().getString("remote.server").toLowerCase()

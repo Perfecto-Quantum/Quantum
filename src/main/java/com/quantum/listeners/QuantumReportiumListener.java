@@ -26,6 +26,7 @@ import com.perfecto.reportium.test.TestContext;
 import com.perfecto.reportium.test.result.TestResultFactory;
 import com.perfecto.reportium.testng.ReportiumTestNgListener;
 import com.qmetry.qaf.automation.core.CheckpointResultBean;
+import com.qmetry.qaf.automation.core.ConfigurationManager;
 import com.qmetry.qaf.automation.core.MessageTypes;
 import com.qmetry.qaf.automation.core.TestBaseProvider;
 import com.qmetry.qaf.automation.keys.ApplicationProperties;
@@ -158,7 +159,19 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 	@Override
 	public void onTestSkipped(ITestResult result) {
-
+		ReportiumClient client = getReportClient();
+		if (null != client) {
+			// By default all the skipped tests will be failed, if you want
+			if (ConfigurationManager.getBundle().getString("skippedTests", "fail").equalsIgnoreCase("pass")) {
+				client.testStop(TestResultFactory.createSuccess());
+			} else {
+				String failureMessage = result.getThrowable().getMessage();
+				failureMessage = (failureMessage.isEmpty() || failureMessage == null)
+						? "This test was skipped" : result.getThrowable().getMessage();
+				client.testStop(TestResultFactory.createFailure(failureMessage, result.getThrowable()));
+			}
+			logTestEnd(result);
+		}
 	}
 
 	@Override
