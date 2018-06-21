@@ -12,6 +12,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,14 +65,15 @@ public class RestAPIUtils {
 	    actionStr="";
 		for (Map.Entry<String, String> et:actions.entrySet())
 		{
-			actionStr=actionStr+"&" + et.getKey()+"="+et.getValue();
+			actionStr=actionStr+"&"+et.getKey()+"="+et.getValue();
 			
 		}
+		
 				
 		paramStr="";
 		for (Map.Entry<String, String> et:params.entrySet())
 		{
-			paramStr=paramStr+"&param." + et.getKey()+"="+et.getValue();
+			paramStr=paramStr+"&param." + et.getKey()+"="+URLEncoder.encode(et.getValue(), "UTF-8");
 			
 		}
 		
@@ -83,9 +85,8 @@ public class RestAPIUtils {
 				+ authStr
 				+ actionStr
 				+ paramStr;
-				//+ "&param.deviceId="+d.getCapabilities().getCapability("deviceName").toString();
+			
 		
-
 		URL obj = new URL(url);
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 		con.setRequestMethod("GET");
@@ -98,11 +99,7 @@ public class RestAPIUtils {
 			response.append(inputLine);
 		}
 		in.close();
-		//JSONObject jObj = new JSONObject(response.toString());
-
-//		ConsoleUtils.logWarningBlocks("Step result:" +response.toString());
-//		Assert.assertTrue(response.toString().toLowerCase().contains("success"),response.toString());
-
+		
 		return response.toString();
 	}
 }
