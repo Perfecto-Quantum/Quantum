@@ -445,6 +445,7 @@ public class DeviceUtils {
 	}
 
 	public static void setFingerprint(String by, String identifier, String resultAuth, String errorType) {
+
 		Map<String, Object> params = new HashMap<>();
 		params.put(by, identifier);
 		params.put("resultAuth", resultAuth);
@@ -453,6 +454,7 @@ public class DeviceUtils {
 	}
 
 	public static void setSensorAuthentication(String by, String identifier, String resultAuth, String errorType) {
+
 		Map<String, Object> params = new HashMap<>();
 		params.put(by, identifier);
 		params.put("resultAuth", resultAuth);

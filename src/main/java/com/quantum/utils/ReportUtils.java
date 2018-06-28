@@ -55,10 +55,9 @@ public class ReportUtils {
 	public static final String CQL_NAME = (ConfigurationManager.getBundle().getString("remote.server").split("\\.")[0])
 			.replace("http://", "").replace("https://", "");
 
-	// See
-	// http://developers.perfectomobile.com/display/PD/Using+the+Reporting+Public+API
-	// on how to obtain an Offline Token
-	public static final String OFFLINE_TOKEN = ConfigurationManager.getBundle().getString("perfecto.offlineToken");
+	private static String getToken() {
+		return ConfigurationManager.getBundle().getString("perfecto.offlineToken").trim();
+	}
 
 	// The reporting Server address depends on the location of the lab. Please
 	// refer to the documentation at
@@ -71,21 +70,25 @@ public class ReportUtils {
 
 	public static void generateSummaryReports(String executionId) throws Exception {
 		// Use your personal offline token to obtain an access token
-		String accessToken = obtainAccessToken();
 
 		// Retrieve a list of the test executions in your lab (as a json)
-		JsonObject executions = retrieveTestExecutions(accessToken, executionId);
+		JsonObject executions = retrieveTestExecutions(getToken(), executionId);
 
 		JsonObject resources = executions.getAsJsonArray("resources").get(0).getAsJsonObject();
 		JsonObject platforms = resources.getAsJsonArray("platforms").get(0).getAsJsonObject();
 		String deviceId = platforms.get("deviceId").getAsString();
-		downloadExecutionSummaryReport(deviceId, executionId, accessToken);
+		downloadExecutionSummaryReport(deviceId, executionId, getToken());
 
 	}
 
 	public static void generateTestReport(String executionId) throws Exception {
-		String accessToken = obtainAccessToken();
-		JsonObject executions = retrieveTestExecutions(accessToken, executionId);
+
+		JsonObject executions = retrieveTestExecutions(getToken(), executionId);
+
+		while (!executions.get("metadata").getAsJsonObject().get("processingStatus").getAsString()
+				.equalsIgnoreCase("PROCESSING_COMPLETE")) {
+			executions = retrieveTestExecutions(getToken(), executionId);
+		}
 
 		for (int i = 0; i < executions.getAsJsonArray("resources").size(); i++) {
 			JsonObject testExecution = executions.getAsJsonArray("resources").get(i).getAsJsonObject();
@@ -94,7 +97,46 @@ public class ReportUtils {
 			JsonObject platforms = testExecution.getAsJsonArray("platforms").get(0).getAsJsonObject();
 			String deviceName = platforms.get("deviceId").getAsString();
 			downloadTestReport(testId,
-					deviceName + "_" + (testName.length() >= 100 ? testName.substring(1, 100) : testName), accessToken);
+					deviceName + "_" + (testName.length() >= 100 ? testName.substring(1, 100) : testName), getToken());
+		}
+
+	}
+
+	public static void downloadReportVideo(String executionId) throws URISyntaxException, IOException {
+		JsonObject executions = retrieveTestExecutions(getToken(), executionId);
+
+		while (!executions.get("metadata").getAsJsonObject().get("processingStatus").getAsString()
+				.equalsIgnoreCase("PROCESSING_COMPLETE")) {
+			executions = retrieveTestExecutions(getToken(), executionId);
+		}
+
+		for (int i = 0; i < executions.getAsJsonArray("resources").size(); i++) {
+			JsonObject testExecution = executions.getAsJsonArray("resources").get(i).getAsJsonObject();
+			String testId = testExecution.get("id").getAsString();
+			String testName = testExecution.get("name").getAsString().replace(" ", "_");
+			JsonObject platforms = testExecution.getAsJsonArray("platforms").get(0).getAsJsonObject();
+			String deviceName = platforms.get("deviceId").getAsString();
+			downloadVideo(deviceName + "_" + (testName.length() >= 100 ? testName.substring(1, 100) : testName), executions);
+		}
+
+	}
+
+	public static void downloadReportAttachments(String executionId) throws URISyntaxException, IOException {
+
+		JsonObject executions = retrieveTestExecutions(getToken(), executionId);
+
+		while (!executions.get("metadata").getAsJsonObject().get("processingStatus").getAsString()
+				.equalsIgnoreCase("PROCESSING_COMPLETE")) {
+			executions = retrieveTestExecutions(getToken(), executionId);
+		}
+
+		for (int i = 0; i < executions.getAsJsonArray("resources").size(); i++) {
+			JsonObject testExecution = executions.getAsJsonArray("resources").get(i).getAsJsonObject();
+			String testId = testExecution.get("id").getAsString();
+			String testName = testExecution.get("name").getAsString().replace(" ", "_");
+			JsonObject platforms = testExecution.getAsJsonArray("platforms").get(0).getAsJsonObject();
+			String deviceName = platforms.get("deviceId").getAsString();
+			downloadAttachments(deviceName + "_" + (testName.length() >= 100 ? testName.substring(1, 100) : testName), executions);
 		}
 
 	}
@@ -230,84 +272,53 @@ public class ReportUtils {
 	}
 
 	@SuppressWarnings("unused")
-	private static void downloadVideo(JsonObject testExecution) throws IOException, URISyntaxException {
-		JsonArray videos = testExecution.getAsJsonArray("videos");
+	private static void downloadVideo(String deviceId, JsonObject testExecution)
+			throws IOException, URISyntaxException {
+		JsonObject resources = testExecution.getAsJsonArray("resources").get(0).getAsJsonObject();
+		JsonArray videos = resources.getAsJsonArray("videos");
+
 		if (videos.size() > 0) {
 			JsonObject video = videos.get(0).getAsJsonObject();
 			String downloadVideoUrl = video.get("downloadUrl").getAsString();
 			String format = "." + video.get("format").getAsString();
-			String testId = testExecution.get("id").getAsString();
+			String testId = resources.get("id").getAsString();
 			// downloadFile(testId, URI.create(downloadVideoUrl), format,
 			// "video");
-			downloadFile("results_video", URI.create(downloadVideoUrl), format, "video");
+			downloadFile(deviceId + "_Video", URI.create(downloadVideoUrl), format, "video");
 		} else {
 			System.out.println("\nNo videos found for test execution");
 		}
 	}
 
 	@SuppressWarnings("unused")
-	private static void downloadAttachments(JsonObject testExecution) throws IOException, URISyntaxException {
+	private static void downloadAttachments(String deviceId, JsonObject testExecution)
+			throws IOException, URISyntaxException {
 		// Example for downloading device logs
-		JsonArray artifacts = testExecution.getAsJsonArray("artifacts");
+
+		JsonObject resources = testExecution.getAsJsonArray("resources").get(0).getAsJsonObject();
+		JsonArray artifacts = resources.getAsJsonArray("artifacts");
 		for (JsonElement artifactElement : artifacts) {
 			JsonObject artifact = artifactElement.getAsJsonObject();
 			String artifactType = artifact.get("type").getAsString();
 			if (artifactType.equals("DEVICE_LOGS")) {
-				String testId = testExecution.get("id").getAsString();
+				String testId = resources.get("id").getAsString();
 				String path = artifact.get("path").getAsString();
 				URIBuilder uriBuilder = new URIBuilder(path);
-				downloadFile(testId, uriBuilder.build(), ".zip", "device logs");
+				downloadFile(deviceId + "_" + testId, uriBuilder.build(), "_device_logs.zip", "device logs");
+			}
+			else if (artifactType.equals("NETWORK")) {
+				String testId = resources.get("id").getAsString();
+				String path = artifact.get("path").getAsString();
+				URIBuilder uriBuilder = new URIBuilder(path);
+				downloadFile(deviceId + "_" + testId, uriBuilder.build(), "_network_logs.zip", "network logs");
+			}
+			else if (artifactType.equals("VITALS")) {
+				String testId = resources.get("id").getAsString();
+				String path = artifact.get("path").getAsString();
+				URIBuilder uriBuilder = new URIBuilder(path);
+				downloadFile(deviceId + "_" + testId, uriBuilder.build(), "_vitals_logs.zip", "vitals logs");
 			}
 		}
-	}
-
-	private static String obtainAccessToken() throws URISyntaxException, IOException {
-		HttpPost tokenPost = new HttpPost(new URI(CQL_SERVER_URL + "/services/v2.0/auth/access-token"));
-		tokenPost.setEntity(new UrlEncodedFormEntity(
-				Collections.singletonList(new BasicNameValuePair("offline_token", OFFLINE_TOKEN))));
-
-		HttpResponse tokenResponse = null;
-
-		if (ConfigurationManager.getBundle().getString("proxyHost") != null
-				&& !ConfigurationManager.getBundle().getString("proxyHost").toString().equals("")) {
-			InetAddress addr;
-			addr = InetAddress.getLocalHost();
-			String hostname = addr.getHostName();
-
-			NTCredentials ntCreds = new NTCredentials(
-					ConfigurationManager.getBundle().getString("proxyUser").toString(),
-					ConfigurationManager.getBundle().getString("proxyPassword").toString(), hostname,
-					ConfigurationManager.getBundle().getString("proxyDomain").toString());
-
-			CredentialsProvider credsProvider = new BasicCredentialsProvider();
-			credsProvider
-					.setCredentials(
-							new AuthScope(ConfigurationManager.getBundle().getString("proxyHost").toString(),
-									Integer.parseInt(
-											ConfigurationManager.getBundle().getString("proxyPort").toString())),
-							ntCreds);
-			HttpClientBuilder clientBuilder = HttpClientBuilder.create();
-
-			clientBuilder.useSystemProperties();
-			clientBuilder.setProxy(new HttpHost(ConfigurationManager.getBundle().getString("proxyHost").toString(),
-					Integer.parseInt(ConfigurationManager.getBundle().getString("proxyPort").toString())));
-			clientBuilder.setDefaultCredentialsProvider(credsProvider);
-			clientBuilder.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
-
-			CloseableHttpClient httpClient = clientBuilder.build();
-			tokenResponse = httpClient.execute(tokenPost);
-		} else {
-			HttpClient httpClient = HttpClientBuilder.create().build();
-			tokenResponse = httpClient.execute(tokenPost);
-		}
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		String accessToken;
-		try (InputStreamReader inputStreamReader = new InputStreamReader(tokenResponse.getEntity().getContent())) {
-			JsonObject tokenEntity = gson.fromJson(inputStreamReader, JsonObject.class);
-			accessToken = tokenEntity.getAsJsonObject("data").get("access_token").getAsString();
-			// System.out.println("Got access token:\n" + accessToken);
-		}
-		return accessToken;
 	}
 
 	private static void downloadFile(String fileName, URI uri, String suffix, String description) throws IOException {
@@ -398,7 +409,7 @@ public class ReportUtils {
 	}
 
 	private static void addDefaultRequestHeaders(HttpRequestBase request, String accessToken) {
-		request.addHeader("Authorization", "Bearer " + accessToken);
+		request.addHeader("PERFECTO_AUTHORIZATION", accessToken);
 	}
 
 	public static void reportComment(String message) {
@@ -407,7 +418,4 @@ public class ReportUtils {
 		DeviceUtils.getQAFDriver().executeScript("mobile:comment", params);
 	}
 
-	public static void main(String[] args) throws URISyntaxException, IOException {
-		System.out.println(obtainAccessToken());
-	}
 }

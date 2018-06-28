@@ -2,6 +2,7 @@ package com.quantum.listeners;
 
 import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -88,6 +89,9 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 				logStepEnd();
 			}
 		}
+		
+		Map<Object, Object> dataPasser = new HashMap<Object, Object>();
+		ConfigurationManager.getBundle().addProperty("dataPasser" + Thread.currentThread(), dataPasser);
 	}
 
 	@Override
@@ -128,6 +132,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 			logTestEnd(testResult);
 		}
 
+		tearIt(testResult);
 	}
 
 	@Override
@@ -154,6 +159,16 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 			logTestEnd(testResult);
 
+			tearIt(testResult);
+		}
+	}
+	
+	private void tearIt(ITestResult testResult)
+	{
+		if (testResult.getTestContext().getCurrentXmlTest().getParallel().toString().equalsIgnoreCase("methods")
+				& testResult.getTestClass().getName().equalsIgnoreCase("gherkin")) {
+			Object testInstance = testResult.getInstance();
+			((WebDriverTestCase) testInstance).getTestBase().tearDown();
 		}
 	}
 

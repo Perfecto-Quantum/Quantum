@@ -1,5 +1,7 @@
 package com.quantum.utils;
 
+import java.util.Map;
+
 import com.qmetry.qaf.automation.core.ConfigurationManager;
 import com.qmetry.qaf.automation.ui.WebDriverTestBase;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
@@ -11,6 +13,21 @@ import io.appium.java_client.ios.IOSDriver;
 
 @SuppressWarnings("rawtypes")
 public class DriverUtils {
+	
+	public static Map<String,Object> getDataPasser()
+	{
+		return (Map<String, Object>) ConfigurationManager.getBundle().getObject("dataPasser" + Thread.currentThread());
+	}
+	
+	public static void putDataPasser(String key, String value)
+	{
+		getDataPasser().put(key, value);
+	}
+	
+	public static Object getDataPasserValue(String key)
+	{
+		return getDataPasser().get(key);
+	}
 
 	public static AppiumDriver getAppiumDriver() {
 		return (AppiumDriver) getDriver().getUnderLayingDriver();
