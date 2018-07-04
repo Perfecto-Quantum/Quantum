@@ -78,7 +78,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 	}
 
 	@Override
-	public void onTestStart(ITestResult testResult) {
+	public synchronized void onTestStart(ITestResult testResult) {
 		if (getBundle().getString("remote.server", "").contains("perfecto")) {
 			createReportiumClient(testResult).testStart(
 					testResult.getMethod().getMethodName() + getDataDrivenText(testResult),

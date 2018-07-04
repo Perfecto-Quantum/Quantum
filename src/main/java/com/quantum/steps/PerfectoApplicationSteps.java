@@ -450,7 +450,7 @@ public class PerfectoApplicationSteps {
      * @param name the application name as it is displayed on the device screen
      */
     @Then("^I start inject \"(.*?)\" image to application name \"(.*?)\"$")
-    public static void startAppByName(String repositoryFile, String name){
+    public static void imageInjectionByAppName(String repositoryFile, String name){
         DeviceUtils.startApp(name, "name");
         // Change to app context after open app
         switchToContext("NATIVE_APP");

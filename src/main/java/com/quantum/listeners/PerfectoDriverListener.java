@@ -169,9 +169,16 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 
 	@Override
 	public void onInitialize(QAFExtendedWebDriver driver) {
-		MutableCapabilities dcaps = CloudUtils.getDeviceProperties((MutableCapabilities) driver.getCapabilities());
-		ConfigurationUtils.setActualDeviceCapabilities(dcaps.asMap());
-		ConsoleUtils.logWarningBlocks("DEVICE PROPERTIES: " + dcaps.toString());
+		// Fix for the issue that if security token is not used then the api call is
+		// failing.
+		if (getBundle().containsKey("perfecto.capabilities.securityToken")
+				|| getBundle().containsKey("driver.capabilities.securityToken")) {
+			MutableCapabilities dcaps = CloudUtils.getDeviceProperties((MutableCapabilities) driver.getCapabilities());
+			ConfigurationUtils.setActualDeviceCapabilities(dcaps.asMap());
+			ConsoleUtils.logWarningBlocks("DEVICE PROPERTIES: " + dcaps.toString());
+		} else {
+			ConsoleUtils.logWarningBlocks("DEVICE PROPERTIES: " + driver.getCapabilities().toString());
+		}
 
 		Long implicitWait = ConfigurationManager.getBundle().getLong("seleniun.wait.implicit", 0);
 		driver.manage().timeouts().implicitlyWait(implicitWait, TimeUnit.MILLISECONDS);
