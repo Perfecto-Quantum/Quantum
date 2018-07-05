@@ -2,9 +2,8 @@ package com.quantum.utils;
 
 import org.testng.IRetryAnalyzer;
 import org.testng.ITestResult;
+
 import com.qmetry.qaf.automation.core.ConfigurationManager;
-import com.qmetry.qaf.automation.ui.WebDriverTestBase;
-import com.quantum.utils.DeviceUtils;
 
 public class Retry implements IRetryAnalyzer  {
 

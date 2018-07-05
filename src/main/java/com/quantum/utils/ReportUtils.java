@@ -10,12 +10,12 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -23,16 +23,13 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.NTCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.ProxyAuthenticationStrategy;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 import com.google.gson.Gson;
@@ -40,11 +37,18 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.perfecto.reportium.client.ReportiumClient;
 import com.qmetry.qaf.automation.core.ConfigurationManager;
-import com.qmetry.qaf.automation.util.StringUtil;
+import com.qmetry.qaf.automation.core.TestBaseProvider;
 import com.quantum.listeners.QuantumReportiumListener;
 
 public class ReportUtils {
+
+	public static final String PERFECTO_REPORT_CLIENT = "perfecto.report.client";
+
+	public static ReportiumClient getReportClient() {
+		return (ReportiumClient) ConfigurationManager.getBundle().getObject(PERFECTO_REPORT_CLIENT);
+	}
 
 	public static void logStepStart(String message) {
 		ConsoleUtils.logInfoBlocks(message, ConsoleUtils.lower_block + " ", 10);
@@ -116,7 +120,8 @@ public class ReportUtils {
 			String testName = testExecution.get("name").getAsString().replace(" ", "_");
 			JsonObject platforms = testExecution.getAsJsonArray("platforms").get(0).getAsJsonObject();
 			String deviceName = platforms.get("deviceId").getAsString();
-			downloadVideo(deviceName + "_" + (testName.length() >= 100 ? testName.substring(1, 100) : testName), executions);
+			downloadVideo(deviceName + "_" + (testName.length() >= 100 ? testName.substring(1, 100) : testName),
+					executions);
 		}
 
 	}
@@ -136,7 +141,8 @@ public class ReportUtils {
 			String testName = testExecution.get("name").getAsString().replace(" ", "_");
 			JsonObject platforms = testExecution.getAsJsonArray("platforms").get(0).getAsJsonObject();
 			String deviceName = platforms.get("deviceId").getAsString();
-			downloadAttachments(deviceName + "_" + (testName.length() >= 100 ? testName.substring(1, 100) : testName), executions);
+			downloadAttachments(deviceName + "_" + (testName.length() >= 100 ? testName.substring(1, 100) : testName),
+					executions);
 		}
 
 	}
@@ -305,14 +311,12 @@ public class ReportUtils {
 				String path = artifact.get("path").getAsString();
 				URIBuilder uriBuilder = new URIBuilder(path);
 				downloadFile(deviceId + "_" + testId, uriBuilder.build(), "_device_logs.zip", "device logs");
-			}
-			else if (artifactType.equals("NETWORK")) {
+			} else if (artifactType.equals("NETWORK")) {
 				String testId = resources.get("id").getAsString();
 				String path = artifact.get("path").getAsString();
 				URIBuilder uriBuilder = new URIBuilder(path);
 				downloadFile(deviceId + "_" + testId, uriBuilder.build(), "_network_logs.zip", "network logs");
-			}
-			else if (artifactType.equals("VITALS")) {
+			} else if (artifactType.equals("VITALS")) {
 				String testId = resources.get("id").getAsString();
 				String path = artifact.get("path").getAsString();
 				URIBuilder uriBuilder = new URIBuilder(path);
@@ -416,6 +420,94 @@ public class ReportUtils {
 		Map<String, Object> params = new HashMap<>();
 		params.put("text", message);
 		DeviceUtils.getQAFDriver().executeScript("mobile:comment", params);
+	}
+
+	//
+	/**
+	 * Using this method will continue the scenario execution on failure, but it
+	 * will mark the scenario as failed at the end and also display all the failure
+	 * messages
+	 * 
+	 * @param message
+	 *            - Assertion message to be displayed in the DZ
+	 * @param status
+	 *            - Assertion flag status - true or false (pass or fail)
+	 */
+	public static void logVerify(String message, boolean status) {
+		try {
+			if (!status) {
+				TestBaseProvider.instance().get().addVerificationError(message);
+			}
+			getReportClient().reportiumAssert(message, status);
+		} catch (Exception e) {
+			// ignore...
+		}
+	}
+
+	/**
+	 * Added this method to report verifications with throwable exception.
+	 * 
+	 * @param message
+	 *            - Assertion message to be displayed in the DZ
+	 * @param status
+	 *            - Assertion flag status - true or false (pass or fail)
+	 * @param e
+	 *            - If the exception will be passed then the stacktrace will be
+	 *            attached on failure flag in DZ
+	 */
+	public static void logVerify(String message, boolean status, Throwable e) {
+		try {
+			if (!status) {
+				TestBaseProvider.instance().get().addVerificationError(e);
+				getReportClient().reportiumAssert(message + "\n" + ExceptionUtils.getFullStackTrace(e), status);
+			} else {
+				getReportClient().reportiumAssert(message, status);
+			}
+		} catch (Exception ex) {
+			// ignore...
+		}
+	}
+
+	/**
+	 * Using this method will add an assertion and stop the execution of the
+	 * scenario in case of failure.
+	 * 
+	 * @param message
+	 *            - Assertion message to be displayed in the DZ
+	 * @param status
+	 *            - Assertion flag status - true or false (pass or fail)
+	 */
+	public static void logAssert(String message, boolean status) {
+		logVerify(message, status);
+		if (!status) {
+			throw new AssertionError(message);
+		}
+	}
+
+	/**
+	 * Added this method to report assertions with throwable exception.
+	 * 
+	 * @param message
+	 *            - Assertion message to be displayed in the DZ
+	 * @param status
+	 *            - Assertion flag status - true or false (pass or fail)
+	 * @param e-
+	 *            If the exception will be passed then the stacktrace will be
+	 *            attached on failure flag in DZ
+	 */
+	public static void logAssert(String message, boolean status, Throwable e) {
+		if (ConfigurationManager.getBundle().getString("assertStop", "false").equalsIgnoreCase("true")) {
+			logVerify(message, status, e);
+			if (!status) {
+				throw new AssertionError(message);
+			}
+		} else {
+			if (status) {
+				getReportClient().reportiumAssert(message, status);
+			} else {
+				getReportClient().reportiumAssert(message + "\n" + ExceptionUtils.getFullStackTrace(e), status);
+			}
+		}
 	}
 
 }

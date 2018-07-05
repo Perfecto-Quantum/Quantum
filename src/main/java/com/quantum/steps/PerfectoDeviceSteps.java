@@ -1,13 +1,14 @@
 package com.quantum.steps;
 
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Point;
+
 import com.qmetry.qaf.automation.step.QAFTestStepProvider;
-import com.qmetry.qaf.automation.testng.report.ReportEntry;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebElement;
 import com.quantum.utils.DeviceUtils;
 import com.quantum.utils.ReportUtils;
 
 import cucumber.api.java.en.Then;
-import org.openqa.selenium.*;
 
 /**
  * The class PerfectoDeviceSteps provides methods for working with a device,

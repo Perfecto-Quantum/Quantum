@@ -5,11 +5,16 @@ package com.quantum.steps;
 
 
 import com.qmetry.qaf.automation.step.QAFTestStepProvider;
+import com.quantum.listeners.QuantumReportiumListener;
 import com.quantum.utils.DeviceUtils;
 import cucumber.api.java.en.Then;
+import cucumber.api.java.en.When;
 
 import static com.qmetry.qaf.automation.step.CommonStep.*;
 import static com.quantum.utils.DeviceUtils.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The class PerfectoApplicationSteps provides methods for working with applications, with cucumber steps annotations.
@@ -565,4 +570,34 @@ public class PerfectoApplicationSteps {
         DeviceUtils.setSensorAuthentication("name", name,  "fail", errorType);
     }
 
+	/**
+	 * This step will inject an audio from the given path into the device.
+	 * 
+	 * @param audioFilePath
+	 *            - example: PUBLIC:Audio\\play25s1.wav
+	 */
+	@When("^I inject an audio from \"(.*?)\" into the device$")
+	public void injectAudio(String audioFilePath) {
+		Map<String, Object> audioInjectParams = new HashMap<>();
+		audioInjectParams.put("key", audioFilePath);
+		audioInjectParams.put("wait", "nowait");
+		DeviceUtils.getQAFDriver().executeScript("mobile:audio:inject", audioInjectParams);
+	}
+
+	/**
+	 * This step will verify that the audio was played. Audio checkpoint will only
+	 * ensure that the audio was played and not the content of audio.
+	 */
+	@When("^I verify the audio is received$")
+	public void audioReceivedCheckpoint() {
+		// The below settings have been working with best and consistent results for
+		// different devices. In case these settings does not work for you then try
+		// changing the configurations.
+		Map<String, Object> audioParam = new HashMap<>();
+		audioParam.put("volume", -100);
+		audioParam.put("duration", 1);
+		audioParam.put("timeout", 45);
+		Object audioCheckpointStatus = DeviceUtils.getQAFDriver().executeScript("mobile:checkpoint:audio", audioParam);
+		QuantumReportiumListener.logAssert("Audio checkpoint status ", Boolean.valueOf((String) audioCheckpointStatus));
+	}
 }
