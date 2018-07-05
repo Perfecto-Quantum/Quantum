@@ -166,7 +166,8 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 	private void tearIt(ITestResult testResult)
 	{
 		if ((testResult.getTestContext().getCurrentXmlTest().getParallel().toString().equalsIgnoreCase("methods")
-				& testResult.getTestClass().getName().equalsIgnoreCase("gherkin")) || ConfigurationManager.getBundle().getString("global.datadriven.parallel").equalsIgnoreCase("true")) {
+				& testResult.getTestClass().getName().equalsIgnoreCase("gherkin"))
+				|| ConfigurationManager.getBundle().getString("global.datadriven.parallel", "false").equalsIgnoreCase("true")) {
 			Object testInstance = testResult.getInstance();
 			((WebDriverTestCase) testInstance).getTestBase().tearDown();
 		}
