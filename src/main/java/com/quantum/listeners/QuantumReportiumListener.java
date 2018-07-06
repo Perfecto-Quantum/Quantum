@@ -171,8 +171,6 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 			Object testInstance = testResult.getInstance();
 			((WebDriverTestCase) testInstance).getTestBase().tearDown();
 		}
-		
-		
 	}
 
 	@Override

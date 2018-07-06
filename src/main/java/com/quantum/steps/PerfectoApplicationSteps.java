@@ -7,6 +7,8 @@ package com.quantum.steps;
 import com.qmetry.qaf.automation.step.QAFTestStepProvider;
 import com.quantum.listeners.QuantumReportiumListener;
 import com.quantum.utils.DeviceUtils;
+import com.quantum.utils.ReportUtils;
+
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
@@ -577,7 +579,7 @@ public class PerfectoApplicationSteps {
 	 *            - example: PUBLIC:Audio\\play25s1.wav
 	 */
 	@When("^I inject an audio from \"(.*?)\" into the device$")
-	public void injectAudio(String audioFilePath) {
+	public static void injectAudio(String audioFilePath) {
 		Map<String, Object> audioInjectParams = new HashMap<>();
 		audioInjectParams.put("key", audioFilePath);
 		audioInjectParams.put("wait", "nowait");
@@ -589,7 +591,7 @@ public class PerfectoApplicationSteps {
 	 * ensure that the audio was played and not the content of audio.
 	 */
 	@When("^I verify the audio is received$")
-	public void audioReceivedCheckpoint() {
+	public static void audioReceivedCheckpoint() {
 		// The below settings have been working with best and consistent results for
 		// different devices. In case these settings does not work for you then try
 		// changing the configurations.
@@ -598,6 +600,6 @@ public class PerfectoApplicationSteps {
 		audioParam.put("duration", 1);
 		audioParam.put("timeout", 45);
 		Object audioCheckpointStatus = DeviceUtils.getQAFDriver().executeScript("mobile:checkpoint:audio", audioParam);
-		QuantumReportiumListener.logAssert("Audio checkpoint status ", Boolean.valueOf((String) audioCheckpointStatus));
+		ReportUtils.logVerify("Audio checkpoint status ", Boolean.valueOf((String) audioCheckpointStatus));
 	}
 }

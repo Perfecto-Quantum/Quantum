@@ -41,6 +41,7 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.DriverCommand;
 
 import com.qmetry.qaf.automation.core.ConfigurationManager;
+import com.qmetry.qaf.automation.core.TestBaseProvider;
 import com.qmetry.qaf.automation.ui.webdriver.CommandTracker;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 import com.qmetry.qaf.automation.ui.webdriver.QAFWebDriverCommandAdapter;
@@ -55,7 +56,6 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 	@Override
 	public void beforeCommand(QAFExtendedWebDriver driver, CommandTracker commandTracker) {
 		if (commandTracker.getCommand().equalsIgnoreCase(DriverCommand.QUIT)) {
-
 			try {
 				String appName = (String) driver.getCapabilities().getCapability("applicationName");
 				if (StringUtil.isNotBlank(appName)
@@ -169,16 +169,15 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 
 	@Override
 	public void onInitialize(QAFExtendedWebDriver driver) {
-		// Fix for the issue that if security token is not used then the api call is
-		// failing.
-		if (getBundle().containsKey("perfecto.capabilities.securityToken")
-				|| getBundle().containsKey("driver.capabilities.securityToken")) {
-			MutableCapabilities dcaps = CloudUtils.getDeviceProperties((MutableCapabilities) driver.getCapabilities());
-			ConfigurationUtils.setActualDeviceCapabilities(dcaps.asMap());
-			ConsoleUtils.logWarningBlocks("DEVICE PROPERTIES: " + dcaps.toString());
-		} else {
-			ConsoleUtils.logWarningBlocks("DEVICE PROPERTIES: " + driver.getCapabilities().toString());
-		}
+		// Commenting the code to get device info as it fails in two conditions - when
+		// there is no security token mentioned and when the execution environment is
+		// beind proxy.
+		// MutableCapabilities dcaps =
+		// CloudUtils.getDeviceProperties((MutableCapabilities)
+		// driver.getCapabilities());
+		// ConfigurationUtils.setActualDeviceCapabilities(dcaps.asMap());
+		// ConsoleUtils.logWarningBlocks("DEVICE PROPERTIES: " + dcaps.toString());
+		ConsoleUtils.logWarningBlocks("DEVICE PROPERTIES: " + driver.getCapabilities().toString());
 
 		Long implicitWait = ConfigurationManager.getBundle().getLong("seleniun.wait.implicit", 0);
 		driver.manage().timeouts().implicitlyWait(implicitWait, TimeUnit.MILLISECONDS);

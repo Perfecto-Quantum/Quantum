@@ -39,6 +39,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.perfecto.reportium.client.ReportiumClient;
 import com.qmetry.qaf.automation.core.ConfigurationManager;
+import com.qmetry.qaf.automation.core.QAFTestBase;
 import com.qmetry.qaf.automation.core.TestBaseProvider;
 import com.quantum.listeners.QuantumReportiumListener;
 
@@ -77,7 +78,14 @@ public class ReportUtils {
 
 		// Retrieve a list of the test executions in your lab (as a json)
 		JsonObject executions = retrieveTestExecutions(getToken(), executionId);
-
+		int counter = 0;
+		while ((!executions.get("metadata").getAsJsonObject().get("processingStatus").getAsString()
+				.equalsIgnoreCase("PROCESSING_COMPLETE") || executions.getAsJsonArray("resources").size() == 0)
+				&& counter < 60) {
+			Thread.sleep(1000);
+			executions = retrieveTestExecutions(getToken(), executionId);
+			counter++;
+		}
 		JsonObject resources = executions.getAsJsonArray("resources").get(0).getAsJsonObject();
 		JsonObject platforms = resources.getAsJsonArray("platforms").get(0).getAsJsonObject();
 		String deviceId = platforms.get("deviceId").getAsString();
@@ -89,9 +97,13 @@ public class ReportUtils {
 
 		JsonObject executions = retrieveTestExecutions(getToken(), executionId);
 
-		while (!executions.get("metadata").getAsJsonObject().get("processingStatus").getAsString()
-				.equalsIgnoreCase("PROCESSING_COMPLETE")) {
+		int counter = 0;
+		while ((!executions.get("metadata").getAsJsonObject().get("processingStatus").getAsString()
+				.equalsIgnoreCase("PROCESSING_COMPLETE") || executions.getAsJsonArray("resources").size() == 0)
+				&& counter < 60) {
+			Thread.sleep(1000);
 			executions = retrieveTestExecutions(getToken(), executionId);
+			counter++;
 		}
 
 		for (int i = 0; i < executions.getAsJsonArray("resources").size(); i++) {
@@ -106,12 +118,15 @@ public class ReportUtils {
 
 	}
 
-	public static void downloadReportVideo(String executionId) throws URISyntaxException, IOException {
+	public static void downloadReportVideo(String executionId) throws URISyntaxException, IOException, InterruptedException {
 		JsonObject executions = retrieveTestExecutions(getToken(), executionId);
-
-		while (!executions.get("metadata").getAsJsonObject().get("processingStatus").getAsString()
-				.equalsIgnoreCase("PROCESSING_COMPLETE")) {
+		int counter = 0;
+		while ((!executions.get("metadata").getAsJsonObject().get("processingStatus").getAsString()
+				.equalsIgnoreCase("PROCESSING_COMPLETE") || executions.getAsJsonArray("resources").size() == 0)
+				&& counter < 60) {
+			Thread.sleep(1000);
 			executions = retrieveTestExecutions(getToken(), executionId);
+			counter++;
 		}
 
 		for (int i = 0; i < executions.getAsJsonArray("resources").size(); i++) {
@@ -126,13 +141,15 @@ public class ReportUtils {
 
 	}
 
-	public static void downloadReportAttachments(String executionId) throws URISyntaxException, IOException {
-
+	public static void downloadReportAttachments(String executionId) throws URISyntaxException, IOException, InterruptedException {
 		JsonObject executions = retrieveTestExecutions(getToken(), executionId);
-
-		while (!executions.get("metadata").getAsJsonObject().get("processingStatus").getAsString()
-				.equalsIgnoreCase("PROCESSING_COMPLETE")) {
+		int counter = 0;
+		while ((!executions.get("metadata").getAsJsonObject().get("processingStatus").getAsString()
+				.equalsIgnoreCase("PROCESSING_COMPLETE") || executions.getAsJsonArray("resources").size() == 0)
+				&& counter < 60) {
+			Thread.sleep(1000);
 			executions = retrieveTestExecutions(getToken(), executionId);
+			counter++;
 		}
 
 		for (int i = 0; i < executions.getAsJsonArray("resources").size(); i++) {
