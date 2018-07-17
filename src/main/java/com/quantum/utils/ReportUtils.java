@@ -118,7 +118,8 @@ public class ReportUtils {
 
 	}
 
-	public static void downloadReportVideo(String executionId) throws URISyntaxException, IOException, InterruptedException {
+	public static void downloadReportVideo(String executionId)
+			throws URISyntaxException, IOException, InterruptedException {
 		JsonObject executions = retrieveTestExecutions(getToken(), executionId);
 		int counter = 0;
 		while ((!executions.get("metadata").getAsJsonObject().get("processingStatus").getAsString()
@@ -141,7 +142,8 @@ public class ReportUtils {
 
 	}
 
-	public static void downloadReportAttachments(String executionId) throws URISyntaxException, IOException, InterruptedException {
+	public static void downloadReportAttachments(String executionId)
+			throws URISyntaxException, IOException, InterruptedException {
 		JsonObject executions = retrieveTestExecutions(getToken(), executionId);
 		int counter = 0;
 		while ((!executions.get("metadata").getAsJsonObject().get("processingStatus").getAsString()
@@ -513,17 +515,9 @@ public class ReportUtils {
 	 *            attached on failure flag in DZ
 	 */
 	public static void logAssert(String message, boolean status, Throwable e) {
-		if (ConfigurationManager.getBundle().getString("assertStop", "false").equalsIgnoreCase("true")) {
-			logVerify(message, status, e);
-			if (!status) {
-				throw new AssertionError(message);
-			}
-		} else {
-			if (status) {
-				getReportClient().reportiumAssert(message, status);
-			} else {
-				getReportClient().reportiumAssert(message + "\n" + ExceptionUtils.getFullStackTrace(e), status);
-			}
+		logVerify(message, status, e);
+		if (!status) {
+			throw new AssertionError(message);
 		}
 	}
 
