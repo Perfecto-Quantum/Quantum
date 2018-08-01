@@ -175,7 +175,7 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 		// MutableCapabilities dcaps =
 		// CloudUtils.getDeviceProperties((MutableCapabilities)
 		// driver.getCapabilities());
-		// ConfigurationUtils.setActualDeviceCapabilities(dcaps.asMap());
+		 ConfigurationUtils.setActualDeviceCapabilities(driver.getCapabilities().asMap());
 		// ConsoleUtils.logWarningBlocks("DEVICE PROPERTIES: " + dcaps.toString());
 		ConsoleUtils.logWarningBlocks("DEVICE PROPERTIES: " + driver.getCapabilities().toString());
 
