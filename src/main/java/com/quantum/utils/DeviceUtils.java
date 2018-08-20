@@ -449,7 +449,10 @@ public class DeviceUtils {
 		Map<String, Object> params = new HashMap<>();
 		params.put(by, identifier);
 		params.put("resultAuth", resultAuth);
-		params.put("errorType", errorType);
+		if(!errorType.isEmpty() && !errorType.equals("")) {
+			params.put("errorType", errorType);
+		}
+		
 		getQAFDriver().executeScript("mobile:fingerprint:set", params);
 	}
 

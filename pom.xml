@@ -5,14 +5,14 @@
 
 	<groupId>com.quantum</groupId>
 	<artifactId>quantum-support</artifactId>
-	<version>1.16</version>
+	<version>1.17-RC</version>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<reportium-sdk.version>1.2.0</reportium-sdk.version>
 		<selenium.version>3.6.0</selenium.version>
-		<testng.version>6.9.10</testng.version>
+		<testng.version>6.10</testng.version>
 		<cukes.version>1.2.5</cukes.version>
 		<org.json.version>20160810</org.json.version>
 		<perfectomobile.version>18.3.0.3</perfectomobile.version>

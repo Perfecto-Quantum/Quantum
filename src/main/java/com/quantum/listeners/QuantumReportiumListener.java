@@ -78,7 +78,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 	}
 
 	@Override
-	public synchronized void onTestStart(ITestResult testResult) {
+	public void onTestStart(ITestResult testResult) {
 		if (getBundle().getString("remote.server", "").contains("perfecto")) {
 			createReportiumClient(testResult).testStart(
 					testResult.getMethod().getMethodName() + getDataDrivenText(testResult),
@@ -89,7 +89,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 				logStepEnd();
 			}
 		}
-		
+
 		Map<Object, Object> dataPasser = new HashMap<Object, Object>();
 		ConfigurationManager.getBundle().addProperty("dataPasser" + Thread.currentThread(), dataPasser);
 	}
@@ -162,12 +162,12 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 			tearIt(testResult);
 		}
 	}
-	
-	private void tearIt(ITestResult testResult)
-	{
+
+	private void tearIt(ITestResult testResult) {
 		if ((testResult.getTestContext().getCurrentXmlTest().getParallel().toString().equalsIgnoreCase("methods")
-				& testResult.getTestClass().getName().equalsIgnoreCase("gherkin"))
-				|| ConfigurationManager.getBundle().getString("global.datadriven.parallel", "false").equalsIgnoreCase("true")) {
+				& testResult.getTestClass().getName().toLowerCase().contains("scenario"))
+				|| ConfigurationManager.getBundle().getString("global.datadriven.parallel", "false")
+						.equalsIgnoreCase("true")) {
 			Object testInstance = testResult.getInstance();
 			((WebDriverTestCase) testInstance).getTestBase().tearDown();
 		}
@@ -182,8 +182,8 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 				client.testStop(TestResultFactory.createSuccess());
 			} else {
 				String failureMessage = result.getThrowable().getMessage();
-				failureMessage = (failureMessage.isEmpty() || failureMessage == null)
-						? "This test was skipped" : result.getThrowable().getMessage();
+				failureMessage = (failureMessage.isEmpty() || failureMessage == null) ? "This test was skipped"
+						: result.getThrowable().getMessage();
 				client.testStop(TestResultFactory.createFailure(failureMessage, result.getThrowable()));
 			}
 			logTestEnd(result);
@@ -197,7 +197,6 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 	@Override
 	public void onFinish(ITestContext context) {
-
 	}
 
 	public static void logTestStep(String message) {
