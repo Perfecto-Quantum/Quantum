@@ -2,10 +2,13 @@ package com.quantum.steps;
 
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
+import org.openqa.selenium.remote.RemoteWebElement;
+import org.testng.Assert;
 
 import com.qmetry.qaf.automation.step.QAFTestStepProvider;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebElement;
 import com.quantum.utils.DeviceUtils;
+import com.quantum.utils.DriverUtils;
 import com.quantum.utils.ReportUtils;
 
 import cucumber.api.java.en.Then;
@@ -372,4 +375,72 @@ public class PerfectoDeviceSteps {
 	public static void addReportComment(String comment) {
 		ReportUtils.reportComment(comment);
 	}
+	/**
+     * 
+     * @param locator - The pickerwheel element must be this specific 
+     * 					type ("XCUIElementTypePickerWheel"), not “XCUIElementTypePicker” 
+     * 					or any other parent/child of the pickerwheel.
+     * @param value - value to compare this must be exact
+     * @param direction - Direction to spin the spinner, either next or previous defaults to next
+     */
+    @Then("^I pick \"(.*?)\" from \"(.*?)\" in the direction \"(.*?)\"$")
+    public static void setPickerWheel(String value, String locator, String direction){
+    	if(!direction.contains("next") && !direction.contains("previous"))
+    	{
+    		direction = "next";
+    	}
+    	DeviceUtils.setPickerWheel( (RemoteWebElement) new QAFExtendedWebElement(locator), direction, value);
+    }
+    /**
+     * 
+     * @param locator - The pickerwheel element must be this specific 
+     * 					type ("XCUIElementTypePickerWheel"), not “XCUIElementTypePicker” 
+     * 					or any other parent/child of the pickerwheel.
+     * @param value - value to compare this must be exact
+     */
+    @Then("^I pick the next \"(.*?)\" from \"(.*?)\"$")
+    public static void setNextPickerWheel(String value, String locator){
+    	DeviceUtils.setPickerWheel( (RemoteWebElement) new QAFExtendedWebElement(locator), "next", value);
+    }
+    /**
+     * 
+     * @param locator - The pickerwheel element must be this specific 
+     * 					type ("XCUIElementTypePickerWheel"), not “XCUIElementTypePicker” 
+     * 					or any other parent/child of the pickerwheel.
+     * @param value - value to compare this must be exact
+     */
+    @Then("^I pick the previous \"(.*?)\" from \"(.*?)\"$")
+    public static void setPreviousPickerWheel(String value, String locator){
+    	DeviceUtils.setPickerWheel( (RemoteWebElement) new QAFExtendedWebElement(locator), "previous", value);
+    }
+    /**
+     * Picks the next value of the specific pickerwheel
+     * @param locator - The pickerwheel element must be this specific 
+     * 					type ("XCUIElementTypePickerWheel"), not “XCUIElementTypePicker” 
+     * 					or any other parent/child of the pickerwheel.
+     */
+    @Then("^I pick the next value from \"(.*?)\"$")
+    public static void pickNext(String locator){
+    	DeviceUtils.pickerwheelStep((RemoteWebElement) new QAFExtendedWebElement(locator), "next");
+    }
+    /**
+     * Picks the previous value of the specific pickerwheel
+     * @param locator - The pickerwheel element must be this specific 
+     * 					type ("XCUIElementTypePickerWheel"), not “XCUIElementTypePicker” 
+     * 					or any other parent/child of the pickerwheel.
+     */
+    @Then("^I pick the previous value from \"(.*?)\"$")
+    public static void pickPrevious(String locator){
+    	DeviceUtils.pickerwheelStep( (RemoteWebElement) new QAFExtendedWebElement(locator), "previous");
+    }
+    /**
+     * Picks the previous value of the specific pickerwheel
+     * @param locator - The pickerwheel element must be this specific 
+     * 					type ("XCUIElementTypePickerWheel"), not “XCUIElementTypePicker” 
+     * 					or any other parent/child of the pickerwheel.
+     */
+    @Then("^I validate \"(.*?)\" has the value \"(.*?)\"$")
+    public static void getValue(String locator, String value){
+    	Assert.assertEquals(new QAFExtendedWebElement(locator).getAttribute("value").replaceAll("[^\\x00-\\x7F]", ""), value.replaceAll("[^\\x00-\\x7F]", ""),"The value did not match.");
+    }
 }
