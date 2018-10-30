@@ -120,11 +120,12 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 			((DesiredCapabilities) desiredCapabilities).setCapability("report.tags", tags);
 		}
 		
-		if(null!=ConfigurationManager.getBundle().getString("driver_availability_check") &&
+		if(null != ConfigurationManager.getBundle().getString("driver_availability_check") &&
 				ConfigurationManager.getBundle().getString("driver_availability_check").toLowerCase().equals("yes") &&
 				!Strings.isNullOrEmpty(((DesiredCapabilities)desiredCapabilities).getCapability("deviceName").toString()))
         {
             try {
+            	RestAPIUtils.loadMyCert();
                 String res=RestAPIUtils.retrieveDeviceInfo(((DesiredCapabilities) desiredCapabilities).getCapability("deviceName").toString());
                 DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
 

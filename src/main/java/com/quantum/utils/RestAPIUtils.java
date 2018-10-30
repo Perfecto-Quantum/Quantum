@@ -6,13 +6,19 @@ import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 import com.quantum.utils.ConsoleUtils;
 import com.quantum.utils.DriverUtils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.Authenticator;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.PasswordAuthentication;
+import java.net.Proxy;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.security.KeyStore;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -88,7 +94,13 @@ public class RestAPIUtils {
 			
 		
 		URL obj = new URL(url);
-		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+		Proxy proxy=getProxy();
+		HttpURLConnection con=null;
+
+	    con = proxy!=null?
+	    		(HttpURLConnection) obj.openConnection(proxy):
+	    			(HttpURLConnection) obj.openConnection();
+		
 		con.setRequestMethod("GET");
 		
 		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
@@ -102,4 +114,46 @@ public class RestAPIUtils {
 		
 		return response.toString();
 	}
+	
+	private static Proxy getProxy() {
+        Proxy proxy = null;
+        
+        if (ConfigurationManager.getBundle().getString("proxyHost") != null
+                      && !ConfigurationManager.getBundle().getString("proxyHost").toString().equals("")) {
+               
+               String authUser=
+                           (ConfigurationManager.getBundle().getString("proxyDomain")+"").trim()!=""?
+                                          ConfigurationManager.getBundle().getString("proxyUser")+"":
+                                                 ConfigurationManager.getBundle().getString("proxyDomain")+"" 
+                             +"\\"+ ConfigurationManager.getBundle().getString("proxyUser")+"";
+               String authPass=
+                            ConfigurationManager.getBundle().getString("proxyPassword")+"";
+               
+               Authenticator authenticator = new Authenticator() {
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return (new PasswordAuthentication(authUser,authPass.toCharArray()));
+                }
+            };
+           
+            Authenticator.setDefault(authenticator);
+           
+            proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(ConfigurationManager.getBundle().getString("proxyHost").toString(), 
+                      Integer.parseInt(
+                                          ConfigurationManager.getBundle().getString("proxyPort").toString())
+                      ));
+           
+     }
+        return proxy;
+ }
+
+
+
+	public static void loadMyCert() throws Exception {
+	 KeyStore keyStore = KeyStore.getInstance("JKS");
+	 
+	 System.setProperty("javax.net.ssl.trustStore", "resources/cacerts");
+	}
+
 }
+
+
