@@ -19,7 +19,7 @@ public class DriverUtils {
 		return (Map<String, Object>) ConfigurationManager.getBundle().getObject("dataPasser" + Thread.currentThread());
 	}
 	
-	public static void putDataPasser(String key, String value)
+	public static void putDataPasser(String key, Object value)
 	{
 		getDataPasser().put(key, value);
 	}
