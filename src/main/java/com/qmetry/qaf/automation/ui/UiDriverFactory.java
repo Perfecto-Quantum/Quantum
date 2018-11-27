@@ -293,6 +293,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 		// private Class<? extends WebDriver> driverCls = null;
 		private String browserName = name();
 
+		@SuppressWarnings("unchecked")
 		private Class<? extends WebDriver> getDriverCls() {
 			return (Class<? extends WebDriver>) ConfigurationManager.getBundle().getProperty("DriverCLS");
 		}
@@ -431,6 +432,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			}
 		}
 
+		@SuppressWarnings({ "deprecation", "unused" })
 		private QAFExtendedWebDriver proxyConnectForNormalDriver(String url, WebDriverCommandLogger reporter)
 				throws Exception {
 			logger.info("Proxy Driver Connect");
