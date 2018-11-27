@@ -39,7 +39,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.perfecto.reportium.client.ReportiumClient;
 import com.qmetry.qaf.automation.core.ConfigurationManager;
-import com.qmetry.qaf.automation.core.QAFTestBase;
 import com.qmetry.qaf.automation.core.TestBaseProvider;
 import com.quantum.listeners.QuantumReportiumListener;
 
@@ -132,7 +131,7 @@ public class ReportUtils {
 
 		for (int i = 0; i < executions.getAsJsonArray("resources").size(); i++) {
 			JsonObject testExecution = executions.getAsJsonArray("resources").get(i).getAsJsonObject();
-			String testId = testExecution.get("id").getAsString();
+			// String testId = testExecution.get("id").getAsString();
 			String testName = testExecution.get("name").getAsString().replace(" ", "_");
 			JsonObject platforms = testExecution.getAsJsonArray("platforms").get(0).getAsJsonObject();
 			String deviceName = platforms.get("deviceId").getAsString();
@@ -156,7 +155,7 @@ public class ReportUtils {
 
 		for (int i = 0; i < executions.getAsJsonArray("resources").size(); i++) {
 			JsonObject testExecution = executions.getAsJsonArray("resources").get(i).getAsJsonObject();
-			String testId = testExecution.get("id").getAsString();
+			// String testId = testExecution.get("id").getAsString();
 			String testName = testExecution.get("name").getAsString().replace(" ", "_");
 			JsonObject platforms = testExecution.getAsJsonArray("platforms").get(0).getAsJsonObject();
 			String deviceName = platforms.get("deviceId").getAsString();

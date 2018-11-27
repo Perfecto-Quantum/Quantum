@@ -36,17 +36,14 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.DriverCommand;
 
 import com.qmetry.qaf.automation.core.ConfigurationManager;
-import com.qmetry.qaf.automation.core.TestBaseProvider;
 import com.qmetry.qaf.automation.ui.webdriver.CommandTracker;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 import com.qmetry.qaf.automation.ui.webdriver.QAFWebDriverCommandAdapter;
 import com.qmetry.qaf.automation.util.StringUtil;
-import com.quantum.utils.CloudUtils;
 import com.quantum.utils.ConfigurationUtils;
 import com.quantum.utils.ConsoleUtils;
 import com.quantum.utils.DeviceUtils;

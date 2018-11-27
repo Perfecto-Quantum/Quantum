@@ -14,6 +14,7 @@ import io.appium.java_client.ios.IOSDriver;
 @SuppressWarnings("rawtypes")
 public class DriverUtils {
 	
+	@SuppressWarnings("unchecked")
 	public static Map<String,Object> getDataPasser()
 	{
 		return (Map<String, Object>) ConfigurationManager.getBundle().getObject("dataPasser" + Thread.currentThread());

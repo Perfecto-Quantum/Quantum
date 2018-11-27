@@ -4,19 +4,33 @@
 package com.quantum.steps;
 
 
+import static com.qmetry.qaf.automation.step.CommonStep.assertPresent;
+import static com.qmetry.qaf.automation.step.CommonStep.clear;
+import static com.qmetry.qaf.automation.step.CommonStep.click;
+import static com.qmetry.qaf.automation.step.CommonStep.get;
+import static com.qmetry.qaf.automation.step.CommonStep.sendKeys;
+import static com.qmetry.qaf.automation.step.CommonStep.verifyPresent;
+import static com.qmetry.qaf.automation.step.CommonStep.waitForPresent;
+import static com.quantum.utils.DeviceUtils.assertAppInfo;
+import static com.quantum.utils.DeviceUtils.assertVisualText;
+import static com.quantum.utils.DeviceUtils.cleanApp;
+import static com.quantum.utils.DeviceUtils.closeApp;
+import static com.quantum.utils.DeviceUtils.startApp;
+import static com.quantum.utils.DeviceUtils.uninstallAllApps;
+import static com.quantum.utils.DeviceUtils.uninstallApp;
+import static com.quantum.utils.DeviceUtils.verifyAppInfo;
+import static com.quantum.utils.DeviceUtils.waitForPresentImageVisual;
+import static com.quantum.utils.DeviceUtils.waitForPresentTextVisual;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import com.qmetry.qaf.automation.step.QAFTestStepProvider;
-import com.quantum.listeners.QuantumReportiumListener;
 import com.quantum.utils.DeviceUtils;
 import com.quantum.utils.ReportUtils;
 
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-
-import static com.qmetry.qaf.automation.step.CommonStep.*;
-import static com.quantum.utils.DeviceUtils.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * The class PerfectoApplicationSteps provides methods for working with applications, with cucumber steps annotations.

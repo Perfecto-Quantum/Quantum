@@ -8,7 +8,6 @@ import org.testng.Assert;
 import com.qmetry.qaf.automation.step.QAFTestStepProvider;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebElement;
 import com.quantum.utils.DeviceUtils;
-import com.quantum.utils.DriverUtils;
 import com.quantum.utils.ReportUtils;
 
 import cucumber.api.java.en.Then;
