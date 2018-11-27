@@ -314,7 +314,6 @@ public class ReportUtils {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	private static void downloadAttachments(String deviceId, JsonObject testExecution)
 			throws IOException, URISyntaxException {
 		// Example for downloading device logs

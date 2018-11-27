@@ -517,6 +517,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			}
 		}
 
+		@SuppressWarnings("deprecation")
 		private QAFExtendedWebDriver proxyConnect(String url, WebDriverCommandLogger reporter) throws Exception {
 			logger.info("Proxy Driver Connect");
 			DesiredCapabilities desiredCapabilities = getDesiredCapabilities();
