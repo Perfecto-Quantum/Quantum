@@ -5,12 +5,12 @@
 
 	<groupId>com.quantum</groupId>
 	<artifactId>quantum-support</artifactId>
-	<version>1.17</version>
+	<version>1.18</version>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<reportium-sdk.version>1.2.0</reportium-sdk.version>
+		<reportium-sdk.version>2.2.1</reportium-sdk.version>
 		<selenium.version>3.6.0</selenium.version>
 		<testng.version>6.10</testng.version>
 		<cukes.version>1.2.5</cukes.version>

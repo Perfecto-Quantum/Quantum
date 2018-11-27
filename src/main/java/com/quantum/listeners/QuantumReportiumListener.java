@@ -2,14 +2,20 @@ package com.quantum.listeners;
 
 import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.ArrayUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.openqa.selenium.WebDriver;
 import org.testng.IInvokedMethod;
 import org.testng.ITestContext;
@@ -24,6 +30,7 @@ import com.perfecto.reportium.model.Job;
 import com.perfecto.reportium.model.PerfectoExecutionContext;
 import com.perfecto.reportium.model.Project;
 import com.perfecto.reportium.test.TestContext;
+import com.perfecto.reportium.test.result.TestResult;
 import com.perfecto.reportium.test.result.TestResultFactory;
 import com.perfecto.reportium.testng.ReportiumTestNgListener;
 import com.qmetry.qaf.automation.core.CheckpointResultBean;
@@ -38,6 +45,7 @@ import com.qmetry.qaf.automation.step.client.TestNGScenario;
 import com.qmetry.qaf.automation.step.client.text.BDDDefinitionHelper;
 import com.qmetry.qaf.automation.step.client.text.BDDDefinitionHelper.ParamType;
 import com.qmetry.qaf.automation.ui.WebDriverTestCase;
+import com.qmetry.qaf.automation.util.FileUtil;
 import com.quantum.utils.ConsoleUtils;
 import com.quantum.utils.ReportUtils;
 
@@ -154,9 +162,17 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 				}
 
 			}
-			client.testStop(TestResultFactory.createFailure(failMsg.isEmpty() ? "An error occurred" : failMsg,
-					testResult.getThrowable()));
 
+			String actualExceptionMessage = ExceptionUtils.getStackTrace(testResult.getThrowable());
+			String failureReason = findFailureReason(actualExceptionMessage);
+			if (!failureReason.isEmpty()) {
+				TestResult reportiumResult = TestResultFactory.createFailure(
+						failMsg.isEmpty() ? "An error occurred" : failMsg, testResult.getThrowable(), failureReason);
+				client.testStop(reportiumResult);
+			} else {
+				client.testStop(TestResultFactory.createFailure(failMsg.isEmpty() ? "An error occurred" : failMsg,
+						testResult.getThrowable()));
+			}
 			logTestEnd(testResult);
 
 			tearIt(testResult);
@@ -402,4 +418,43 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 		return description;
 	}
 
+	/**
+	 * This method is used to find the failure reason from the given JSON file in
+	 * location - src/main/resources/failureReasons.json
+	 * 
+	 * @param actualExceptionMessage
+	 *            - The failure exception stacktrace from the test failure
+	 * @return
+	 */
+	@SuppressWarnings("deprecation")
+	private static String findFailureReason(String actualExceptionMessage) {
+		String jsonStr;
+		String failureConfigLoc = ConfigurationManager.getBundle().getString("failureReasonConfig",
+				"src/main/resources/failureReasons.json");
+		try {
+			jsonStr = FileUtil.readFileToString(new File(failureConfigLoc));
+			JSONArray frArr = new JSONArray(jsonStr);
+			List<String> failureReasons = new ArrayList<String>();
+			for (int i = 0; i < frArr.length(); i++) {
+				JSONObject jsonObj = frArr.getJSONObject(i);
+				String tempKey = "";
+				for (String key : jsonObj.keySet()) {
+					tempKey = key;
+					failureReasons.add(key);
+				}
+				JSONArray tempArray = jsonObj.getJSONArray(tempKey);
+
+				for (int j = 0; j < tempArray.length(); j++) {
+					String excepMsg = tempArray.getString(j);
+					if (actualExceptionMessage.contains(excepMsg)) {
+						return tempKey;
+					}
+				}
+			}
+			return "";
+		} catch (IOException e) {
+			e.printStackTrace();
+			return "";
+		}
+	}
 }
