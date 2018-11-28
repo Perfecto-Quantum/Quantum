@@ -1,5 +1,6 @@
 package com.quantum.utils;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.openqa.selenium.JavascriptExecutor;
@@ -49,19 +50,27 @@ public class DriverUtils {
 		return new WebDriverTestBase().getDriver();
 	}
 
-	public static boolean isRunningOnIOS() {
-		return (null != getDriver().getCapabilities().getCapability("platformName")) && (ConfigurationManager
-				.getBundle().getString("driver.capabilities.platformName").toLowerCase().contains("ios")
-				|| ConfigurationManager.getBundle().getString("perfecto.capabilities.platformName").toLowerCase()
-						.contains("ios"));
+	public boolean isRunningAndroid() {
+		if (getOS().equalsIgnoreCase("android")) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
-	public static boolean isRunningOnAndroid() {
-		return (null != getDriver().getCapabilities().getCapability("platformName")) && (ConfigurationManager
-				.getBundle().getString("driver.capabilities.platformName").toLowerCase().contains("android")
-				|| ConfigurationManager.getBundle().getString("perfecto.capabilities.platformName").toLowerCase()
-						.contains("android"));
+	public boolean isRunningIOS() {
+		if (getOS().equalsIgnoreCase("ios")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
+	private String getOS() {
+		Map<String, String> params = new HashMap<>();
+		params.put("property", "os");
+		String properties = (String) DriverUtils.getDriver().executeScript("mobile:handset:info", params);
+		return properties;
 	}
 
 	/**
