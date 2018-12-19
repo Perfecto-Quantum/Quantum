@@ -192,7 +192,11 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 	private static QAFExtendedWebDriver getDriver(WebDriverCommandLogger reporter, String... args) throws Exception {
 		String b = STBArgs.browser_str.getFrom(args).toLowerCase();
-		String urlStr = STBArgs.sel_server.getFrom(args).startsWith("http") ? STBArgs.sel_server.getFrom(args)
+		String urlStr = STBArgs.sel_server.getFrom(args).startsWith("http")
+				? (STBArgs.sel_server.getFrom(args).contains("https")
+						? (!STBArgs.sel_server.getFrom(args).contains("perfecto") ? ""
+								: STBArgs.sel_server.getFrom(args))
+						: STBArgs.sel_server.getFrom(args))
 				: String.format("http://%s:%s/wd/hub", STBArgs.sel_server.getFrom(args), STBArgs.port.getFrom(args));
 
 		Browsers browser = Browsers.getBrowser(b);
@@ -265,20 +269,15 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 	private enum Browsers {
 		edge(DesiredCapabilities.edge(), EdgeDriver.class),
 
-		firefox(DesiredCapabilities.firefox(), FirefoxDriver.class), iexplorer(DesiredCapabilities.internetExplorer(),
-				InternetExplorerDriver.class), chrome(DesiredCapabilities.chrome(), ChromeDriver.class), opera(
-						new DesiredCapabilities("opera", "", Platform.ANY),
-						"com.opera.core.systems.OperaDriver"), android(DesiredCapabilities.android(),
-								"org.openqa.selenium.android.AndroidDriver"), iphone(
-										new DesiredCapabilities("iPhone", "", Platform.MAC),
-										"org.openqa.selenium.iphone.IPhoneDriver"), ipad(
-												new DesiredCapabilities("iPad", "", Platform.MAC),
-												"org.openqa.selenium.iphone.IPhoneDriver"), safari(
-														new DesiredCapabilities("safari", "", Platform.ANY),
-														"org.openqa.selenium.safari.SafariDriver"), appium(
-																new DesiredCapabilities(),
-																"io.appium.java_client.AppiumDriver"), perfecto(
-																		new DesiredCapabilities()),
+		firefox(DesiredCapabilities.firefox(), FirefoxDriver.class),
+		iexplorer(DesiredCapabilities.internetExplorer(), InternetExplorerDriver.class),
+		chrome(DesiredCapabilities.chrome(), ChromeDriver.class),
+		opera(new DesiredCapabilities("opera", "", Platform.ANY), "com.opera.core.systems.OperaDriver"),
+		android(DesiredCapabilities.android(), "org.openqa.selenium.android.AndroidDriver"),
+		iphone(new DesiredCapabilities("iPhone", "", Platform.MAC), "org.openqa.selenium.iphone.IPhoneDriver"),
+		ipad(new DesiredCapabilities("iPad", "", Platform.MAC), "org.openqa.selenium.iphone.IPhoneDriver"),
+		safari(new DesiredCapabilities("safari", "", Platform.ANY), "org.openqa.selenium.safari.SafariDriver"),
+		appium(new DesiredCapabilities(), "io.appium.java_client.AppiumDriver"), perfecto(new DesiredCapabilities()),
 
 		/**
 		 * can with assumption that you have set desired capabilities using property.
