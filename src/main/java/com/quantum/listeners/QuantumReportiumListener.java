@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -160,19 +162,24 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 					// }
 					// }
 				}
-
 			}
 
-			String actualExceptionMessage = ExceptionUtils.getStackTrace(testResult.getThrowable());
-			String failureReason = findFailureReason(actualExceptionMessage);
-			if (!failureReason.isEmpty()) {
-				TestResult reportiumResult = TestResultFactory.createFailure(
-						failMsg.isEmpty() ? "An error occurred" : failMsg, testResult.getThrowable(), failureReason);
-				client.testStop(reportiumResult);
-			} else {
+			if(testResult.getThrowable() == null) {
 				client.testStop(TestResultFactory.createFailure(failMsg.isEmpty() ? "An error occurred" : failMsg,
-						testResult.getThrowable()));
+						new Exception("There was some validation failure in the scenario which did not provide any throwable object.")));
+			} else {
+				String actualExceptionMessage = ExceptionUtils.getStackTrace(testResult.getThrowable());
+				String failureReason = findFailureReason(actualExceptionMessage);
+				if (!failureReason.isEmpty()) {
+					TestResult reportiumResult = TestResultFactory.createFailure(
+							failMsg.isEmpty() ? "An error occurred" : failMsg, testResult.getThrowable(), failureReason);
+					client.testStop(reportiumResult);
+				} else {
+					client.testStop(TestResultFactory.createFailure(failMsg.isEmpty() ? "An error occurred" : failMsg,
+							testResult.getThrowable()));
+				}
 			}
+			
 			logTestEnd(testResult);
 
 			tearIt(testResult);
@@ -348,6 +355,16 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 		return result;
 	}
 
+	public static List<String> getArgNames(String def) {
+		Pattern p = Pattern.compile("[$][{](.*?)}");
+		Matcher matcher = p.matcher(def);
+		List<String> args = new ArrayList<String>();
+		while (matcher.find()) {
+			args.add(matcher.group().replace("$", ""));
+		}
+		return args;
+	}
+	
 	@SuppressWarnings("unchecked")
 	private String getProcessStepDescription(TestStep step) {
 		// process parameters in step;
@@ -361,7 +378,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 		if ((actualArgs != null) && (actualArgs.length > 0)) {
 			Map<String, Object> paramMap = step.getStepExecutionTracker().getContext();
-			List<String> paramNames = BDDDefinitionHelper.getArgNames(def);
+			List<String> paramNames = getArgNames(def);
 
 			System.out.println(paramNames);
 
@@ -453,7 +470,6 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 			}
 			return "";
 		} catch (IOException e) {
-			e.printStackTrace();
 			return "";
 		}
 	}
