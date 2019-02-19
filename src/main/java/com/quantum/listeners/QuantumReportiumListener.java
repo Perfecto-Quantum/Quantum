@@ -44,7 +44,6 @@ import com.qmetry.qaf.automation.step.QAFTestStepListener;
 import com.qmetry.qaf.automation.step.StepExecutionTracker;
 import com.qmetry.qaf.automation.step.TestStep;
 import com.qmetry.qaf.automation.step.client.TestNGScenario;
-import com.qmetry.qaf.automation.step.client.text.BDDDefinitionHelper;
 import com.qmetry.qaf.automation.step.client.text.BDDDefinitionHelper.ParamType;
 import com.qmetry.qaf.automation.ui.WebDriverTestCase;
 import com.qmetry.qaf.automation.util.FileUtil;
@@ -360,7 +359,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 		Matcher matcher = p.matcher(def);
 		List<String> args = new ArrayList<String>();
 		while (matcher.find()) {
-			args.add(matcher.group().replace("$", ""));
+			args.add(matcher.group().replace("${", "{"));
 		}
 		return args;
 	}

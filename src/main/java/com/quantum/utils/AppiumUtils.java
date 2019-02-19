@@ -23,6 +23,9 @@ import io.appium.java_client.MobileElement;
 import io.appium.java_client.TouchAction;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
+import io.appium.java_client.touch.LongPressOptions;
+import io.appium.java_client.touch.offset.ElementOption;
+import io.appium.java_client.touch.offset.PointOption;
 
 public final class AppiumUtils {
 
@@ -41,6 +44,7 @@ public final class AppiumUtils {
 		return checkType(AndroidDriver.class);
 	}
 
+	@SuppressWarnings("rawtypes")
 	public static TouchAction getTouchAction() {
 		return new TouchAction(getAppiumDriver());
 	}
@@ -50,7 +54,8 @@ public final class AppiumUtils {
 	 */
 	public static void swipeUp() {
 		Point[] points = getXYtoVSwipe();
-		getTouchAction().press(points[0].x, points[0].y).moveTo(points[1].x, points[1].y).release().perform();
+		getTouchAction().press(PointOption.point(points[0].x, points[0].y))
+				.moveTo(PointOption.point(points[1].x, points[1].y)).release().perform();
 	}
 
 	/**
@@ -58,7 +63,8 @@ public final class AppiumUtils {
 	 */
 	public static void swipeDown() {
 		Point[] points = getXYtoVSwipe();
-		getTouchAction().press(points[1].x, points[1].y).moveTo(points[0].x, points[0].y).release().perform();
+		getTouchAction().press(PointOption.point(points[1].x, points[1].y))
+				.moveTo(PointOption.point(points[0].x, points[0].y)).release().perform();
 	}
 
 	/**
@@ -66,7 +72,8 @@ public final class AppiumUtils {
 	 */
 	public static void swipeLeft() {
 		Point[] points = getXYtoHSwipe();
-		getTouchAction().press(points[0].x, points[0].y).moveTo(points[1].x, points[1].y).release().perform();
+		getTouchAction().press(PointOption.point(points[0].x, points[0].y))
+				.moveTo(PointOption.point(points[1].x, points[1].y)).release().perform();
 	}
 
 	/**
@@ -74,7 +81,8 @@ public final class AppiumUtils {
 	 */
 	public static void swipeRight() {
 		Point[] points = getXYtoHSwipe();
-		getTouchAction().press(points[1].x, points[1].y).moveTo(points[0].x, points[0].y).release().perform();
+		getTouchAction().press(PointOption.point(points[1].x, points[1].y))
+				.moveTo(PointOption.point(points[0].x, points[0].y)).release().perform();
 	}
 
 	/**
@@ -225,10 +233,11 @@ public final class AppiumUtils {
 
 			By meX = By.xpath("//android.widget.NumberPicker[" + (i + 1) + "]/android.widget.EditText[1]");
 			fluentWait(driver, meX);
-			MobileElement me = (MobileElement) driver.findElement(meX);
+			WebElement me = driver.findElement(meX);
 
 			TouchAction touchAction6 = new TouchAction(driver);
-			touchAction6.longPress(me).release();
+			touchAction6.longPress(LongPressOptions.longPressOptions().withElement(ElementOption.element(me)))
+					.release();
 			driver.performTouchAction(touchAction6);
 
 			driver.getKeyboard().pressKey(convertAndroidMonthName(list[i]) + "");
@@ -379,7 +388,7 @@ public final class AppiumUtils {
 	}
 
 	// performs a wait command on a web element
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "deprecation" })
 	private static MobileElement fluentWait(AppiumDriver driver, By xpath) {
 		MobileElement waitElement = null;
 

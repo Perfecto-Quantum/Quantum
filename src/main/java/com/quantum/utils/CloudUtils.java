@@ -134,13 +134,12 @@ public class CloudUtils {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public static Credentials getCredentials(DesiredCapabilities dcaps) {
-		Map<String, String> dCapMap = (Map<String, String>) dcaps.asMap();
-		String user = dCapMap.get("user") != null ? dCapMap.get("user") : "";
-		String password = dCapMap.get("password") != null ? dCapMap.get("password") : "";
-		String offlineToken = dCapMap.get("offlineToken") != null ? dCapMap.get("securityToken") : "";
-		String accessToken = dCapMap.get("securityToken") != null ? dCapMap.get("securityToken") : "";
+		Map<String, Object> dCapMap = (Map<String, Object>) dcaps.asMap();
+		String user = dCapMap.get("user") != null ? (String) dCapMap.get("user") : "";
+		String password = dCapMap.get("password") != null ? (String) dCapMap.get("password") : "";
+		String offlineToken = dCapMap.get("offlineToken") != null ? (String) dCapMap.get("securityToken") : "";
+		String accessToken = dCapMap.get("securityToken") != null ? (String) dCapMap.get("securityToken") : "";
 		offlineToken = accessToken != null ? accessToken : offlineToken;
 		return new Credentials(user, password, offlineToken, accessToken);
 	}

@@ -6,21 +6,21 @@
 
 	<groupId>com.quantum</groupId>
 	<artifactId>quantum-support</artifactId>
-	<version>1.19-RC</version>
+	<version>1.19</version>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<reportium-sdk.version>2.2.1</reportium-sdk.version>
-		<selenium.version>3.6.0</selenium.version>
+		<selenium.version>3.14.0</selenium.version>
 		<testng.version>6.10</testng.version>
 		<cukes.version>1.2.5</cukes.version>
 		<org.json.version>20160810</org.json.version>
 		<perfectomobile.version>18.3.0.3</perfectomobile.version>
 		<intellij.perfectomobile.version>18.4.0.0 </intellij.perfectomobile.version>
-		<qaf.version>2.1.13</qaf.version>
-		<qafsupport.version>2.1.13</qafsupport.version>
-		<appium.client.version>5.0.4</appium.client.version>
+		<qaf.version>2.1.14</qaf.version>
+		<qafsupport.version>2.1.14</qafsupport.version>
+		<appium.client.version>6.1.0</appium.client.version>
 	</properties>
 
 	<scm>
@@ -188,14 +188,14 @@
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-support</artifactId>
-			<version>3.0.0</version>
+			<version>${selenium.version}</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-server -->
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-server</artifactId>
-			<version>3.6.0</version>
+			<version>${selenium.version}</version>
 		</dependency>
 
 
