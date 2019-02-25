@@ -329,10 +329,7 @@ public class ReportUtils {
 	private static void downloadTestReport(String testId, String fileName, String accessToken)
 			throws URISyntaxException, IOException {
 		System.out.println("Starting PDF generation for test ID: " + testId);
-		HttpClient httpClient = HttpClientBuilder.create().setRetryHandler(new DefaultHttpRequestRetryHandler(3, true))
-				.setDefaultRequestConfig(RequestConfig.custom().setSocketTimeout(TIMEOUT_MILLIS)
-						.setConnectTimeout(TIMEOUT_MILLIS).setConnectionRequestTimeout(TIMEOUT_MILLIS).build())
-				.build();
+
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
 		URIBuilder taskUriBuilder = new URIBuilder(REPORTING_SERVER_URL + "/export/api/v2/test-executions/pdf/task");
@@ -343,7 +340,46 @@ public class ReportUtils {
 		CreatePdfTask task = null;
 		for (int attempt = 1; attempt <= PDF_DOWNLOAD_ATTEMPTS; attempt++) {
 
-			HttpResponse response = httpClient.execute(httpPost);
+			// HttpResponse response = httpClient.execute(httpPost);
+			HttpResponse response = null;
+
+			if (ConfigurationManager.getBundle().getString("proxyHost") != null
+					&& !ConfigurationManager.getBundle().getString("proxyHost").toString().equals("")) {
+				InetAddress addr;
+				addr = InetAddress.getLocalHost();
+				String hostname = addr.getHostName();
+
+				NTCredentials ntCreds = new NTCredentials(
+						ConfigurationManager.getBundle().getString("proxyUser").toString(),
+						ConfigurationManager.getBundle().getString("proxyPassword").toString(), hostname,
+						ConfigurationManager.getBundle().getString("proxyDomain").toString());
+
+				CredentialsProvider credsProvider = new BasicCredentialsProvider();
+				credsProvider
+						.setCredentials(
+								new AuthScope(ConfigurationManager.getBundle().getString("proxyHost").toString(),
+										Integer.parseInt(
+												ConfigurationManager.getBundle().getString("proxyPort").toString())),
+								ntCreds);
+				HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+
+				clientBuilder.useSystemProperties();
+				clientBuilder.setProxy(new HttpHost(ConfigurationManager.getBundle().getString("proxyHost").toString(),
+						Integer.parseInt(ConfigurationManager.getBundle().getString("proxyPort").toString())));
+				clientBuilder.setDefaultCredentialsProvider(credsProvider);
+				clientBuilder.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
+
+				CloseableHttpClient httpClient = clientBuilder.build();
+				response = httpClient.execute(httpPost);
+			} else {
+				HttpClient httpClient = HttpClientBuilder.create()
+						.setRetryHandler(new DefaultHttpRequestRetryHandler(3, true))
+						.setDefaultRequestConfig(RequestConfig.custom().setSocketTimeout(TIMEOUT_MILLIS)
+								.setConnectTimeout(TIMEOUT_MILLIS).setConnectionRequestTimeout(TIMEOUT_MILLIS).build())
+						.build();
+				response = httpClient.execute(httpPost);
+			}
+
 			try {
 				int statusCode = response.getStatusLine().getStatusCode();
 				if (HttpStatus.SC_OK == statusCode) {
@@ -409,17 +445,50 @@ public class ReportUtils {
 			throws URISyntaxException, IOException {
 		CreatePdfTask task;
 
-		HttpClient httpClient = HttpClientBuilder.create().setRetryHandler(new DefaultHttpRequestRetryHandler(3, true))
-				.setDefaultRequestConfig(RequestConfig.custom().setSocketTimeout(TIMEOUT_MILLIS)
-						.setConnectTimeout(TIMEOUT_MILLIS).setConnectionRequestTimeout(TIMEOUT_MILLIS).build())
-				.build();
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
 		URIBuilder taskUriBuilder = new URIBuilder(
 				REPORTING_SERVER_URL + "/export/api/v2/test-executions/pdf/task/" + taskId);
 		HttpGet httpGet = new HttpGet(taskUriBuilder.build());
 		addDefaultRequestHeaders(httpGet, accessToken);
-		HttpResponse response = httpClient.execute(httpGet);
+		HttpResponse response = null;
+		if (ConfigurationManager.getBundle().getString("proxyHost") != null
+				&& !ConfigurationManager.getBundle().getString("proxyHost").toString().equals("")) {
+			InetAddress addr;
+			addr = InetAddress.getLocalHost();
+			String hostname = addr.getHostName();
+
+			NTCredentials ntCreds = new NTCredentials(
+					ConfigurationManager.getBundle().getString("proxyUser").toString(),
+					ConfigurationManager.getBundle().getString("proxyPassword").toString(), hostname,
+					ConfigurationManager.getBundle().getString("proxyDomain").toString());
+
+			CredentialsProvider credsProvider = new BasicCredentialsProvider();
+			credsProvider
+					.setCredentials(
+							new AuthScope(ConfigurationManager.getBundle().getString("proxyHost").toString(),
+									Integer.parseInt(
+											ConfigurationManager.getBundle().getString("proxyPort").toString())),
+							ntCreds);
+			HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+
+			clientBuilder.useSystemProperties();
+			clientBuilder.setProxy(new HttpHost(ConfigurationManager.getBundle().getString("proxyHost").toString(),
+					Integer.parseInt(ConfigurationManager.getBundle().getString("proxyPort").toString())));
+			clientBuilder.setDefaultCredentialsProvider(credsProvider);
+			clientBuilder.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
+
+			CloseableHttpClient httpClient = clientBuilder.build();
+			response = httpClient.execute(httpGet);
+		} else {
+			HttpClient httpClient = HttpClientBuilder.create()
+					.setRetryHandler(new DefaultHttpRequestRetryHandler(3, true))
+					.setDefaultRequestConfig(RequestConfig.custom().setSocketTimeout(TIMEOUT_MILLIS)
+							.setConnectTimeout(TIMEOUT_MILLIS).setConnectionRequestTimeout(TIMEOUT_MILLIS).build())
+					.build();
+			response = httpClient.execute(httpGet);
+		}
+
 		int statusCode = response.getStatusLine().getStatusCode();
 		if (HttpStatus.SC_OK == statusCode) {
 			task = gson.fromJson(EntityUtils.toString(response.getEntity()), CreatePdfTask.class);
