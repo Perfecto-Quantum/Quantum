@@ -192,7 +192,11 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 	private static QAFExtendedWebDriver getDriver(WebDriverCommandLogger reporter, String... args) throws Exception {
 		String b = STBArgs.browser_str.getFrom(args).toLowerCase();
-		String urlStr = STBArgs.sel_server.getFrom(args).startsWith("http") ? STBArgs.sel_server.getFrom(args)
+		String urlStr = STBArgs.sel_server.getFrom(args).startsWith("http")
+				? (STBArgs.sel_server.getFrom(args).contains("https")
+						? (!STBArgs.sel_server.getFrom(args).contains("perfecto") ? ""
+								: STBArgs.sel_server.getFrom(args))
+						: STBArgs.sel_server.getFrom(args))
 				: String.format("http://%s:%s/wd/hub", STBArgs.sel_server.getFrom(args), STBArgs.port.getFrom(args));
 
 		Browsers browser = Browsers.getBrowser(b);

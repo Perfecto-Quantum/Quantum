@@ -376,7 +376,8 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 		String def = step.getDescription();
 
 		if ((actualArgs != null) && (actualArgs.length > 0)) {
-			Map<String, Object> paramMap = step.getStepExecutionTracker().getContext();
+			Map<String, Object> paramMap = new HashMap<>(); 
+			paramMap.putAll(step.getStepExecutionTracker().getContext());
 			List<String> paramNames = getArgNames(def);
 
 			System.out.println(paramNames);
