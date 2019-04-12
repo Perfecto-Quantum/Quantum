@@ -3,6 +3,8 @@ package com.quantum.listeners;
 import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,13 +27,17 @@ import org.testng.ITestListener;
 import org.testng.ITestResult;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.stream.JsonReader;
 import com.perfecto.reportium.WebDriverProvider;
 import com.perfecto.reportium.client.ReportiumClient;
 import com.perfecto.reportium.client.ReportiumClientFactory;
+import com.perfecto.reportium.model.CustomField;
 import com.perfecto.reportium.model.Job;
 import com.perfecto.reportium.model.PerfectoExecutionContext;
 import com.perfecto.reportium.model.Project;
 import com.perfecto.reportium.test.TestContext;
+import com.perfecto.reportium.test.TestContext.Builder;
 import com.perfecto.reportium.test.result.TestResult;
 import com.perfecto.reportium.test.result.TestResultFactory;
 import com.perfecto.reportium.testng.ReportiumTestNgListener;
@@ -53,15 +59,91 @@ import com.quantum.utils.ReportUtils;
 import cucumber.runtime.RuntimeOptions;
 import cucumber.runtime.RuntimeOptionsFactory;
 
-/**
- * Created by mitchellw on 9/27/2016.
- */
+class Messages {
+	List<String> StackTraceErrors;
+	List<String> CustomFields;
+	List<String> Tags;
+	String CustomError;
+	String JsonFile;
+	
+	public String getJsonFile() {
+		return this.JsonFile;
+	}
+
+	public void setJsonFile(String jsonFile) {
+		this.JsonFile = jsonFile;
+	}
+
+	public String getCustomError() {
+		return this.CustomError;
+	}
+
+	public void setCustomError(String customError) {
+		this.CustomError = customError;
+	}
+
+	public List<String> getStackTraceErrors() {
+		return this.StackTraceErrors;
+	}
+
+	public void setStackTraceErrors(List<String> error) {
+		this.StackTraceErrors = error;
+	}
+
+	public List<String> getCustomFields() {
+		return this.CustomFields;
+	}
+
+	public void setCustomFields(List<String> customFields) {
+		this.CustomFields = customFields;
+	}
+
+	public List<String> getTags() {
+		return this.Tags;
+	}
+
+	public void setTags(List<String> tags) {
+		this.Tags = tags;
+	}
+}
+
 public class QuantumReportiumListener extends ReportiumTestNgListener implements QAFTestStepListener, ITestListener {
 
 	public static final String PERFECTO_REPORT_CLIENT = "perfecto.report.client";
 
 	public static ReportiumClient getReportClient() {
 		return (ReportiumClient) getBundle().getObject(PERFECTO_REPORT_CLIENT);
+	}
+
+	public Messages parseFailureJsonFile(String actualMessage) {
+		String jsonStr = null;
+		String failureConfigLoc = ConfigurationManager.getBundle().getString("failureReasonConfig",
+				"src/main/resources/failureReasons4.json");
+
+		GsonBuilder gsonBuilder = new GsonBuilder();
+		gsonBuilder.setLenient();
+		Gson gson = gsonBuilder.create();
+		JsonReader reader = null;
+
+		try {
+			reader = new JsonReader(new FileReader(failureConfigLoc));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			System.out.println("Problem parsing failure reason json file: " + failureConfigLoc);
+			e.printStackTrace();	
+		}
+		Messages[] response = gson.fromJson(reader, Messages[].class);
+
+		for (Messages messages : response) {
+
+			if (messages.getStackTraceErrors().toString().contains(actualMessage)) {
+				messages.setJsonFile(failureConfigLoc);
+				return messages;
+			}
+
+		}
+
+		return null;
 	}
 
 	@Override
@@ -89,9 +171,44 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 	@Override
 	public void onTestStart(ITestResult testResult) {
 		if (getBundle().getString("remote.server", "").contains("perfecto")) {
-			createReportiumClient(testResult).testStart(
-					testResult.getMethod().getMethodName() + getDataDrivenText(testResult),
-					new TestContext(testResult.getMethod().getGroups()));
+			
+
+			// get custom fields "%name-value" from groups
+						// compile actual groups
+						String[] groups = testResult.getMethod().getGroups();
+						ArrayList<String> groupsFinal = new ArrayList<String>();
+
+						ArrayList<CustomField> cfc = new ArrayList<CustomField>();
+						for (String string : groups) {
+							if (string.startsWith(getBundle().getString("custom.field.identifier","%"))) {
+								try {
+									cfc.add(new CustomField(
+											string.split(getBundle().getString("custom.field.delimiter","-"))[0].substring(1),
+											string.split(getBundle().getString("custom.field.delimiter","-"))[1]));
+								} catch (Exception ex) {
+									throw new NullPointerException(
+											"Custom field key/value pair not delimited properly.  Example of proper default usage: %Developer-Jeremy.  Check application properties custom.field.delimiter and custom.field.identifier for custom values that may have been set.");
+								}
+							} else {
+								groupsFinal.add(string);
+							}
+						}
+
+						Builder testContext = new TestContext.Builder();
+						if (groupsFinal.size() > 0) {
+							testContext.withTestExecutionTags(groupsFinal.toString().split(","));
+						}
+
+						if (cfc.size() > 0) {
+							testContext.withCustomFields(cfc);
+						}
+
+						createReportiumClient(testResult).testStart(
+								testResult.getMethod().getMethodName() + getDataDrivenText(testResult), testContext.build());
+			
+			
+			
+			
 			if (testResult.getParameters().length > 0 && getBundle().getBoolean("addFullDataToReport", false)) {
 				logStepStart("Test Data used");
 				ReportUtils.reportComment(testResult.getParameters()[0].toString());
@@ -167,12 +284,46 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 				client.testStop(TestResultFactory.createFailure(failMsg.isEmpty() ? "An error occurred" : failMsg,
 						new Exception("There was some validation failure in the scenario which did not provide any throwable object.")));
 			} else {
-				String actualExceptionMessage = ExceptionUtils.getStackTrace(testResult.getThrowable());
-				String failureReason = findFailureReason(actualExceptionMessage);
-				if (!failureReason.isEmpty()) {
+				ExceptionUtils.getStackTrace(testResult.getThrowable());
+				String actualExceptionMessage = testResult.getThrowable().toString();
+				Messages message = parseFailureJsonFile(actualExceptionMessage);
+
+				if (message != null) {
+					String customError = message.getCustomError();
+					List<String> customFields = message.getCustomFields();
+					List<String> tags = message.getTags();
+					String fileLoc= message.getJsonFile();
+
+					ArrayList<CustomField> cfc = new ArrayList<CustomField>();
+
+					for (String customField : customFields) {
+						try {
+							cfc.add(new CustomField(customField.split(getBundle().getString("custom.field.delimiter","-"))[0], customField.split(getBundle().getString("custom.field.delimiter","-"))[1]));
+						}
+						catch (Exception ex) {
+							throw new NullPointerException(
+									"Custom field key/value pair not delimited properly in failure reason json file: " + fileLoc + ".  Example of proper default usage: Developer-Jeremy.  Check application properties custom.field.delimiter for custom values that may have been set.");
+						}
+					}
+
+					ArrayList<String> tagsFinal = new ArrayList<String>();
+					for (String tag : tags) {
+						tagsFinal.add(tag);
+					}
+
+					Builder testContext = new TestContext.Builder();
+
+					if (cfc.size() > 0) {
+						testContext.withCustomFields(cfc);
+					}
+
+					if (tagsFinal.size() > 0) {
+						testContext.withTestExecutionTags(tagsFinal);
+					}
+
 					TestResult reportiumResult = TestResultFactory.createFailure(
-							failMsg.isEmpty() ? "An error occurred" : failMsg, testResult.getThrowable(), failureReason);
-					client.testStop(reportiumResult);
+							failMsg.isEmpty() ? "An error occurred" : failMsg, testResult.getThrowable(), customError);
+					client.testStop(reportiumResult, testContext.build());
 				} else {
 					client.testStop(TestResultFactory.createFailure(failMsg.isEmpty() ? "An error occurred" : failMsg,
 							testResult.getThrowable()));
@@ -189,7 +340,13 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 		if ((testResult.getTestContext().getCurrentXmlTest().getParallel().toString().equalsIgnoreCase("methods")
 				& testResult.getTestClass().getName().toLowerCase().contains("scenario"))
 				|| ConfigurationManager.getBundle().getString("global.datadriven.parallel", "false")
-						.equalsIgnoreCase("true")) {
+						.equalsIgnoreCase("true")
+				|| testResult.getTestContext().getCurrentXmlTest().getXmlClasses().get(0).getName()
+						.contains("com.qmetry.qaf.automation.step.client.excel.ExcelTestFactory")
+				|| testResult.getTestContext().getCurrentXmlTest().getXmlClasses().get(0).getName()
+						.contains("com.qmetry.qaf.automation.step.client.csv.KwdTestFactory")
+
+		) {
 			Object testInstance = testResult.getInstance();
 			((WebDriverTestCase) testInstance).getTestBase().tearDown();
 		}
@@ -432,44 +589,5 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 		}
 		// }
 		return description;
-	}
-
-	/**
-	 * This method is used to find the failure reason from the given JSON file in
-	 * location - src/main/resources/failureReasons.json
-	 * 
-	 * @param actualExceptionMessage
-	 *            - The failure exception stacktrace from the test failure
-	 * @return
-	 */
-	@SuppressWarnings("deprecation")
-	private static String findFailureReason(String actualExceptionMessage) {
-		String jsonStr;
-		String failureConfigLoc = ConfigurationManager.getBundle().getString("failureReasonConfig",
-				"src/main/resources/failureReasons.json");
-		try {
-			jsonStr = FileUtil.readFileToString(new File(failureConfigLoc));
-			JSONArray frArr = new JSONArray(jsonStr);
-			List<String> failureReasons = new ArrayList<String>();
-			for (int i = 0; i < frArr.length(); i++) {
-				JSONObject jsonObj = frArr.getJSONObject(i);
-				String tempKey = "";
-				for (String key : jsonObj.keySet()) {
-					tempKey = key;
-					failureReasons.add(key);
-				}
-				JSONArray tempArray = jsonObj.getJSONArray(tempKey);
-
-				for (int j = 0; j < tempArray.length(); j++) {
-					String excepMsg = tempArray.getString(j);
-					if (actualExceptionMessage.contains(excepMsg)) {
-						return tempKey;
-					}
-				}
-			}
-			return "";
-		} catch (IOException e) {
-			return "";
-		}
 	}
 }

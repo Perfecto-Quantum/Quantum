@@ -16,6 +16,8 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -39,6 +41,7 @@ import com.perfectomobile.httpclient.ParameterValue;
 import com.perfectomobile.httpclient.device.DeviceParameter;
 import com.perfectomobile.httpclient.device.DeviceResult;
 import com.perfectomobile.httpclient.device.DevicesHttpClient;
+import com.qmetry.qaf.automation.core.ConfigurationManager;
 import com.qmetry.qaf.automation.ui.WebDriverTestBase;
 
 /**
@@ -208,14 +211,26 @@ public class CloudUtils {
 
 	/**
 	 * Uploads a file to the media repository. Example:
+	 * uploadMedia("C:\\test\\ApiDemos.apk", "PRIVATE:apps/ApiDemos.apk");
+	 * @throws URISyntaxException 
+	 */
+	public static void uploadMedia(String path, String repositoryKey)
+			throws IOException, URISyntaxException {
+		File file = new File(path);
+		byte[] content = readFile(file);
+		uploadMedia(content, repositoryKey);
+	}
+
+	/**
+	 * Uploads a file to the media repository. Example:
 	 * uploadMedia("demo.perfectomobile.com", "john@perfectomobile.com", "123456",
 	 * "C:\\test\\ApiDemos.apk", "PRIVATE:apps/ApiDemos.apk");
 	 */
-	public static void uploadMedia(String host, String user, String password, String path, String repositoryKey)
+	public static void uploadMedia(String host, String user, String token, String path, String repositoryKey)
 			throws IOException {
 		File file = new File(path);
 		byte[] content = readFile(file);
-		uploadMedia(host, user, password, content, repositoryKey);
+		uploadMedia(host, user, token, content, repositoryKey);
 	}
 
 	/**
@@ -224,10 +239,10 @@ public class CloudUtils {
 	 * uploadMedia("demo.perfectomobile.com", "john@perfectomobile.com", "123456",
 	 * url, "PRIVATE:apps/ApiDemos.apk");
 	 */
-	public static void uploadMedia(String host, String user, String password, URL mediaURL, String repositoryKey)
+	public static void uploadMedia(String host, String user, String token, URL mediaURL, String repositoryKey)
 			throws IOException {
 		byte[] content = readURL(mediaURL);
-		uploadMedia(host, user, password, content, repositoryKey);
+		uploadMedia(host, user, token, content, repositoryKey);
 	}
 
 	/**
@@ -235,13 +250,32 @@ public class CloudUtils {
 	 * uploadMedia("demo.perfectomobile.com", "john@perfectomobile.com", "123456",
 	 * content, "PRIVATE:apps/ApiDemos.apk");
 	 */
-	public static void uploadMedia(String host, String user, String password, byte[] content, String repositoryKey)
+	public static void uploadMedia(String host, String user, String token, byte[] content, String repositoryKey)
 			throws UnsupportedEncodingException, MalformedURLException, IOException {
 		if (content != null) {
 			String encodedUser = URLEncoder.encode(user, "UTF-8");
-			String encodedPassword = URLEncoder.encode(password, "UTF-8");
+			String encodedPassword = URLEncoder.encode(token, "UTF-8");
 			String urlStr = HTTPS + host + MEDIA_REPOSITORY + repositoryKey + "?" + UPLOAD_OPERATION + "&user="
-					+ encodedUser + "&password=" + encodedPassword;
+					+ encodedUser + "&securityToken=" + encodedPassword;
+			URL url = new URL(urlStr);
+
+			sendRequest(content, url);
+		}
+	}
+	
+	public static void uploadMedia(byte[] content, String repositoryKey)
+			throws UnsupportedEncodingException, MalformedURLException, IOException, URISyntaxException {
+		if (content != null) {
+			String encodedUser = URLEncoder.encode(getCredentials(ConfigurationUtils.getDesiredDeviceCapabilities()).getUser(), "UTF-8");
+			String encodedPassword = URLEncoder.encode(getCredentials(ConfigurationUtils.getDesiredDeviceCapabilities()).getOfflineToken(), "UTF-8");
+			
+			
+			URI uri = new URI(ConfigurationManager.getBundle().getString("remote.server"));
+		    String hostName = uri.getHost();
+		    
+		    String urlStr = HTTPS + hostName + MEDIA_REPOSITORY + repositoryKey + "?" + UPLOAD_OPERATION + "&user="
+					+ encodedUser + "&securityToken=" + encodedPassword;
+			
 			URL url = new URL(urlStr);
 
 			sendRequest(content, url);
