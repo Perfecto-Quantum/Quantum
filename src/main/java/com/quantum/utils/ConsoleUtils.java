@@ -66,7 +66,7 @@ public class ConsoleUtils {
 	}
 
 	public static String getThreadName(Capabilities caps){
-		return String.format("[%s]", String.format("%5.15s", getDeviceDesc(caps).replace("null", "")));
+		return String.format("[%s]", String.format("%5.41s", getDeviceDesc(caps).replace("null", "")));
 	}
 	
 	public static void setThreadName(Capabilities caps) {

@@ -8,6 +8,7 @@ import org.testng.Assert;
 import com.qmetry.qaf.automation.step.QAFTestStepProvider;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebElement;
 import com.quantum.utils.DeviceUtils;
+import com.quantum.utils.DriverUtils;
 import com.quantum.utils.ReportUtils;
 
 import cucumber.api.java.en.Then;
@@ -77,6 +78,49 @@ public class PerfectoDeviceSteps {
 	public void setLocationByCoordinates(String coordinates) {
 		DeviceUtils.setLocation(coordinates, "coordinates");
 	}
+	
+	
+	/**
+	 * When AppiumDriver bool set to true/false it switches to either a new AppiumDriver/RemoteWebDriver session with a mobile device
+	 * or returns to an open session. To use you must assign at least two parameter 
+	 * groups in your testNG config containing either capabilities assigned to a driver name or 
+	 * pointing to an env.resource file containing the set of capabilities associated with the driver name.
+	 * <p>
+	 * Example: 
+	 * <p>
+	 * &lt;parameter name="perfecto.capabilities.platformName" value="Android" />
+	 * <p>&lt;parameter name="perfecto2.env.resources" value="src/main/resources/android2" />
+	 * <p>
+	 * <b>Note:</b> 
+	 * If AppiumDriver is set to true you must also have the appropriate Appium driver class assigned to the driver name
+	 * <p>
+	 * &lt;parameter name="perfecto.capabilities.driverClass" value="io.appium.java_client.android.AndroidDriver" />
+	 * <p>or
+	 * <p>&lt;parameter name="perfecto.capabilities.driverClass" value="io.appium.java_client.ios.IOSDriver" />
+	 * <p>
+	 * <b>Note:</b>
+	 * <p>If you wish to use Appium driver the word remote is removed from the driver name otherwise it is added for RemoteWebDriver automatically
+	 * <p>
+	 * <b>Note:</b>
+	 * <p>
+	 * When switching from and back to a driver you should use the same boolean for the driver name
+	 * <p>
+	 * I switch to driver "perfecto" with Appium Mode set to "true"  &lt;-- use both times
+	 * 
+	 * @param driverName
+	 *            The name of the driver you are switching to "perfecto" or "perfecto2"
+	 * @param AppiumDriver
+	 * 			  If set to true sets the driver to an AppiumDriver if false sets to RemoteWebDriver
+	 */
+	@Then("^I switch to driver \"([^\"]*)\" with Appium Mode set to \"([^\\\"]*)\" $")
+	public static void switchToDriver(String driverName, String AppiumDriver) {
+
+		DriverUtils.switchToDriver(driverName, Boolean.parseBoolean(AppiumDriver));
+
+	}
+	
+	
+	
 
 	/**
 	 * Sets the device location using address (Google Geocoding) format. This

@@ -6,6 +6,7 @@ import java.util.Map;
 import org.openqa.selenium.JavascriptExecutor;
 
 import com.qmetry.qaf.automation.core.ConfigurationManager;
+import com.qmetry.qaf.automation.core.TestBaseProvider;
 import com.qmetry.qaf.automation.ui.WebDriverTestBase;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 
@@ -63,6 +64,71 @@ public class DriverUtils {
 			return true;
 		} else {
 			return false;
+		}
+	}
+
+	
+	/**
+	 * Switches to either a new WebDriver session with a mobile device / web browser
+	 * or returns to an open session. To use you must assign at least two parameter 
+	 * groups in your testNG config containing either capabilities assigned to a driver name or 
+	 * pointing to an env.resource file containing the set of capabilities associated with the driver name.
+	 * <p>
+	 * Example: 
+	 * <p>
+	 * &lt;parameter name="perfecto.capabilities.platformName" value="Android" />
+	 * <p>&lt;parameter name="perfecto2.env.resources" value="src/main/resources/android2" />
+	 * @param driverName
+	 *            The name of the driver you are switching to "perfecto" or "perfecto2"
+	 */
+	public static void switchToDriver(String driverName) {
+		switchToDriver(driverName, false);
+	}
+	
+	/**
+	 * When set to true/false it switches to either a new AppiumDriver/RemoteWebDriver session with a mobile device
+	 * or returns to an open session. To use you must assign at least two parameter 
+	 * groups in your testNG config containing either capabilities assigned to a driver name or 
+	 * pointing to an env.resource file containing the set of capabilities associated with the driver name.
+	 * <p>
+	 * Example: 
+	 * <p>
+	 * &lt;parameter name="perfecto.capabilities.platformName" value="Android" />
+	 * <p>&lt;parameter name="perfecto2.env.resources" value="src/main/resources/android2" />
+	 * <p>
+	 * <b>Note:</b> 
+	 * If AppiumDriver is set to true you must also have the appropriate Appium driver class assigned to the driver name
+	 * <p>
+	 * &lt;parameter name="perfecto.capabilities.driverClass" value="io.appium.java_client.android.AndroidDriver" />
+	 * <p>or
+	 * <p>&lt;parameter name="perfecto.capabilities.driverClass" value="io.appium.java_client.ios.IOSDriver" />
+	 * <p>
+	 * <b>Note:</b>
+	 * <p>If you wish to use Appium driver the word remote is removed from the driver name otherwise it is added for RemoteWebDriver automatically
+	 * <p>
+	 * <b>Note:</b>
+	 * <p>
+	 * When switching from and back to a driver you should use the same boolean for the driver name
+	 * <p>
+	 * switchToDriver("perfecto",true);  &lt;-- use both times
+	 * 
+	 * @param driverName
+	 *            The name of the driver you are switching to "perfecto" or "perfecto2"
+	 * @param AppiumDriver
+	 * 			  If set to true sets the driver to an AppiumDriver if false sets to RemoteWebDriver
+	 */
+	public static void switchToDriver(String driverName, boolean AppiumDriver) {
+		if(AppiumDriver)
+		{
+		TestBaseProvider.instance().get().setDriver(driverName.replaceAll("(?i)remote","") + "Driver");
+		String envResources = ConfigurationManager.getBundle().getString(driverName + ".env.resources");
+		ConfigurationManager.getBundle().setProperty("env.resources", envResources);
+		}
+		else
+		{
+			TestBaseProvider.instance().get().setDriver(driverName + "RemoteDriver");
+			String envResources = ConfigurationManager.getBundle().getString(driverName + ".env.resources");
+			ConfigurationManager.getBundle().setProperty("env.resources", envResources);
 		}
 	}
 
