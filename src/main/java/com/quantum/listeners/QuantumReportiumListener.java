@@ -30,6 +30,7 @@ import com.perfecto.reportium.client.ReportiumClient;
 import com.perfecto.reportium.client.ReportiumClientFactory;
 import com.perfecto.reportium.model.Job;
 import com.perfecto.reportium.model.PerfectoExecutionContext;
+import com.perfecto.reportium.model.PerfectoExecutionContext.PerfectoExecutionContextBuilder;
 import com.perfecto.reportium.model.Project;
 import com.perfecto.reportium.test.TestContext;
 import com.perfecto.reportium.test.result.TestResult;
@@ -163,22 +164,24 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 				}
 			}
 
-			if(testResult.getThrowable() == null) {
+			if (testResult.getThrowable() == null) {
 				client.testStop(TestResultFactory.createFailure(failMsg.isEmpty() ? "An error occurred" : failMsg,
-						new Exception("There was some validation failure in the scenario which did not provide any throwable object.")));
+						new Exception(
+								"There was some validation failure in the scenario which did not provide any throwable object.")));
 			} else {
 				String actualExceptionMessage = ExceptionUtils.getStackTrace(testResult.getThrowable());
 				String failureReason = findFailureReason(actualExceptionMessage);
 				if (!failureReason.isEmpty()) {
 					TestResult reportiumResult = TestResultFactory.createFailure(
-							failMsg.isEmpty() ? "An error occurred" : failMsg, testResult.getThrowable(), failureReason);
+							failMsg.isEmpty() ? "An error occurred" : failMsg, testResult.getThrowable(),
+							failureReason);
 					client.testStop(reportiumResult);
 				} else {
 					client.testStop(TestResultFactory.createFailure(failMsg.isEmpty() ? "An error occurred" : failMsg,
 							testResult.getThrowable()));
 				}
 			}
-			
+
 			logTestEnd(testResult);
 
 			tearIt(testResult);
@@ -290,22 +293,49 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 				+ (System.getProperty("reportium-tags") == null ? "" : "," + System.getProperty("reportium-tags"));
 
 		Object testInstance = testResult.getInstance();
+		
+//		Create a list of webdriver
+//		For loop on the drvier name list
+//		Switch to driver names one by one in the for loop and add the driver object in the list of webdrivers
+		List<WebDriver> driverList = new ArrayList<WebDriver>();
+		String driverNameList = ConfigurationManager.getBundle().getString("driverNameList", "");
+		
+		
+		
 		WebDriver driver = null;
-		if (testInstance instanceof WebDriverTestCase)
-			driver = ((WebDriverTestCase) testInstance).getDriver();
-		else if (testInstance instanceof WebDriverProvider)
-			driver = ((WebDriverProvider) testInstance).getWebDriver();
+		if(driverNameList.isEmpty()) {
+			
+			if (testInstance instanceof WebDriverTestCase)
+				driver = ((WebDriverTestCase) testInstance).getDriver();
+			else if (testInstance instanceof WebDriverProvider)
+				driver = ((WebDriverProvider) testInstance).getWebDriver();
+			driverList.add(driver);
+		} else {
+			 for(String driverName : driverNameList.split(",")) {
+				 
+			 }
+		}
+		
+		
+		
+		
+		
+		
 		if (driver != null) {
-			PerfectoExecutionContext perfectoExecutionContext = new PerfectoExecutionContext.PerfectoExecutionContextBuilder()
+			PerfectoExecutionContextBuilder perfectoExecutionContextBuilder = new PerfectoExecutionContext.PerfectoExecutionContextBuilder()
 					.withProject(new Project(prjName, prjVer)).withContextTags(allTags.split(","))
 					.withJob(new Job(getBundle().getString("JOB_NAME", System.getProperty("reportium-job-name")),
 							getBundle().getInt("BUILD_NUMBER",
 									System.getProperty("reportium-job-number") == null ? 0
 											: Integer.parseInt(System.getProperty("reportium-job-number"))))
-													.withBranch(System.getProperty("reportium-job-branch")))
-					.withWebDriver(driver).build();
+													.withBranch(System.getProperty("reportium-job-branch")));
+//					.withWebDriver(driver).build();
+			
+//			for(){
+//				Add the with Drivers in the context builkder here
+//			}
 
-			reportiumClient = new ReportiumClientFactory().createPerfectoReportiumClient(perfectoExecutionContext);
+			reportiumClient = new ReportiumClientFactory().createPerfectoReportiumClient(perfectoExecutionContextBuilder.build());
 		}
 		getBundle().setProperty(PERFECTO_REPORT_CLIENT, reportiumClient);
 
@@ -355,15 +385,21 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 	}
 
 	public static List<String> getArgNames(String def) {
-		Pattern p = Pattern.compile("[$][{](.*?)}");
+//		Pattern p = Pattern.compile("[$][{](.*?)}");
+//		Pattern p = Pattern.compile("\"(.*?)[$][{](.*?)}\"");
+//		String allChars = "[a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]";
+		Pattern p = Pattern.compile("\\\"([a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/? ]*)[$][{](([a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/? ]*))}([a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/? ]*)\\\"");
+		
 		Matcher matcher = p.matcher(def);
 		List<String> args = new ArrayList<String>();
 		while (matcher.find()) {
-			args.add(matcher.group().replace("${", "{"));
+			String paramName = matcher.group();
+			String finalParamNam = paramName.substring(1, paramName.length() - 2);
+			args.add(finalParamNam.replace("${", "{"));
 		}
 		return args;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private String getProcessStepDescription(TestStep step) {
 		// process parameters in step;
@@ -376,7 +412,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 		String def = step.getDescription();
 
 		if ((actualArgs != null) && (actualArgs.length > 0)) {
-			Map<String, Object> paramMap = new HashMap<>(); 
+			Map<String, Object> paramMap = new HashMap<>();
 			paramMap.putAll(step.getStepExecutionTracker().getContext());
 			List<String> paramNames = getArgNames(def);
 
@@ -429,9 +465,9 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 				}
 
 				description = StrSubstitutor.replace(description, paramMap);
+
 			}
 		}
-		// }
 		return description;
 	}
 
@@ -445,6 +481,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 	 */
 	@SuppressWarnings("deprecation")
 	private static String findFailureReason(String actualExceptionMessage) {
+		System.out.println("Trying to find the failure reason!");
 		String jsonStr;
 		String failureConfigLoc = ConfigurationManager.getBundle().getString("failureReasonConfig",
 				"src/main/resources/failureReasons.json");
@@ -453,12 +490,14 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 			JSONArray frArr = new JSONArray(jsonStr);
 			List<String> failureReasons = new ArrayList<String>();
 			for (int i = 0; i < frArr.length(); i++) {
+
 				JSONObject jsonObj = frArr.getJSONObject(i);
 				String tempKey = "";
 				for (String key : jsonObj.keySet()) {
 					tempKey = key;
 					failureReasons.add(key);
 				}
+
 				JSONArray tempArray = jsonObj.getJSONArray(tempKey);
 
 				for (int j = 0; j < tempArray.length(); j++) {

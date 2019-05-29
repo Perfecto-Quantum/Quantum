@@ -86,48 +86,51 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 
 			try {
 
-				if (ConfigurationManager.getBundle().getString("perfecto.download.reports", "false").toLowerCase()
-						.equals("true")) {
-					try {
-						System.out.println("downloading test reports");
-						ReportUtils.generateTestReport(ConfigurationManager.getBundle().getString("executionId"));
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						ConsoleUtils.logError(e.toString());
+				if(ConfigurationUtils.getBaseBundle().getString("remote.server", "").contains("perfecto")) {
+					if (ConfigurationManager.getBundle().getString("perfecto.download.reports", "false").toLowerCase()
+							.equals("true")) {
+						try {
+							System.out.println("downloading test reports");
+							ReportUtils.generateTestReport(ConfigurationManager.getBundle().getString("executionId"));
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							ConsoleUtils.logError(e.toString());
+						}
 					}
-				}
-				if (ConfigurationManager.getBundle().getString("perfecto.download.summaryReports", "false")
-						.toLowerCase().equals("true")) {
+					if (ConfigurationManager.getBundle().getString("perfecto.download.summaryReports", "false")
+							.toLowerCase().equals("true")) {
 
-					try {
-						System.out.println("downloading summary reports");
-						ReportUtils.generateSummaryReports(ConfigurationManager.getBundle().getString("executionId"));
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						ConsoleUtils.logError(e.toString());
+						try {
+							System.out.println("downloading summary reports");
+							ReportUtils.generateSummaryReports(ConfigurationManager.getBundle().getString("executionId"));
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							ConsoleUtils.logError(e.toString());
+						}
+					}
+					if (ConfigurationManager.getBundle().getString("perfecto.download.video", "false").toLowerCase()
+							.equals("true")) {
+						try {
+							System.out.println("downloading video");
+							ReportUtils.downloadReportVideo(ConfigurationManager.getBundle().getString("executionId"));
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							ConsoleUtils.logError(e.toString());
+						}
+					}
+					if (ConfigurationManager.getBundle().getString("perfecto.download.attachments", "false").toLowerCase()
+							.equals("true")) {
+						try {
+							System.out.println("downloading attachments");
+							ReportUtils
+									.downloadReportAttachments(ConfigurationManager.getBundle().getString("executionId"));
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							ConsoleUtils.logError(e.toString());
+						}
 					}
 				}
-				if (ConfigurationManager.getBundle().getString("perfecto.download.video", "false").toLowerCase()
-						.equals("true")) {
-					try {
-						System.out.println("downloading video");
-						ReportUtils.downloadReportVideo(ConfigurationManager.getBundle().getString("executionId"));
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						ConsoleUtils.logError(e.toString());
-					}
-				}
-				if (ConfigurationManager.getBundle().getString("perfecto.download.attachments", "false").toLowerCase()
-						.equals("true")) {
-					try {
-						System.out.println("downloading attachments");
-						ReportUtils
-								.downloadReportAttachments(ConfigurationManager.getBundle().getString("executionId"));
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						ConsoleUtils.logError(e.toString());
-					}
-				}
+				
 			} catch (Exception ex) {
 
 			}
