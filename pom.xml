@@ -11,7 +11,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<reportium-sdk.version>2.2.1</reportium-sdk.version>
+		<reportium-sdk.version>2.3</reportium-sdk.version>
 		<selenium.version>3.14.0</selenium.version>
 		<testng.version>6.10</testng.version>
 		<cukes.version>1.2.5</cukes.version>
@@ -83,7 +83,7 @@
 		<repository>
 			<id>perfectomobile</id>
 			<name>Perfecto mobile</name>
-			<url>https://repo1.perfectomobile.com/repositories/maven</url>
+			<url>https://repo1.perfectomobile.com/public/repositories/maven</url>
 		</repository>
 		<repository>
 			<id>jai</id>
@@ -169,6 +169,12 @@
 			<groupId>com.perfecto.reporting-sdk</groupId>
 			<artifactId>reportium-java</artifactId>
 			<version>${reportium-sdk.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.seleniumhq.selenium</groupId>
+					<artifactId>selenium-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.perfecto.reporting-sdk</groupId>

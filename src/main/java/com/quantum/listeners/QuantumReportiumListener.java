@@ -50,6 +50,8 @@ import com.qmetry.qaf.automation.step.client.TestNGScenario;
 import com.qmetry.qaf.automation.step.client.text.BDDDefinitionHelper.ParamType;
 import com.qmetry.qaf.automation.ui.WebDriverTestCase;
 import com.quantum.utils.ConsoleUtils;
+import com.quantum.utils.DeviceUtils;
+import com.quantum.utils.DriverUtils;
 import com.quantum.utils.ReportUtils;
 
 import cucumber.runtime.RuntimeOptions;
@@ -61,7 +63,7 @@ class Messages {
 	List<String> Tags;
 	String CustomError;
 	String JsonFile;
-	
+
 	public String getJsonFile() {
 		return this.JsonFile;
 	}
@@ -126,7 +128,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			System.out.println("Problem parsing failure reason json file: " + failureConfigLoc);
-			e.printStackTrace();	
+			e.printStackTrace();
 		}
 		Messages[] response = gson.fromJson(reader, Messages[].class);
 
@@ -167,44 +169,40 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 	@Override
 	public void onTestStart(ITestResult testResult) {
 		if (getBundle().getString("remote.server", "").contains("perfecto")) {
-			
 
 			// get custom fields "%name-value" from groups
-						// compile actual groups
-						String[] groups = testResult.getMethod().getGroups();
-						ArrayList<String> groupsFinal = new ArrayList<String>();
+			// compile actual groups
+			String[] groups = testResult.getMethod().getGroups();
+			ArrayList<String> groupsFinal = new ArrayList<String>();
 
-						ArrayList<CustomField> cfc = new ArrayList<CustomField>();
-						for (String string : groups) {
-							if (string.startsWith(getBundle().getString("custom.field.identifier","%"))) {
-								try {
-									cfc.add(new CustomField(
-											string.split(getBundle().getString("custom.field.delimiter","-"))[0].substring(1),
-											string.split(getBundle().getString("custom.field.delimiter","-"))[1]));
-								} catch (Exception ex) {
-									throw new NullPointerException(
-											"Custom field key/value pair not delimited properly.  Example of proper default usage: %Developer-Jeremy.  Check application properties custom.field.delimiter and custom.field.identifier for custom values that may have been set.");
-								}
-							} else {
-								groupsFinal.add(string);
-							}
-						}
+			ArrayList<CustomField> cfc = new ArrayList<CustomField>();
+			for (String string : groups) {
+				if (string.startsWith(getBundle().getString("custom.field.identifier", "%"))) {
+					try {
+						cfc.add(new CustomField(
+								string.split(getBundle().getString("custom.field.delimiter", "-"))[0].substring(1),
+								string.split(getBundle().getString("custom.field.delimiter", "-"))[1]));
+					} catch (Exception ex) {
+						throw new NullPointerException(
+								"Custom field key/value pair not delimited properly.  Example of proper default usage: %Developer-Jeremy.  Check application properties custom.field.delimiter and custom.field.identifier for custom values that may have been set.");
+					}
+				} else {
+					groupsFinal.add(string);
+				}
+			}
 
-						Builder testContext = new TestContext.Builder();
-						if (groupsFinal.size() > 0) {
-							testContext.withTestExecutionTags(groupsFinal.toString().split(","));
-						}
+			Builder testContext = new TestContext.Builder();
+			if (groupsFinal.size() > 0) {
+				testContext.withTestExecutionTags(groupsFinal.toString().split(","));
+			}
 
-						if (cfc.size() > 0) {
-							testContext.withCustomFields(cfc);
-						}
+			if (cfc.size() > 0) {
+				testContext.withCustomFields(cfc);
+			}
 
-						createReportiumClient(testResult).testStart(
-								testResult.getMethod().getMethodName() + getDataDrivenText(testResult), testContext.build());
-			
-			
-			
-			
+			createReportiumClient(testResult).testStart(
+					testResult.getMethod().getMethodName() + getDataDrivenText(testResult), testContext.build());
+
 			if (testResult.getParameters().length > 0 && getBundle().getBoolean("addFullDataToReport", false)) {
 				logStepStart("Test Data used");
 				ReportUtils.reportComment(testResult.getParameters()[0].toString());
@@ -289,17 +287,20 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 					String customError = message.getCustomError();
 					List<String> customFields = message.getCustomFields();
 					List<String> tags = message.getTags();
-					String fileLoc= message.getJsonFile();
+					String fileLoc = message.getJsonFile();
 
 					ArrayList<CustomField> cfc = new ArrayList<CustomField>();
 
 					for (String customField : customFields) {
 						try {
-							cfc.add(new CustomField(customField.split(getBundle().getString("custom.field.delimiter","-"))[0], customField.split(getBundle().getString("custom.field.delimiter","-"))[1]));
-						}
-						catch (Exception ex) {
+							cfc.add(new CustomField(
+									customField.split(getBundle().getString("custom.field.delimiter", "-"))[0],
+									customField.split(getBundle().getString("custom.field.delimiter", "-"))[1]));
+						} catch (Exception ex) {
 							throw new NullPointerException(
-									"Custom field key/value pair not delimited properly in failure reason json file: " + fileLoc + ".  Example of proper default usage: Developer-Jeremy.  Check application properties custom.field.delimiter for custom values that may have been set.");
+									"Custom field key/value pair not delimited properly in failure reason json file: "
+											+ fileLoc
+											+ ".  Example of proper default usage: Developer-Jeremy.  Check application properties custom.field.delimiter for custom values that may have been set.");
 						}
 					}
 
@@ -444,50 +445,40 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 				+ (System.getProperty("reportium-tags") == null ? "" : "," + System.getProperty("reportium-tags"));
 
 		Object testInstance = testResult.getInstance();
-		
-//		Create a list of webdriver
-//		For loop on the drvier name list
-//		Switch to driver names one by one in the for loop and add the driver object in the list of webdrivers
-		List<WebDriver> driverList = new ArrayList<WebDriver>();
+
+		HashMap<String, WebDriver> driverList = new HashMap<String, WebDriver>();
 		String driverNameList = ConfigurationManager.getBundle().getString("driverNameList", "");
-		
-		
-		
-		WebDriver driver = null;
-		if(driverNameList.isEmpty()) {
-			
+
+		if (driverNameList.isEmpty()) {
+			WebDriver driver = null;
 			if (testInstance instanceof WebDriverTestCase)
 				driver = ((WebDriverTestCase) testInstance).getDriver();
 			else if (testInstance instanceof WebDriverProvider)
 				driver = ((WebDriverProvider) testInstance).getWebDriver();
-			driverList.add(driver);
+			driverList.put("Default Driver", driver);
 		} else {
-			 for(String driverName : driverNameList.split(",")) {
-				 
-			 }
+			for (String driverName : driverNameList.split(",")) {
+				System.out.println("Adding driver with name - " + driverName);
+				DriverUtils.switchToDriver(driverName);
+				driverList.put(driverName, DeviceUtils.getQAFDriver());
+			}
 		}
-		
-		
-		
-		
-		
-		
-		if (driver != null) {
-			PerfectoExecutionContextBuilder perfectoExecutionContextBuilder = new PerfectoExecutionContext.PerfectoExecutionContextBuilder()
-					.withProject(new Project(prjName, prjVer)).withContextTags(allTags.split(","))
-					.withJob(new Job(getBundle().getString("JOB_NAME", System.getProperty("reportium-job-name")),
-							getBundle().getInt("BUILD_NUMBER",
-									System.getProperty("reportium-job-number") == null ? 0
-											: Integer.parseInt(System.getProperty("reportium-job-number"))))
-													.withBranch(System.getProperty("reportium-job-branch")));
-//					.withWebDriver(driver).build();
-			
-//			for(){
-//				Add the with Drivers in the context builkder here
-//			}
 
-			reportiumClient = new ReportiumClientFactory().createPerfectoReportiumClient(perfectoExecutionContextBuilder.build());
+		PerfectoExecutionContextBuilder perfectoExecutionContextBuilder = new PerfectoExecutionContext.PerfectoExecutionContextBuilder()
+				.withProject(new Project(prjName, prjVer)).withContextTags(allTags.split(","))
+				.withJob(new Job(getBundle().getString("JOB_NAME", System.getProperty("reportium-job-name")),
+						getBundle().getInt("BUILD_NUMBER",
+								System.getProperty("reportium-job-number") == null ? 0
+										: Integer.parseInt(System.getProperty("reportium-job-number"))))
+												.withBranch(System.getProperty("reportium-job-branch")));
+		for (String driverName : driverList.keySet()) {
+			
+			perfectoExecutionContextBuilder.withWebDriver(driverList.get(driverName), driverName);
 		}
+
+		reportiumClient = new ReportiumClientFactory()
+				.createPerfectoReportiumClient(perfectoExecutionContextBuilder.build());
+
 		getBundle().setProperty(PERFECTO_REPORT_CLIENT, reportiumClient);
 
 		return reportiumClient;
@@ -536,11 +527,12 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 	}
 
 	public static List<String> getArgNames(String def) {
-//		Pattern p = Pattern.compile("[$][{](.*?)}");
-//		Pattern p = Pattern.compile("\"(.*?)[$][{](.*?)}\"");
-//		String allChars = "[a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]";
-		Pattern p = Pattern.compile("\\\"([a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/? ]*)[$][{](([a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/? ]*))}([a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/? ]*)\\\"");
-		
+		// Pattern p = Pattern.compile("[$][{](.*?)}");
+		// Pattern p = Pattern.compile("\"(.*?)[$][{](.*?)}\"");
+		// String allChars = "[a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]";
+		Pattern p = Pattern.compile(
+				"\\\"([a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/? ]*)[$][{](([a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/? ]*))}([a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/? ]*)\\\"");
+
 		Matcher matcher = p.matcher(def);
 		List<String> args = new ArrayList<String>();
 		while (matcher.find()) {
