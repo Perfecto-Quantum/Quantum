@@ -115,9 +115,10 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 	public Messages parseFailureJsonFile(String actualMessage) {
 		String jsonStr = null;
-		String failureConfigLoc = ConfigurationManager.getBundle().getString("failureReasonConfig",
-				"src/main/resources/failureReasons4.json");
-
+		String failureConfigLoc = ConfigurationManager.getBundle().getString("failureReasonConfig", "");
+		
+		if (failureConfigLoc.isEmpty()) return null;
+		
 		GsonBuilder gsonBuilder = new GsonBuilder();
 		gsonBuilder.setLenient();
 		Gson gson = gsonBuilder.create();
