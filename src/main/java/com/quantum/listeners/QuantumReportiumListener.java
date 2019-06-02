@@ -13,6 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.ArrayUtils;
@@ -116,7 +117,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 	public Messages parseFailureJsonFile(String actualMessage) {
 		String jsonStr = null;
 		String failureConfigLoc = ConfigurationManager.getBundle().getString("failureReasonConfig", "");
-		
+				
 		if (failureConfigLoc.isEmpty()) return null;
 		
 		GsonBuilder gsonBuilder = new GsonBuilder();
@@ -134,11 +135,16 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 		Messages[] response = gson.fromJson(reader, Messages[].class);
 
 		for (Messages messages : response) {
-
-			if (messages.getStackTraceErrors().toString().contains(actualMessage)) {
-				messages.setJsonFile(failureConfigLoc);
-				return messages;
+			for (String error : ListUtils.emptyIfNull(messages.getStackTraceErrors()))	{
+				if (actualMessage.contains(error)) {
+					messages.setJsonFile(failureConfigLoc);
+					return messages;
 			}
+		}
+//			if (messages.getStackTraceErrors().toString().contains(actualMessage)) {
+//				messages.setJsonFile(failureConfigLoc);
+//				return messages;
+//			}
 
 		}
 
@@ -286,8 +292,8 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 				if (message != null) {
 					String customError = message.getCustomError();
-					List<String> customFields = message.getCustomFields();
-					List<String> tags = message.getTags();
+					List<String> customFields = ListUtils.emptyIfNull(message.getCustomFields());
+					List<String> tags = ListUtils.emptyIfNull(message.getTags());
 					String fileLoc = message.getJsonFile();
 
 					ArrayList<CustomField> cfc = new ArrayList<CustomField>();

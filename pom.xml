@@ -211,5 +211,10 @@
 			<artifactId>guava</artifactId>
 			<version>24.1-jre</version>
 		</dependency>
+		<dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-collections4</artifactId>
+		    <version>4.0</version>
+		</dependency>
 	</dependencies>
 </project>
