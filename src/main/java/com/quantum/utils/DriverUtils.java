@@ -93,6 +93,9 @@ public class DriverUtils {
 		String envResources = ConfigurationManager.getBundle()
 				.getString(driverName.replaceAll("(?i)remote", "") + ".env.resources");
 		ConfigurationManager.getBundle().setProperty("env.resources", envResources);
+		
+		ConfigurationUtils.setActualDeviceCapabilities(getDriver().getCapabilities().asMap());
+		
 	}
 
 	private String getOS() {

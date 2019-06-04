@@ -52,8 +52,9 @@ import com.quantum.utils.ReportUtils;
 public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 	@Override
 	public void beforeCommand(QAFExtendedWebDriver driver, CommandTracker commandTracker) {
-		ConfigurationUtils.setActualDeviceCapabilities(driver.getCapabilities().asMap());
+		
 		if (commandTracker.getCommand().equalsIgnoreCase(DriverCommand.QUIT)) {
+			ConfigurationUtils.setActualDeviceCapabilities(driver.getCapabilities().asMap());
 			try {
 				String appName = (String) driver.getCapabilities().getCapability("applicationName");
 				if (StringUtil.isNotBlank(appName)

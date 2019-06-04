@@ -2,6 +2,7 @@ package com.quantum.listeners;
 
 import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
@@ -116,9 +117,15 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 	public Messages parseFailureJsonFile(String actualMessage) {
 		String jsonStr = null;
-		String failureConfigLoc = ConfigurationManager.getBundle().getString("failureReasonConfig", "");
-				
-		if (failureConfigLoc.isEmpty()) return null;
+		String failureConfigLoc = ConfigurationManager.getBundle().getString("failureReasonConfig", "src/main/resources/failureReasons.json");
+		
+		File failureConfigFile = new File(failureConfigLoc);
+		
+		if (!failureConfigFile.exists()) {
+			System.out.println("Ignoring Failure Reasons because JSON file was not found in path: " + failureConfigLoc);
+			return null;
+		}
+		
 		
 		GsonBuilder gsonBuilder = new GsonBuilder();
 		gsonBuilder.setLenient();
@@ -129,12 +136,18 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 			reader = new JsonReader(new FileReader(failureConfigLoc));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
-			System.out.println("Problem parsing failure reason json file: " + failureConfigLoc);
+			System.out.println("Problem parsing Failure Reason JSON file: " + failureConfigLoc);
 			e.printStackTrace();
 		}
 		Messages[] response = gson.fromJson(reader, Messages[].class);
-
+		
 		for (Messages messages : response) {
+			if (messages.getStackTraceErrors() == null) {
+				System.out.println("Failure Reason JSON file has wrong formmat, please read here https://developers.perfectomobile.com/pages/viewpage.action?pageId=31103917: " + failureConfigLoc);
+				return null;
+			
+			}
+				
 			for (String error : ListUtils.emptyIfNull(messages.getStackTraceErrors()))	{
 				if (actualMessage.contains(error)) {
 					messages.setJsonFile(failureConfigLoc);
