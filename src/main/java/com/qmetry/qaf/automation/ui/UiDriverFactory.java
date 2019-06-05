@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.Proxy;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
@@ -13,6 +15,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationMap;
@@ -37,7 +40,10 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.CommandInfo;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.HttpCommandExecutor;
+import org.openqa.selenium.remote.http.HttpClient;
+import org.openqa.selenium.remote.http.HttpClient.Builder;
 import org.openqa.selenium.remote.http.HttpClient.Factory;
+import org.openqa.selenium.remote.internal.OkHttpClient;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -53,6 +59,12 @@ import com.qmetry.qaf.automation.ui.webdriver.ChromeDriverHelper;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 import com.qmetry.qaf.automation.ui.webdriver.QAFWebDriverCommandListener;
 import com.qmetry.qaf.automation.util.StringUtil;
+
+import okhttp3.Authenticator;
+import okhttp3.Credentials;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.Route;
 
 public class UiDriverFactory implements DriverFactory<UiDriver> {
 	private static final Log logger = LogFactoryImpl.getLog(UiDriverFactory.class);
@@ -451,24 +463,33 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			} catch (MalformedURLException e) {
 				throw new RuntimeException(e.getMessage(), e);
 			}
-			HttpClientBuilder builder = HttpClientBuilder.create();
-			HttpHost proxy = new HttpHost(proxyHost, proxyPort);
+			Authenticator proxyAuthenticator = new Authenticator() {
+				@Override
+				public Request authenticate(Route route, Response response) throws IOException {
+					String credential = Credentials.basic(proxyUser, proxyPassword);
+					return response.request().newBuilder().header("Proxy-Authorization", credential).build();
+				}
+
+			};
+
 			CredentialsProvider credsProvider = new BasicCredentialsProvider();
-			credsProvider.setCredentials(new AuthScope(proxyHost, proxyPort),
-					new NTCredentials(proxyUser, proxyPassword, getWorkstation(), proxyUserDomain));
 			if (urls.getUserInfo() != null && !urls.getUserInfo().isEmpty()) {
 				credsProvider.setCredentials(
 						new AuthScope(urls.getHost(), (urls.getPort() > 0 ? urls.getPort() : urls.getDefaultPort())),
 						new UsernamePasswordCredentials(urls.getUserInfo()));
 			}
-			builder.setProxy(proxy);
-			builder.setDefaultCredentialsProvider(credsProvider);
-			Factory factory = new MyHttpClientFactory(builder);
-			HttpCommandExecutor executor = new HttpCommandExecutor(new HashMap<String, CommandInfo>(), urls, factory);
+			okhttp3.OkHttpClient.Builder client = new okhttp3.OkHttpClient.Builder()
+					.connectTimeout(60, TimeUnit.SECONDS).writeTimeout(60, TimeUnit.SECONDS)
+					.readTimeout(60, TimeUnit.SECONDS)
+					.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)))
+					.proxyAuthenticator(proxyAuthenticator);
+			
+			Factory factory = new MyHttpClientFactory(new OkHttpClient(client.build(), urls));
+			/************** NEW end ****************/
 
 			beforeInitialize(desiredCapabilities, listners);
+			
 			try {
-
 				WebDriver driver = getDriverProxyObj(getDriverCls(), desiredCapabilities, urls, factory);// driverCls.newInstance();
 				return new QAFExtendedWebDriver(driver, reporter);
 
@@ -534,23 +555,31 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			} catch (MalformedURLException e) {
 				throw new RuntimeException(e.getMessage(), e);
 			}
-			HttpClientBuilder builder = HttpClientBuilder.create();
-			HttpHost proxy = new HttpHost(proxyHost, proxyPort);
+			Authenticator proxyAuthenticator = new Authenticator() {
+				public Request authenticate(Route route, Response response) throws IOException {
+					String credential = Credentials.basic(proxyUser, proxyPassword);
+					return response.request().newBuilder().header("Proxy-Authorization", credential).build();
+				}
+			};
+
 			CredentialsProvider credsProvider = new BasicCredentialsProvider();
-			credsProvider.setCredentials(new AuthScope(proxyHost, proxyPort),
-					new NTCredentials(proxyUser, proxyPassword, getWorkstation(), proxyUserDomain));
 			if (urls.getUserInfo() != null && !urls.getUserInfo().isEmpty()) {
 				credsProvider.setCredentials(
 						new AuthScope(urls.getHost(), (urls.getPort() > 0 ? urls.getPort() : urls.getDefaultPort())),
 						new UsernamePasswordCredentials(urls.getUserInfo()));
 			}
-			builder.setProxy(proxy);
-			builder.setDefaultCredentialsProvider(credsProvider);
-			Factory factory = new MyHttpClientFactory(builder);
-			HttpCommandExecutor executor = new HttpCommandExecutor(new HashMap<String, CommandInfo>(), urls, factory);
+			okhttp3.OkHttpClient.Builder client = new okhttp3.OkHttpClient.Builder()
+					.connectTimeout(60, TimeUnit.SECONDS).writeTimeout(60, TimeUnit.SECONDS)
+					.readTimeout(60, TimeUnit.SECONDS)
+					.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)))
+					.proxyAuthenticator(proxyAuthenticator);
+			Factory factory = new MyHttpClientFactory(new OkHttpClient(client.build(), urls));
 
 			beforeInitialize(desiredCapabilities, listners);
+
 			try {
+				HttpCommandExecutor executor = new HttpCommandExecutor(new HashMap<String, CommandInfo>(), urls,
+						factory);
 				return new QAFExtendedWebDriver(executor, desiredCapabilities, reporter);
 
 			} catch (Throwable e) {

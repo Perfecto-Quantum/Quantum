@@ -2,24 +2,32 @@ package com.qmetry.qaf.automation.ui;
 
 import java.net.URL;
 
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.openqa.selenium.remote.internal.ApacheHttpClient;
+import org.openqa.selenium.remote.http.HttpClient;
+import org.openqa.selenium.remote.internal.OkHttpClient;
+import org.openqa.selenium.remote.http.HttpClient.Builder;
+import org.openqa.selenium.remote.http.HttpClient.Factory;
 
-public class MyHttpClientFactory implements org.openqa.selenium.remote.http.HttpClient.Factory {
-	final HttpClientBuilder builder;
+public class MyHttpClientFactory implements Factory {
+	final OkHttpClient okHttpClient;
 
-	public MyHttpClientFactory(HttpClientBuilder builder) {
-		this.builder = builder;
+	public MyHttpClientFactory(OkHttpClient okHttpClient2) {
+		this.okHttpClient = okHttpClient2;
 	}
 
 	@Override
-	public org.openqa.selenium.remote.http.HttpClient createClient(URL url) {
-		return new ApacheHttpClient(builder.build(), url);
+	public HttpClient createClient(URL url) {
+		return (HttpClient) okHttpClient;
 	}
 
 	@Override
 	public void cleanupIdleClients() {
 		// TODO Auto-generated method stub
-
 	}
+
+	@Override
+	public Builder builder() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
