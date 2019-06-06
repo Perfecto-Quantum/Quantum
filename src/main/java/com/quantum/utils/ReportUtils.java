@@ -301,7 +301,7 @@ public class ReportUtils {
 	}
 
 	private static void downloadExecutionSummaryReport(String deviceId, String driverExecutionId, String accessToken)
-			throws URISyntaxException, IOException {
+			throws Exception {
 		URIBuilder uriBuilder = new URIBuilder(REPORTING_SERVER_URL + "/export/api/v1/test-executions/pdf");
 		uriBuilder.addParameter("externalId[0]", driverExecutionId);
 		// downloadFileAuthenticated(driverExecutionId, uriBuilder.build(),
@@ -323,11 +323,9 @@ public class ReportUtils {
 	 *            - Name of the pdf file that will be downloaded.
 	 * @param accessToken
 	 *            - Security token of the user.
-	 * @throws URISyntaxException
-	 * @throws IOException
+	 * @throws Exception
 	 */
-	private static void downloadTestReport(String testId, String fileName, String accessToken)
-			throws URISyntaxException, IOException {
+	private static void downloadTestReport(String testId, String fileName, String accessToken) throws Exception {
 		System.out.println("Starting PDF generation for test ID: " + testId);
 
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -344,28 +342,27 @@ public class ReportUtils {
 			HttpResponse response = null;
 
 			if (ConfigurationManager.getBundle().getString("proxyHost") != null
-					&& !ConfigurationManager.getBundle().getString("proxyHost").toString().equals("")) {
+					&& !ConfigurationManager.getBundle().getString("proxyHost").equals("")) {
+
+				if (ConfigurationManager.getBundle().getString("proxyPort") == null) {
+					throw new Exception("Please mention the NTLM port in the application properties file");
+				}
 				InetAddress addr;
 				addr = InetAddress.getLocalHost();
 				String hostname = addr.getHostName();
 
-				NTCredentials ntCreds = new NTCredentials(
-						ConfigurationManager.getBundle().getString("proxyUser").toString(),
-						ConfigurationManager.getBundle().getString("proxyPassword").toString(), hostname,
-						ConfigurationManager.getBundle().getString("proxyDomain").toString());
+				NTCredentials ntCreds = new NTCredentials(ConfigurationManager.getBundle().getString("proxyUser", ""),
+						ConfigurationManager.getBundle().getString("proxyPassword", ""), hostname,
+						ConfigurationManager.getBundle().getString("proxyDomain", ""));
 
 				CredentialsProvider credsProvider = new BasicCredentialsProvider();
-				credsProvider
-						.setCredentials(
-								new AuthScope(ConfigurationManager.getBundle().getString("proxyHost").toString(),
-										Integer.parseInt(
-												ConfigurationManager.getBundle().getString("proxyPort").toString())),
-								ntCreds);
+				credsProvider.setCredentials(new AuthScope(ConfigurationManager.getBundle().getString("proxyHost"),
+						Integer.parseInt(ConfigurationManager.getBundle().getString("proxyPort"))), ntCreds);
 				HttpClientBuilder clientBuilder = HttpClientBuilder.create();
 
 				clientBuilder.useSystemProperties();
-				clientBuilder.setProxy(new HttpHost(ConfigurationManager.getBundle().getString("proxyHost").toString(),
-						Integer.parseInt(ConfigurationManager.getBundle().getString("proxyPort").toString())));
+				clientBuilder.setProxy(new HttpHost(ConfigurationManager.getBundle().getString("proxyHost"),
+						Integer.parseInt(ConfigurationManager.getBundle().getString("proxyPort"))));
 				clientBuilder.setDefaultCredentialsProvider(credsProvider);
 				clientBuilder.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
 
@@ -413,7 +410,7 @@ public class ReportUtils {
 	}
 
 	private static void downloadTestReport(String testPdfPath, CreatePdfTask task, String accessToken)
-			throws URISyntaxException, IOException {
+			throws Exception {
 		long startTime = System.currentTimeMillis();
 		int maxWaitMin = 10;
 		long maxGenerationTime = TimeUnit.MINUTES.toMillis(maxWaitMin);
@@ -441,8 +438,7 @@ public class ReportUtils {
 		}
 	}
 
-	private static CreatePdfTask getUpdatedTask(String taskId, String accessToken)
-			throws URISyntaxException, IOException {
+	private static CreatePdfTask getUpdatedTask(String taskId, String accessToken) throws Exception {
 		CreatePdfTask task;
 
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -454,27 +450,29 @@ public class ReportUtils {
 		HttpResponse response = null;
 		if (ConfigurationManager.getBundle().getString("proxyHost") != null
 				&& !ConfigurationManager.getBundle().getString("proxyHost").toString().equals("")) {
+			if (ConfigurationManager.getBundle().getString("proxyPort") == null) {
+				throw new Exception("Please mention the NTLM port in the application properties file");
+			}
 			InetAddress addr;
 			addr = InetAddress.getLocalHost();
 			String hostname = addr.getHostName();
 
-			NTCredentials ntCreds = new NTCredentials(
-					ConfigurationManager.getBundle().getString("proxyUser").toString(),
-					ConfigurationManager.getBundle().getString("proxyPassword").toString(), hostname,
-					ConfigurationManager.getBundle().getString("proxyDomain").toString());
+			NTCredentials ntCreds = new NTCredentials(ConfigurationManager.getBundle().getString("proxyUser", ""),
+					ConfigurationManager.getBundle().getString("proxyPassword", ""), hostname,
+					ConfigurationManager.getBundle().getString("proxyDomain", ""));
 
 			CredentialsProvider credsProvider = new BasicCredentialsProvider();
 			credsProvider
 					.setCredentials(
-							new AuthScope(ConfigurationManager.getBundle().getString("proxyHost").toString(),
+							new AuthScope(ConfigurationManager.getBundle().getString("proxyHost"),
 									Integer.parseInt(
-											ConfigurationManager.getBundle().getString("proxyPort").toString())),
+											ConfigurationManager.getBundle().getString("proxyPort"))),
 							ntCreds);
 			HttpClientBuilder clientBuilder = HttpClientBuilder.create();
 
 			clientBuilder.useSystemProperties();
-			clientBuilder.setProxy(new HttpHost(ConfigurationManager.getBundle().getString("proxyHost").toString(),
-					Integer.parseInt(ConfigurationManager.getBundle().getString("proxyPort").toString())));
+			clientBuilder.setProxy(new HttpHost(ConfigurationManager.getBundle().getString("proxyHost"),
+					Integer.parseInt(ConfigurationManager.getBundle().getString("proxyPort"))));
 			clientBuilder.setDefaultCredentialsProvider(credsProvider);
 			clientBuilder.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
 
@@ -500,7 +498,7 @@ public class ReportUtils {
 
 	@SuppressWarnings("unused")
 	private static void downloadVideo(String deviceId, JsonObject testExecution)
-			throws IOException, URISyntaxException {
+			throws Exception {
 		JsonObject resources = testExecution.getAsJsonArray("resources").get(0).getAsJsonObject();
 		JsonArray videos = resources.getAsJsonArray("videos");
 
@@ -518,7 +516,7 @@ public class ReportUtils {
 	}
 
 	private static void downloadAttachments(String deviceId, JsonObject testExecution)
-			throws IOException, URISyntaxException {
+			throws Exception {
 		// Example for downloading device logs
 
 		JsonObject resources = testExecution.getAsJsonArray("resources").get(0).getAsJsonObject();
@@ -545,12 +543,12 @@ public class ReportUtils {
 		}
 	}
 
-	private static void downloadFile(String fileName, URI uri, String suffix, String description) throws IOException {
+	private static void downloadFile(String fileName, URI uri, String suffix, String description) throws Exception {
 		downloadFileToFS(new HttpGet(uri), fileName, suffix, description);
 	}
 
 	private static void downloadFileAuthenticated(String fileName, URI uri, String suffix, String description,
-			String accessToken) throws IOException {
+			String accessToken) throws Exception {
 		HttpGet httpGet = new HttpGet(uri);
 		addDefaultRequestHeaders(httpGet, accessToken);
 		downloadFileToFS(httpGet, fileName, suffix, description);
@@ -571,33 +569,36 @@ public class ReportUtils {
 
 	@SuppressWarnings("deprecation")
 	private static void downloadFileToFS(HttpGet httpGet, String fileName, String suffix, String description)
-			throws IOException {
+			throws Exception {
 
 		HttpResponse response = null;
 
 		if (ConfigurationManager.getBundle().getString("proxyHost") != null
 				&& !ConfigurationManager.getBundle().getString("proxyHost").toString().equals("")) {
+			if(ConfigurationManager.getBundle().getString("proxyPort") == null) {
+				throw new Exception("Please mention the NTLM port in the application properties file");
+			}
 			InetAddress addr;
 			addr = InetAddress.getLocalHost();
 			String hostname = addr.getHostName();
 
 			NTCredentials ntCreds = new NTCredentials(
-					ConfigurationManager.getBundle().getString("proxyUser").toString(),
-					ConfigurationManager.getBundle().getString("proxyPassword").toString(), hostname,
-					ConfigurationManager.getBundle().getString("proxyDomain").toString());
+					ConfigurationManager.getBundle().getString("proxyUser",""),
+					ConfigurationManager.getBundle().getString("proxyPassword",""), hostname,
+					ConfigurationManager.getBundle().getString("proxyDomain",""));
 
 			CredentialsProvider credsProvider = new BasicCredentialsProvider();
 			credsProvider
 					.setCredentials(
-							new AuthScope(ConfigurationManager.getBundle().getString("proxyHost").toString(),
+							new AuthScope(ConfigurationManager.getBundle().getString("proxyHost"),
 									Integer.parseInt(
-											ConfigurationManager.getBundle().getString("proxyPort").toString())),
+											ConfigurationManager.getBundle().getString("proxyPort"))),
 							ntCreds);
 			HttpClientBuilder clientBuilder = HttpClientBuilder.create();
 
 			clientBuilder.useSystemProperties();
-			clientBuilder.setProxy(new HttpHost(ConfigurationManager.getBundle().getString("proxyHost").toString(),
-					Integer.parseInt(ConfigurationManager.getBundle().getString("proxyPort").toString())));
+			clientBuilder.setProxy(new HttpHost(ConfigurationManager.getBundle().getString("proxyHost"),
+					Integer.parseInt(ConfigurationManager.getBundle().getString("proxyPort"))));
 			clientBuilder.setDefaultCredentialsProvider(credsProvider);
 			clientBuilder.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
 
