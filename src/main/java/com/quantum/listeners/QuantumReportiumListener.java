@@ -197,6 +197,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 			ArrayList<CustomField> cfc = new ArrayList<CustomField>();
 			for (String string : groups) {
+				System.out.println(string);
 				if (string.startsWith(getBundle().getString("custom.field.identifier", "%"))) {
 					try {
 						cfc.add(new CustomField(
@@ -213,7 +214,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 			Builder testContext = new TestContext.Builder();
 			if (groupsFinal.size() > 0) {
-				testContext.withTestExecutionTags(groupsFinal.toString().split(","));
+				testContext.withTestExecutionTags(groupsFinal.toString().replace('[', ' ').replace(']',' ').split(","));
 			}
 
 			if (cfc.size() > 0) {
