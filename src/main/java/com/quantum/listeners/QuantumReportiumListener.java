@@ -197,7 +197,6 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 			ArrayList<CustomField> cfc = new ArrayList<CustomField>();
 			for (String string : groups) {
-				System.out.println(string);
 				if (string.startsWith(getBundle().getString("custom.field.identifier", "%"))) {
 					try {
 						cfc.add(new CustomField(
@@ -255,7 +254,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 	@Override
 	public void afterExecute(StepExecutionTracker stepExecutionTracker) {
-		logStepEnd();
+		//logStepEnd();
 		String msg = "END STEP: " + stepExecutionTracker.getStep().getDescription();
 		ConsoleUtils.logInfoBlocks(msg, ConsoleUtils.upper_block + " ", 10);
 	}
