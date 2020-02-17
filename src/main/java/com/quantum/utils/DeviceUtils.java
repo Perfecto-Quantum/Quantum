@@ -162,7 +162,7 @@ public class DeviceUtils {
 				isImg(image, seconds), Matchers.equalTo("true"));
 	}
 
-	private static String isImg(String img, Integer timeout) {
+	public static String isImg(String img, Integer timeout) {
 		String context = getCurrentContext();
 		switchToContext("VISUAL");
 		Map<String, Object> params = new HashMap<String, Object>();
@@ -189,19 +189,37 @@ public class DeviceUtils {
 	/**
 	 * Visual Text Checkpoint based on the text sent in and a threshold of 100
 	 * 
-	 * @param text
-	 *            - Text to compare
-	 * @param timeout
-	 *            - timeout amount to search
+	 * @param text    - Text to compare
+	 * @param timeout - timeout amount to search
 	 * @return true if found or false if not found
 	 */
-	private static String isText(String text, Integer timeout) {
+	public static String isText(String text, Integer timeout) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("content", text);
 		if (timeout != null) {
 			params.put("timeout", timeout);
 		}
 		params.put("threshold", "100");
+		Object result = getQAFDriver().executeScript("mobile:checkpoint:text", params);
+		return result.toString();
+	}
+
+	/**
+	 * Visual Text Checkpoint based on the text sent in
+	 * 
+	 * @param text      - Text to compare
+	 * @param timeout   - timeout amount to search
+	 * @param threshold - String threshold to match the text with
+	 * @return true if found or false if not found
+	 * 
+	 */
+	public static String isText(String text, Integer timeout, String threshold) {
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("content", text);
+		if (timeout != null) {
+			params.put("timeout", timeout);
+		}
+		params.put("threshold", threshold);
 		Object result = getQAFDriver().executeScript("mobile:checkpoint:text", params);
 		return result.toString();
 	}
@@ -227,8 +245,7 @@ public class DeviceUtils {
 	 * The listed keys are not necessarily supported by all devices. The available
 	 * keys depend on the device.
 	 *
-	 * @param keySequence
-	 *            the single or sequence of keys to click
+	 * @param keySequence the single or sequence of keys to click
 	 */
 	public static void pressKey(String keySequence) {
 		Map<String, String> params = new HashMap<String, String>();
@@ -242,12 +259,10 @@ public class DeviceUtils {
 	 * Example swipe left:<br/>
 	 * start: 60%,50% end: 10%,50%
 	 *
-	 * @param start
-	 *            write in format of x,y. can be in pixels or
-	 *            percentage(recommended).
-	 * @param end
-	 *            write in format of x,y. can be in pixels or
-	 *            percentage(recommended).
+	 * @param start write in format of x,y. can be in pixels or
+	 *              percentage(recommended).
+	 * @param end   write in format of x,y. can be in pixels or
+	 *              percentage(recommended).
 	 */
 	public static void swipe(String start, String end) {
 		Map<String, String> params = new HashMap<String, String>();
@@ -263,12 +278,10 @@ public class DeviceUtils {
 	 * seconds.
 	 * <p>
 	 *
-	 * @param point
-	 *            write in format of x,y. can be in pixels or
-	 *            percentage(recommended).
+	 * @param point   write in format of x,y. can be in pixels or
+	 *                percentage(recommended).
 	 *
-	 * @param seconds
-	 *            The duration, in seconds, for performing the touch operation.
+	 * @param seconds The duration, in seconds, for performing the touch operation.
 	 */
 	public static void longTouch(String point, int seconds) {
 
@@ -282,9 +295,8 @@ public class DeviceUtils {
 	/**
 	 * Performs the touch gesture according to the point coordinates.
 	 * 
-	 * @param point
-	 *            write in format of x,y. can be in pixels or
-	 *            percentage(recommended).
+	 * @param point write in format of x,y. can be in pixels or
+	 *              percentage(recommended).
 	 */
 	public static void touch(String point) {
 		Map<String, String> params = new HashMap<String, String>();
@@ -296,9 +308,8 @@ public class DeviceUtils {
 	/**
 	 * Performs the double touch gesture according to the point coordinates.
 	 *
-	 * @param point
-	 *            write in format of x,y. can be in pixels or
-	 *            percentage(recommended).
+	 * @param point write in format of x,y. can be in pixels or
+	 *              percentage(recommended).
 	 */
 	public static void doubleTouch(String point) {
 		Map<String, Object> params = new HashMap<>();
@@ -310,9 +321,8 @@ public class DeviceUtils {
 	/**
 	 * Performs the long touch gesture according to the point coordinates.
 	 *
-	 * @param point
-	 *            write in format of x,y. can be in pixels or
-	 *            percentage(recommended).
+	 * @param point write in format of x,y. can be in pixels or
+	 *              percentage(recommended).
 	 */
 	public static void longTouch(String point) {
 		Map<String, Object> params = new HashMap<>();
@@ -336,10 +346,9 @@ public class DeviceUtils {
 	/**
 	 * Rotates the device to landscape, portrait, or its next state.
 	 * 
-	 * @param restValue
-	 *            the "next" operation, or the "landscape" or "portrait" state.
-	 * @param by
-	 *            the "state" or "operation"
+	 * @param restValue the "next" operation, or the "landscape" or "portrait"
+	 *                  state.
+	 * @param by        the "state" or "operation"
 	 */
 	// TODO: need additional description.
 	public static void rotateDevice(String restValue, String by) {
@@ -447,10 +456,10 @@ public class DeviceUtils {
 		Map<String, Object> params = new HashMap<>();
 		params.put(by, identifier);
 		params.put("resultAuth", resultAuth);
-		if(!errorType.isEmpty() && !errorType.equals("")) {
+		if (!errorType.isEmpty() && !errorType.equals("")) {
 			params.put("errorType", errorType);
 		}
-		
+
 		getQAFDriver().executeScript("mobile:fingerprint:set", params);
 	}
 
@@ -459,7 +468,9 @@ public class DeviceUtils {
 		Map<String, Object> params = new HashMap<>();
 		params.put(by, identifier);
 		params.put("resultAuth", resultAuth);
-		params.put("errorType", errorType);
+		if (!errorType.isEmpty() && !errorType.equals("")) {
+			params.put("errorType", errorType);
+		}
 		getQAFDriver().executeScript("mobile:sensorAuthentication:set", params);
 	}
 
@@ -493,13 +504,10 @@ public class DeviceUtils {
 	/**
 	 * Sets the picker wheel to the value specified.
 	 * 
-	 * @param picker
-	 *            - WebElement that holds the XCUIElementTypePicker
-	 * @param direction
-	 *            - Direction to spin the spinner, either next or previous defaults
-	 *            to next
-	 * @param value
-	 *            - value to compare this must be exact
+	 * @param picker    - WebElement that holds the XCUIElementTypePicker
+	 * @param direction - Direction to spin the spinner, either next or previous
+	 *                  defaults to next
+	 * @param value     - value to compare this must be exact
 	 */
 	public static void setPickerWheel(RemoteWebElement picker, String direction, String value) {
 		value = value.replaceAll("[^\\x00-\\x7F]", "");
@@ -517,8 +525,7 @@ public class DeviceUtils {
 	/**
 	 * Returns the selected value from the picker wheel
 	 * 
-	 * @param element
-	 *            - WebElement that holds the XCUIElementTypePicker
+	 * @param element - WebElement that holds the XCUIElementTypePicker
 	 * @return string value of the value attribute
 	 */
 	public static String pickerwheelGet(RemoteWebElement element) {
@@ -528,11 +535,9 @@ public class DeviceUtils {
 	/**
 	 * Moves the pickerwheel in one step using a default of 0.15
 	 * 
-	 * @param picker
-	 *            - WebElement that holds the XCUIElementTypePicker
-	 * @param direction
-	 *            - Direction to spin the spinner, either next or previous defaults
-	 *            to next
+	 * @param picker    - WebElement that holds the XCUIElementTypePicker
+	 * @param direction - Direction to spin the spinner, either next or previous
+	 *                  defaults to next
 	 */
 	public static void pickerwheelStep(RemoteWebElement element, String direction) {
 		pickerwheelStep(element, direction, 0.15);
@@ -541,13 +546,10 @@ public class DeviceUtils {
 	/**
 	 * Moves the pickerwheel in one step
 	 * 
-	 * @param picker
-	 *            - WebElement that holds the XCUIElementTypePicker
-	 * @param direction
-	 *            - Direction to spin the spinner, either next or previous defaults
-	 *            to next
-	 * @param offset
-	 *            - the offset of the picker this represents 1 slide
+	 * @param picker    - WebElement that holds the XCUIElementTypePicker
+	 * @param direction - Direction to spin the spinner, either next or previous
+	 *                  defaults to next
+	 * @param offset    - the offset of the picker this represents 1 slide
 	 */
 	public static void pickerwheelStep(RemoteWebElement element, String direction, double offset) {
 		Map<String, Object> params = new HashMap<>();
@@ -560,13 +562,10 @@ public class DeviceUtils {
 	/**
 	 * Sets the picker wheel to the value specified.
 	 * 
-	 * @param locator
-	 *            - Locator to find the element based on
-	 * @param direction
-	 *            - Direction to spin the spinner, either next or previous defaults
-	 *            to next
-	 * @param value
-	 *            - value to compare this must be exact
+	 * @param locator   - Locator to find the element based on
+	 * @param direction - Direction to spin the spinner, either next or previous
+	 *                  defaults to next
+	 * @param value     - value to compare this must be exact
 	 */
 	public static void setPickerWheel(String locator, String direction, String value) {
 		setPickerWheel((RemoteWebElement) getQAFDriver().findElement(locator), direction, value);
@@ -577,11 +576,9 @@ public class DeviceUtils {
 	 * manually tap the point location of the middle of the element. This function
 	 * accounts that there may be a header to offset from.
 	 * 
-	 * @param loc
-	 *            - locator to find the element to be clicked
-	 * @param addressBar
-	 *            - navigation bar that takes up the top half of the device outside
-	 *            of the webview
+	 * @param loc        - locator to find the element to be clicked
+	 * @param addressBar - navigation bar that takes up the top half of the device
+	 *                   outside of the webview
 	 */
 	public static void touchObject(String loc, String addressBar) {
 		int bannerY = getOffset(addressBar);
@@ -600,8 +597,7 @@ public class DeviceUtils {
 	/**
 	 * Slides the provided object to the left
 	 * 
-	 * @param loc
-	 *            object to slide
+	 * @param loc object to slide
 	 */
 	public static void slideObjectLeft(String loc) {
 		// uses 0.5 to get the middle of the Y
@@ -618,14 +614,10 @@ public class DeviceUtils {
 	/**
 	 * Slides the provided object
 	 * 
-	 * @param loc
-	 *            object to slide
-	 * @param xStartMult
-	 *            - x point to start on
-	 * @param xEndMult
-	 *            - y point to end on
-	 * @param yMult
-	 *            - y point for both the start and stop
+	 * @param loc        object to slide
+	 * @param xStartMult - x point to start on
+	 * @param xEndMult   - y point to end on
+	 * @param yMult      - y point for both the start and stop
 	 */
 	public static void slideObject(String loc, float xStartMult, float xEndMult, float yMult) {
 		slideObject(loc, xStartMult, xEndMult, yMult, yMult);
@@ -635,16 +627,11 @@ public class DeviceUtils {
 	 * 
 	 * Slides the provided object
 	 * 
-	 * @param loc
-	 *            object to slide
-	 * @param xStartMult
-	 *            - x point to start on
-	 * @param xEndMult
-	 *            - y point to end on
-	 * @param yStartMult
-	 *            - y point to start on
-	 * @param yEndMult
-	 *            - y point to end on
+	 * @param loc        object to slide
+	 * @param xStartMult - x point to start on
+	 * @param xEndMult   - y point to end on
+	 * @param yStartMult - y point to start on
+	 * @param yEndMult   - y point to end on
 	 */
 	public static void slideObject(String loc, float xStartMult, float xEndMult, float yStartMult, float yEndMult) {
 		// Gets the current scale of the device
@@ -681,8 +668,7 @@ public class DeviceUtils {
 	/**
 	 * Gets the offset of the header values to offset y value of the header element
 	 * 
-	 * @param addressBar
-	 *            - header element to measure
+	 * @param addressBar - header element to measure
 	 * @return the y offset of the element
 	 */
 	public static int getOffset(String addressBar) {
@@ -692,10 +678,8 @@ public class DeviceUtils {
 	/**
 	 * Gets the offset of the header values to offset y value of the header element
 	 * 
-	 * @param addressBar
-	 *            - header element to measure
-	 * @param context
-	 *            - context of the element to use
+	 * @param addressBar - header element to measure
+	 * @param context    - context of the element to use
 	 * @return the y offset of the element
 	 */
 	public static int getOffset(String addressBar, String context) {

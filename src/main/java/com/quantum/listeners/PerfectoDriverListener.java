@@ -52,7 +52,7 @@ import com.quantum.utils.ReportUtils;
 public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 	@Override
 	public void beforeCommand(QAFExtendedWebDriver driver, CommandTracker commandTracker) {
-		
+
 		if (commandTracker.getCommand().equalsIgnoreCase(DriverCommand.QUIT)) {
 			ConfigurationUtils.setActualDeviceCapabilities(driver.getCapabilities().asMap());
 			try {
@@ -88,7 +88,7 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 
 			try {
 
-				if(ConfigurationUtils.getBaseBundle().getString("remote.server", "").contains("perfecto")) {
+				if (ConfigurationUtils.getBaseBundle().getString("remote.server", "").contains("perfecto")) {
 					if (ConfigurationManager.getBundle().getString("perfecto.download.reports", "false").toLowerCase()
 							.equals("true")) {
 						try {
@@ -104,7 +104,8 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 
 						try {
 							System.out.println("downloading summary reports");
-							ReportUtils.generateSummaryReports(ConfigurationManager.getBundle().getString("executionId"));
+							ReportUtils
+									.generateSummaryReports(ConfigurationManager.getBundle().getString("executionId"));
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							ConsoleUtils.logError(e.toString());
@@ -120,19 +121,19 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 							ConsoleUtils.logError(e.toString());
 						}
 					}
-					if (ConfigurationManager.getBundle().getString("perfecto.download.attachments", "false").toLowerCase()
-							.equals("true")) {
+					if (ConfigurationManager.getBundle().getString("perfecto.download.attachments", "false")
+							.toLowerCase().equals("true")) {
 						try {
 							System.out.println("downloading attachments");
-							ReportUtils
-									.downloadReportAttachments(ConfigurationManager.getBundle().getString("executionId"));
+							ReportUtils.downloadReportAttachments(
+									ConfigurationManager.getBundle().getString("executionId"));
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							ConsoleUtils.logError(e.toString());
 						}
 					}
 				}
-				
+
 			} catch (Exception ex) {
 
 			}
@@ -167,6 +168,28 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 			((DesiredCapabilities) desiredCapabilities).setCapability("report.tags", tags);
 		}
 
+		String pureAppiumBehavior = getBundle().getString("pureAppiumBehavior",
+				System.getProperty("pureAppiumBehavior"));
+
+		if (pureAppiumBehavior.equalsIgnoreCase("native")) {
+			if (desiredCapabilities.getPlatform().toString().equalsIgnoreCase("android")) {
+				((DesiredCapabilities) desiredCapabilities).setCapability("enableAppiumBehavior", true);
+			}
+		} else if (pureAppiumBehavior.equalsIgnoreCase("hybrid")) {
+			if (desiredCapabilities.getPlatform().toString().equalsIgnoreCase("android")) {
+				((DesiredCapabilities) desiredCapabilities).setCapability("enableAppiumBehavior", true);
+			}
+			((DesiredCapabilities) desiredCapabilities).setCapability("useAppiumForHybrid", true);
+		} else if (pureAppiumBehavior.equalsIgnoreCase("web")) {
+			if (desiredCapabilities.getPlatform().toString().equalsIgnoreCase("android")) {
+				((DesiredCapabilities) desiredCapabilities).setCapability("enableAppiumBehavior", true);
+			}
+			((DesiredCapabilities) desiredCapabilities).setCapability("useAppiumForWeb", true);
+		} else if (pureAppiumBehavior.equalsIgnoreCase("disable")) {
+			((DesiredCapabilities) desiredCapabilities).setCapability("enableAppiumBehavior", false);
+			((DesiredCapabilities) desiredCapabilities).setCapability("useAppiumForHybrid", false);
+			((DesiredCapabilities) desiredCapabilities).setCapability("useAppiumForWeb", false);
+		}
 	}
 
 	@Override
@@ -177,7 +200,7 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 		// MutableCapabilities dcaps =
 		// CloudUtils.getDeviceProperties((MutableCapabilities)
 		// driver.getCapabilities());
-		 ConfigurationUtils.setActualDeviceCapabilities(driver.getCapabilities().asMap());
+		ConfigurationUtils.setActualDeviceCapabilities(driver.getCapabilities().asMap());
 		// ConsoleUtils.logWarningBlocks("DEVICE PROPERTIES: " + dcaps.toString());
 		ConsoleUtils.logWarningBlocks("DEVICE PROPERTIES: " + driver.getCapabilities().toString());
 
