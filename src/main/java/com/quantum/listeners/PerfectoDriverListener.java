@@ -168,8 +168,7 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 			((DesiredCapabilities) desiredCapabilities).setCapability("report.tags", tags);
 		}
 
-		String pureAppiumBehavior = getBundle().getString("pureAppiumBehavior",
-				System.getProperty("pureAppiumBehavior"));
+		String pureAppiumBehavior = getBundle().getString("pureAppiumBehavior", "ignore");
 
 		if (pureAppiumBehavior.equalsIgnoreCase("native")) {
 			if (desiredCapabilities.getPlatform().toString().equalsIgnoreCase("android")) {
