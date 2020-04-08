@@ -210,6 +210,21 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 					groupsFinal.add(string);
 				}
 			}
+			
+			if(ConfigurationManager.getBundle().getString("custom.field") != null) {
+				String customFieldValue = ConfigurationManager.getBundle().getString("custom.field");
+				String[] customFieldPairs = customFieldValue.split(",");
+				for(String customFieldPair : customFieldPairs) {
+					try {
+					cfc.add(new CustomField(
+							customFieldPair.split(getBundle().getString("custom.field.delimiter", "-"))[0],
+							customFieldPair.split(getBundle().getString("custom.field.delimiter", "-"))[1]));
+					} catch (Exception ex) {
+						new NullPointerException(
+								"Custom field key/value pair not delimited properly.  Example of proper default usage: %Developer-Jeremy.  Check application properties custom.field.delimiter and custom.field.identifier for custom values that may have been set.").printStackTrace();
+					}
+				}
+			}
 
 			Builder testContext = new TestContext.Builder();
 			if (groupsFinal.size() > 0) {
