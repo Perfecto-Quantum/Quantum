@@ -169,26 +169,28 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 		}
 
 		String pureAppiumBehavior = getBundle().getString("pureAppiumBehavior", "ignore");
-
-		if (pureAppiumBehavior.equalsIgnoreCase("native")) {
-			if (desiredCapabilities.getPlatform().toString().equalsIgnoreCase("android")) {
-				((DesiredCapabilities) desiredCapabilities).setCapability("enableAppiumBehavior", true);
+		if (desiredCapabilities.getPlatform() != null) {
+			if (pureAppiumBehavior.equalsIgnoreCase("native")) {
+				if (desiredCapabilities.getPlatform().toString().equalsIgnoreCase("android")) {
+					((DesiredCapabilities) desiredCapabilities).setCapability("enableAppiumBehavior", true);
+				}
+			} else if (pureAppiumBehavior.equalsIgnoreCase("hybrid")) {
+				if (desiredCapabilities.getPlatform().toString().equalsIgnoreCase("android")) {
+					((DesiredCapabilities) desiredCapabilities).setCapability("enableAppiumBehavior", true);
+				}
+				((DesiredCapabilities) desiredCapabilities).setCapability("useAppiumForHybrid", true);
+			} else if (pureAppiumBehavior.equalsIgnoreCase("web")) {
+				if (desiredCapabilities.getPlatform().toString().equalsIgnoreCase("android")) {
+					((DesiredCapabilities) desiredCapabilities).setCapability("enableAppiumBehavior", true);
+				}
+				((DesiredCapabilities) desiredCapabilities).setCapability("useAppiumForWeb", true);
+			} else if (pureAppiumBehavior.equalsIgnoreCase("disable")) {
+				((DesiredCapabilities) desiredCapabilities).setCapability("enableAppiumBehavior", false);
+				((DesiredCapabilities) desiredCapabilities).setCapability("useAppiumForHybrid", false);
+				((DesiredCapabilities) desiredCapabilities).setCapability("useAppiumForWeb", false);
 			}
-		} else if (pureAppiumBehavior.equalsIgnoreCase("hybrid")) {
-			if (desiredCapabilities.getPlatform().toString().equalsIgnoreCase("android")) {
-				((DesiredCapabilities) desiredCapabilities).setCapability("enableAppiumBehavior", true);
-			}
-			((DesiredCapabilities) desiredCapabilities).setCapability("useAppiumForHybrid", true);
-		} else if (pureAppiumBehavior.equalsIgnoreCase("web")) {
-			if (desiredCapabilities.getPlatform().toString().equalsIgnoreCase("android")) {
-				((DesiredCapabilities) desiredCapabilities).setCapability("enableAppiumBehavior", true);
-			}
-			((DesiredCapabilities) desiredCapabilities).setCapability("useAppiumForWeb", true);
-		} else if (pureAppiumBehavior.equalsIgnoreCase("disable")) {
-			((DesiredCapabilities) desiredCapabilities).setCapability("enableAppiumBehavior", false);
-			((DesiredCapabilities) desiredCapabilities).setCapability("useAppiumForHybrid", false);
-			((DesiredCapabilities) desiredCapabilities).setCapability("useAppiumForWeb", false);
 		}
+
 	}
 
 	@Override
