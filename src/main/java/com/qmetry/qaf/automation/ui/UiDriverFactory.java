@@ -21,29 +21,30 @@ import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.LogFactoryImpl;
-import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.NTCredentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
+import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.ie.InternetExplorerOptions;
+import org.openqa.selenium.opera.OperaOptions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.CommandInfo;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.HttpCommandExecutor;
-import org.openqa.selenium.remote.http.HttpClient;
-import org.openqa.selenium.remote.http.HttpClient.Builder;
 import org.openqa.selenium.remote.http.HttpClient.Factory;
 import org.openqa.selenium.remote.internal.OkHttpClient;
+import org.openqa.selenium.safari.SafariOptions;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -204,7 +205,11 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 	private static QAFExtendedWebDriver getDriver(WebDriverCommandLogger reporter, String... args) throws Exception {
 		String b = STBArgs.browser_str.getFrom(args).toLowerCase();
-		String urlStr = STBArgs.sel_server.getFrom(args).startsWith("http") ? STBArgs.sel_server.getFrom(args)
+		String urlStr = STBArgs.sel_server.getFrom(args).startsWith("http")
+				? (STBArgs.sel_server.getFrom(args).contains("https")
+						? (!STBArgs.sel_server.getFrom(args).contains("perfecto") ? ""
+								: STBArgs.sel_server.getFrom(args))
+						: STBArgs.sel_server.getFrom(args))
 				: String.format("http://%s:%s/wd/hub", STBArgs.sel_server.getFrom(args), STBArgs.port.getFrom(args));
 
 		Browsers browser = Browsers.getBrowser(b);
@@ -275,22 +280,16 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 	}
 
 	private enum Browsers {
-		edge(DesiredCapabilities.edge(), EdgeDriver.class),
-
-		firefox(DesiredCapabilities.firefox(), FirefoxDriver.class), iexplorer(DesiredCapabilities.internetExplorer(),
-				InternetExplorerDriver.class), chrome(DesiredCapabilities.chrome(), ChromeDriver.class), opera(
-						new DesiredCapabilities("opera", "", Platform.ANY),
-						"com.opera.core.systems.OperaDriver"), android(DesiredCapabilities.android(),
-								"org.openqa.selenium.android.AndroidDriver"), iphone(
-										new DesiredCapabilities("iPhone", "", Platform.MAC),
-										"org.openqa.selenium.iphone.IPhoneDriver"), ipad(
-												new DesiredCapabilities("iPad", "", Platform.MAC),
-												"org.openqa.selenium.iphone.IPhoneDriver"), safari(
-														new DesiredCapabilities("safari", "", Platform.ANY),
-														"org.openqa.selenium.safari.SafariDriver"), appium(
-																new DesiredCapabilities(),
-																"io.appium.java_client.AppiumDriver"), perfecto(
-																		new DesiredCapabilities()),
+		edge(new DesiredCapabilities(new EdgeOptions()), EdgeDriver.class),
+		firefox(new DesiredCapabilities(new FirefoxOptions()), FirefoxDriver.class),
+		iexplorer(new DesiredCapabilities(new InternetExplorerOptions()), InternetExplorerDriver.class),
+		chrome(new DesiredCapabilities(new ChromeOptions()), ChromeDriver.class),
+		opera(new DesiredCapabilities(new OperaOptions()), "com.opera.core.systems.OperaDriver"),
+		android(DesiredCapabilities.android(), "org.openqa.selenium.android.AndroidDriver"),
+		iphone(new DesiredCapabilities("iPhone", "", Platform.MAC), "org.openqa.selenium.iphone.IPhoneDriver"),
+		ipad(new DesiredCapabilities("iPad", "", Platform.MAC), "org.openqa.selenium.iphone.IPhoneDriver"),
+		safari(new DesiredCapabilities(new SafariOptions()), "org.openqa.selenium.safari.SafariDriver"),
+		appium(new DesiredCapabilities(), "io.appium.java_client.AppiumDriver"), perfecto(new DesiredCapabilities()),
 
 		/**
 		 * can with assumption that you have set desired capabilities using property.

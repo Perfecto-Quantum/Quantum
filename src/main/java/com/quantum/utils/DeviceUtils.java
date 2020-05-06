@@ -162,7 +162,7 @@ public class DeviceUtils {
 				isImg(image, seconds), Matchers.equalTo("true"));
 	}
 
-	private static String isImg(String img, Integer timeout) {
+	public static String isImg(String img, Integer timeout) {
 		String context = getCurrentContext();
 		switchToContext("VISUAL");
 		Map<String, Object> params = new HashMap<String, Object>();
@@ -195,7 +195,7 @@ public class DeviceUtils {
 	 *            - timeout amount to search
 	 * @return true if found or false if not found
 	 */
-	private static String isText(String text, Integer timeout) {
+	public static String isText(String text, Integer timeout) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("content", text);
 		if (timeout != null) {
@@ -205,6 +205,16 @@ public class DeviceUtils {
 		Object result = getQAFDriver().executeScript("mobile:checkpoint:text", params);
 		return result.toString();
 	}
+	
+	  public static String isText(String text, Integer timeout, String threshold) {
+		    Map<String, Object> params = new HashMap<>();
+		    params.put("content", text);
+		    if (timeout != null)
+		      params.put("timeout", timeout); 
+		    params.put("threshold", threshold);
+		    Object result = getQAFDriver().executeScript("mobile:checkpoint:text", new Object[] { params });
+		    return result.toString();
+		  }
 
 	/**
 	 * @return the current context - "NATIVE_APP", "WEBVIEW", "VISUAL"
@@ -459,7 +469,9 @@ public class DeviceUtils {
 		Map<String, Object> params = new HashMap<>();
 		params.put(by, identifier);
 		params.put("resultAuth", resultAuth);
-		params.put("errorType", errorType);
+		if (!errorType.isEmpty() && !errorType.equals("")) {
+			params.put("errorType", errorType);
+		}
 		getQAFDriver().executeScript("mobile:sensorAuthentication:set", params);
 	}
 

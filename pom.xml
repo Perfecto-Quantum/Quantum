@@ -6,7 +6,7 @@
 
 	<groupId>com.quantum</groupId>
 	<artifactId>quantum-support</artifactId>
-	<version>1.20.1</version>
+	<version>1.21</version>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -18,8 +18,8 @@
 		<org.json.version>20160810</org.json.version>
 		<perfectomobile.version>18.3.0.3</perfectomobile.version>
 		<intellij.perfectomobile.version>18.4.0.0 </intellij.perfectomobile.version>
-		<qaf.version>2.1.14</qaf.version>
-		<qafsupport.version>2.1.14</qafsupport.version>
+		<qaf.version>2.1.15</qaf.version>
+		<qafsupport.version>2.1.15</qafsupport.version>
 		<appium.client.version>6.1.0</appium.client.version>
 	</properties>
 
