@@ -616,4 +616,15 @@ public class PerfectoApplicationSteps {
 		Object audioCheckpointStatus = DeviceUtils.getQAFDriver().executeScript("mobile:checkpoint:audio", audioParam);
 		ReportUtils.logVerify("Audio checkpoint status ", Boolean.valueOf((String) audioCheckpointStatus));
 	}
+
+    /**
+     * This step will perform an audit of the accessibility features in the application. To check the entire application, this command needs to be repeated for each application screen.
+     *
+     * @param tagName - The tag that is appended to the name of the audit report to help match it to the application screen.
+     */
+    @Then("^I perform an audit of the accessibility on tag application screen \"(.*?)\"$")
+    public static void checkAccessibility(String tagName) {
+        DeviceUtils.checkAccessibility(tagName);
+
+    }
 }

@@ -694,4 +694,19 @@ public class DeviceUtils {
 		// we will use this to offset the element
 		return (view.getY() + view.getHeight());
 	}
+
+
+	/**
+	 * Performs an audit of the accessibility features in the application. To check the entire application, this command needs to be repeated for each application screen.
+	 *
+	 * @param tagName - The tag that is appended to the name of the audit report to help match it to the application screen.
+	 */
+	public static void checkAccessibility(String tagName) {
+		//declare the Map for script parameters
+		Map<String, Object> params = new HashMap<>();
+
+		params.put("tag", tagName);
+		getQAFDriver().executeScript("mobile:checkAccessibility:audit", params);
+
+	}
 }
