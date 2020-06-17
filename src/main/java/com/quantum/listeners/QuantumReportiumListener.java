@@ -562,22 +562,19 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 	}
 
 	public static List<String> getArgNames(String def) {
-		// Pattern p = Pattern.compile("[$][{](.*?)}");
-		// Pattern p = Pattern.compile("\"(.*?)[$][{](.*?)}\"");
-		// String allChars = "[a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]";
 		Pattern p = Pattern.compile(
-				"\\\"([a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/? ]*)[$][{](([a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/? ]*))}([a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/? ]*)\\\"");
+                "\\\"([a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\\\\|,.<>\\/? ]*)[${](([a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\\\\|,.<>\\/? ]*))}([a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\\\\|,.<>\\/? ]*)\\\"");
 
 		Matcher matcher = p.matcher(def);
 		List<String> args = new ArrayList<String>();
 		while (matcher.find()) {
 			String paramName = matcher.group();
-			String finalParamNam = paramName.substring(1, paramName.length() - 2);
+			String finalParamNam = paramName.substring(1, paramName.length() - 1);
 			args.add(finalParamNam.replace("${", "{"));
 		}
 		return args;
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	private String getProcessStepDescription(TestStep step) {
 		// process parameters in step;
