@@ -190,6 +190,15 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 				((DesiredCapabilities) desiredCapabilities).setCapability("useAppiumForWeb", false);
 			}
 		}
+		if (ConfigurationUtils.getBaseBundle().getString("remote.server", "").contains("perfecto")) {
+			if(ConfigurationManager.getBundle().getString("perfecto.harfile.enable","false").equals("true")) {
+				Object platformName = ((DesiredCapabilities) desiredCapabilities).getCapability("platformName");
+				if(platformName!=null) {
+					if(platformName.toString().equalsIgnoreCase("windows"))
+						((DesiredCapabilities) desiredCapabilities).setCapability("captureHAR", true);
+				}	
+			}
+		}
 
 	}
 
