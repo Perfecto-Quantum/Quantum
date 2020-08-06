@@ -32,6 +32,7 @@ package com.quantum.listeners;
 import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -54,28 +55,43 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 	public void beforeCommand(QAFExtendedWebDriver driver, CommandTracker commandTracker) {
 
 		if (commandTracker.getCommand().equalsIgnoreCase(DriverCommand.QUIT)) {
-			ConfigurationUtils.setActualDeviceCapabilities(driver.getCapabilities().asMap());
-			try {
-				String appName = (String) driver.getCapabilities().getCapability("applicationName");
-				if (StringUtil.isNotBlank(appName)
-						&& StringUtil.isBlank((String) driver.getCapabilities().getCapability("eclipseExecutionId"))) {
-
-					DeviceUtils.closeApp(appName, "name", true, driver);
+			boolean virtualDeviceCap = false;
+			boolean virtualDeviceName = false;
+			Map<String, Object> map = driver.getCapabilities().asMap();
+			for(String cap : map.keySet()) {
+				if(cap.equalsIgnoreCase("useVirtualDevice") ) {
+					virtualDeviceCap = (boolean)map.get(cap);
 				}
-			} catch (Exception ex) {
+				if(cap.contains("deviceName")) {
+					if(String.valueOf(map.get(cap)).toUpperCase().contains("EMULATOR") || String.valueOf(map.get(cap)).toUpperCase().contains("SIMULATOR")) 
+						virtualDeviceName = true;
+				}
 			}
-			if (ConfigurationManager.getBundle().getString("remote.server").toLowerCase()
-					.contains(".perfectomobile.com")) {
-
+			System.out.println("Virtual device capability - >" + virtualDeviceCap);
+			if (!virtualDeviceCap && !virtualDeviceName) {
+				ConfigurationUtils.setActualDeviceCapabilities(driver.getCapabilities().asMap());
 				try {
-					Map<String, Object> params = new HashMap<>();
-					driver.executeScript("mobile:execution:close", params);
+					String appName = (String) driver.getCapabilities().getCapability("applicationName");
+					if (StringUtil.isNotBlank(appName) && StringUtil
+							.isBlank((String) driver.getCapabilities().getCapability("eclipseExecutionId"))) {
+
+						DeviceUtils.closeApp(appName, "name", true, driver);
+					}
 				} catch (Exception ex) {
 				}
 
-				try {
-					driver.close();
-				} catch (Exception ex) {
+				if (ConfigurationManager.getBundle().getString("remote.server").toLowerCase()
+						.contains(".perfectomobile.com")) {
+					try {
+						Map<String, Object> params = new HashMap<>();
+						driver.executeScript("mobile:execution:close", params);
+					} catch (Exception ex) {
+					}
+
+					try {
+						driver.close();
+					} catch (Exception ex) {
+					}
 				}
 			}
 		}
