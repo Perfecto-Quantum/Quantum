@@ -539,6 +539,12 @@ public class ReportUtils {
 				String path = artifact.get("path").getAsString();
 				URIBuilder uriBuilder = new URIBuilder(path);
 				downloadFile(deviceId + "_" + testId, uriBuilder.build(), "_vitals_logs.zip", "vitals logs");
+			} else if (artifactType.toLowerCase().contains("accessibility")) {
+				String testId = resources.get("id").getAsString();
+				String path = artifact.get("path").getAsString();
+				String fileName = artifact.get("fileName").getAsString().replace(" ", "_");
+				URIBuilder uriBuilder = new URIBuilder(path);
+				downloadFile(deviceId + "_" + testId, uriBuilder.build(), "_" + fileName + ".zip", "accessibility reports");
 			}
 		}
 	}
