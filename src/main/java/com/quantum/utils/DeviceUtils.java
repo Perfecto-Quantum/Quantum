@@ -80,9 +80,9 @@ public class DeviceUtils {
 	public static void installApp(String repoKey, String instrument, String sensorInstrument, String resignEnable) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("file", getBundle().getString("repoKey", repoKey));
-		params.put("instrument",  instrument);
-		params.put("sensorInstrument", sensorInstrument);
-		params.put("resign", resignEnable);
+		if (!instrument.isEmpty()) params.put("instrument",  instrument);
+        if (!sensorInstrument.isEmpty())params.put("sensorInstrument", sensorInstrument);
+        if (!resignEnable.isEmpty())params.put("resign", resignEnable);
 
 		String resultStr = (String) getQAFDriver().executeScript("mobile:application:install", params);
 		System.out.println(resultStr);
@@ -110,8 +110,8 @@ public class DeviceUtils {
 	public static void installInstrumantedAppOnAndroid(String repoKey, String instrument, String sensorInstrument, String certificateFile, String certificateUser, String certificatePassword, String certificateParams) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("file", getBundle().getString("repoKey", repoKey));
-		params.put("instrument", getBundle().getString("instrument", instrument));
-		params.put("sensorInstrument", getBundle().getString("sensorInstrument", sensorInstrument));
+        if (!getBundle().getString(instrument, instrument).isEmpty()) params.put("instrument",  instrument);
+        if (!sensorInstrument.isEmpty())params.put("sensorInstrument", sensorInstrument);
 
 		if (getBundle().getString(instrument, instrument).equals("instrument")) {
 
