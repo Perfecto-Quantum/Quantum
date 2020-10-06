@@ -200,6 +200,60 @@ public class PerfectoApplicationSteps {
     	DeviceUtils.installApp(application, true);
     }
 
+
+
+    /**
+     * Installs a single application on the device, with WebView instrumentation.
+     * <p>
+     * To use, specify the local path to the application or the application repository key.
+     * If the application repository key is specified, the application must first be uploaded to the Perfecto Lab repository.
+     * <p>
+     * To do this, log in to the Perfecto Lab interface and use the Repository manager.
+     * Supported file formats include APK files for Android and IPA for iOS.
+     *
+     * @param application the local or repository path, including directory and file name, where to locate the application
+     */
+    @Then("^I install application \"(.*?)\" with WebView instrumentation$")
+    public static void installAppWithWebViewInstrumentation(String application){
+        DeviceUtils.installApp(application, "noinstrument", "nosensor", "true");
+    }
+
+
+
+    /**
+     * Installs a single application on the device, with WebView instrumentation and sensor instrumentation.
+     * <p>
+     * To use, specify the local path to the application or the application repository key.
+     * If the application repository key is specified, the application must first be uploaded to the Perfecto Lab repository.
+     * <p>
+     * To do this, log in to the Perfecto Lab interface and use the Repository manager.
+     * Supported file formats include APK files for Android and IPA for iOS.
+     *
+     * @param application the local or repository path, including directory and file name, where to locate the application
+     */
+    @Then("^I install application \"(.*?)\" with WebView instrumentation and sensor instrumentation$")
+    public static void installAppWithWebViewInstrumentationAndSensorInstrumentation( String application){
+        DeviceUtils.installApp(application, "noinstrument", "sensor", "true");
+    }
+
+
+    /**
+     * Installs a single application on the device, with sensor instrumentation.
+     * <p>
+     * To use, specify the local path to the application or the application repository key.
+     * If the application repository key is specified, the application must first be uploaded to the Perfecto Lab repository.
+     * <p>
+     * To do this, log in to the Perfecto Lab interface and use the Repository manager.
+     * Supported file formats include APK files for Android and IPA for iOS.
+     *
+     * @param application the local or repository path, including directory and file name, where to locate the application
+     */
+    @Then("^I install application \"(.*?)\" with sensor instrumentation")
+    public static void installAppWithSensorInstrumentation(String application){
+        DeviceUtils.installApp(application, "noinstrument", "sensor", "false");
+    }
+
+
     /**
 	 * Uninstalls all applications on the device, returning the device to its initial state. It does not affect applications pre-installed on the device. 
 	 */
@@ -489,7 +543,7 @@ public class PerfectoApplicationSteps {
     @Then("^I start inject \"(.*?)\" image to application id \"(.*?)\"$")
     public static void startImageInejection(String repositoryFile, String id){
 
-        DeviceUtils.startImageInjection(repositoryFile, id, "id");
+        DeviceUtils.startImageInjection(repositoryFile, id, "identifier");
     }
 
     /**
@@ -627,4 +681,6 @@ public class PerfectoApplicationSteps {
         DeviceUtils.checkAccessibility(tagName);
 
     }
+
+
 }
