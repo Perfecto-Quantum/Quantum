@@ -67,7 +67,7 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 						virtualDeviceName = true;
 				}
 			}
-			System.out.println("Virtual device capability - >" + virtualDeviceCap);
+//			System.out.println("Virtual device capability - >" + virtualDeviceCap);
 			if (!virtualDeviceCap && !virtualDeviceName) {
 				ConfigurationUtils.setActualDeviceCapabilities(driver.getCapabilities().asMap());
 				try {

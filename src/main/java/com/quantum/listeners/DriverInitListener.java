@@ -183,9 +183,9 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 
 				@Override
 				public Boolean apply(String apiUrl) {
-					System.out.println("Polling again");
+//					System.out.println("Polling for device availability");
 					if (!isDeviceCombinationValid(commonDevicesUrl)) {
-						System.out.println("Polled for device combination check and it failed.");
+//						System.out.println("Polled for device combination check and it failed.");
 						return false;
 //						return new Exception("Device Not Found");
 					}
@@ -210,8 +210,8 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 							try {
 								builder = factory.newDocumentBuilder();
 								Document document = builder.parse(new InputSource(new StringReader(result.toString())));
-								System.out.println("Device Available API Response"
-										+ document.getElementsByTagName("handset").getLength());
+//								System.out.println("Device Available API Response"
+//										+ document.getElementsByTagName("handset").getLength());
 								return document.getElementsByTagName("handset").getLength() > 0;
 							} catch (Exception e) {
 								throw new Exception("Device Not Available");
