@@ -191,7 +191,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 	@Override
 	public void onTestStart(ITestResult testResult) {
 		if (getBundle().getString("remote.server", "").contains("perfecto")) {
-
+			getBundle().setProperty("ScenarioExecution", testResult.getMethod().getMethodName());
 			// get custom fields "%name-value" from groups
 			// compile actual groups
 			String[] groups = testResult.getMethod().getGroups();
@@ -307,6 +307,8 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 	@Override
 	public void onTestSuccess(ITestResult testResult) {
+		getBundle().setProperty("ScenarioExecution", "FromListener");
+		getBundle().setProperty("device_not_available", false);
 		ReportiumClient client = getReportClient();
 		if (ConfigurationManager.getBundle().getPropertyValue("perfecto.harfile.enable").equals("true")) {
 			String platformName = DriverUtils.getDriver().getCapabilities().getCapability("platformName").toString();
@@ -335,6 +337,8 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 	@Override
 	public void onTestFailure(ITestResult testResult) {
+		getBundle().setProperty("ScenarioExecution", "FromListener");
+		getBundle().setProperty("device_not_available", false);
 		ReportiumClient client = getReportClient();
 		if (ConfigurationManager.getBundle().getPropertyValue("perfecto.harfile.enable").equals("true")) {
 			String platformName = DriverUtils.getDriver().getCapabilities().getCapability("platformName").toString();
@@ -446,6 +450,8 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 	@Override
 	public void onTestSkipped(ITestResult result) {
+		getBundle().setProperty("ScenarioExecution", "FromListener");
+		getBundle().setProperty("device_not_available", false);
 		ReportiumClient client = getReportClient();
 		if (null != client) {
 			// By default all the skipped tests will be failed, if you want
@@ -625,8 +631,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 		// Pattern p = Pattern.compile("\"(.*?)[$][{](.*?)}\"");
 		// String allChars = "[a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]";
 		Pattern p = Pattern.compile(
-				"\\\"([a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/? ]*)[$][{](([a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/? ]*))}([a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/? ]*)\\\"");
-
+				"\\\"([a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\\\\|,.<>\\/? ]*)[${](([a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\\\\|,.<>\\/? ]*))}([a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\\\\|,.<>\\/? ]*)\\\"");
 		Matcher matcher = p.matcher(def);
 		List<String> args = new ArrayList<String>();
 		while (matcher.find()) {
