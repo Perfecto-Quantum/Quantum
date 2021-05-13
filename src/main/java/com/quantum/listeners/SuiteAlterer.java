@@ -97,7 +97,7 @@ public class SuiteAlterer implements IAlterSuiteListener {
 				for (int r = 0; r < parameterList.size(); r++) {
 					XmlTest newTest = (XmlTest) originalTest.get(z).clone();
 
-					Map<String, String> testPars = originalTest.get(z).getParameters();
+					Map<String, String> testPars = originalTest.get(z).getAllParameters();
 
 					Map<String, String> testParams = new HashMap<String, String>();
 					Iterator it2 = testPars.entrySet().iterator();
@@ -207,7 +207,7 @@ public class SuiteAlterer implements IAlterSuiteListener {
 
 				newTest.setClasses(testClass);
 
-				Map<String, String> testPars = originalTest.get(z).getParameters();
+				Map<String, String> testPars = originalTest.get(z).getAllParameters();
 				Map<String, String> testParams = new HashMap<String, String>();
 				Iterator it2 = testPars.entrySet().iterator();
 				while (it2.hasNext()) {
@@ -328,7 +328,7 @@ public class SuiteAlterer implements IAlterSuiteListener {
 		List<String> hasParams = new ArrayList<String>();
 		for (int z = 0; z < originalTest.size(); z++) {
 
-			Map<String, String> testPars = originalTest.get(z).getParameters();
+			Map<String, String> testPars = originalTest.get(z).getAllParameters();
 
 			Iterator it2 = testPars.entrySet().iterator();
 			while (it2.hasNext()) {
@@ -344,7 +344,7 @@ public class SuiteAlterer implements IAlterSuiteListener {
 	}
 
 	public List<Map<String, String>> getParameterList(XmlTest test) throws IOException {
-		Map<String, String> testPars = test.getParameters();
+		Map<String, String> testPars = test.getAllParameters();
 
 		Iterator it2 = testPars.entrySet().iterator();
 		String path = null;

@@ -203,7 +203,11 @@ public class PerfectoApplicationSteps {
 
 
     /**
+<<<<<<< HEAD
      * Installs a single application on the device, with WebView instrumentation.
+=======
+     * Installs a single application on the device, and re-sign the application.
+>>>>>>> 2d1b654474387cbab8129f20668a87eea2d9ca37
      * <p>
      * To use, specify the local path to the application or the application repository key.
      * If the application repository key is specified, the application must first be uploaded to the Perfecto Lab repository.
@@ -213,7 +217,11 @@ public class PerfectoApplicationSteps {
      *
      * @param application the local or repository path, including directory and file name, where to locate the application
      */
+<<<<<<< HEAD
     @Then("^I install application \"(.*?)\" with WebView instrumentation$")
+=======
+    @Then("^I install application \"(.*?)\" and re-sign it")
+>>>>>>> 2d1b654474387cbab8129f20668a87eea2d9ca37
     public static void installAppWithWebViewInstrumentation(String application){
         DeviceUtils.installApp(application, "noinstrument", "nosensor", "true");
     }
@@ -221,7 +229,11 @@ public class PerfectoApplicationSteps {
 
 
     /**
+<<<<<<< HEAD
      * Installs a single application on the device, with WebView instrumentation and sensor instrumentation.
+=======
+     * Installs a single application on the device, with sensor instrumentation and re-sign the application.
+>>>>>>> 2d1b654474387cbab8129f20668a87eea2d9ca37
      * <p>
      * To use, specify the local path to the application or the application repository key.
      * If the application repository key is specified, the application must first be uploaded to the Perfecto Lab repository.
@@ -231,7 +243,11 @@ public class PerfectoApplicationSteps {
      *
      * @param application the local or repository path, including directory and file name, where to locate the application
      */
+<<<<<<< HEAD
     @Then("^I install application \"(.*?)\" with WebView instrumentation and sensor instrumentation$")
+=======
+    @Then("^I install application \"(.*?)\" with sensor instrumentation and re-sign it$")
+>>>>>>> 2d1b654474387cbab8129f20668a87eea2d9ca37
     public static void installAppWithWebViewInstrumentationAndSensorInstrumentation( String application){
         DeviceUtils.installApp(application, "noinstrument", "sensor", "true");
     }

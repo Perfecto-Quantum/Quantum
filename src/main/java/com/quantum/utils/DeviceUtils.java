@@ -849,6 +849,7 @@ public class DeviceUtils {
 		if (!toNumber.isEmpty()) pars.put("to.number", toNumber);
 		getQAFDriver().executeScript("mobile:gateway:sms", pars);
 	}
+<<<<<<< HEAD
 
 
 	public static void startVitals() {
@@ -878,4 +879,6 @@ public class DeviceUtils {
 		Map<String, Object> params = new HashMap<>();
 		getQAFDriver().executeScript("mobile:vitals:stop", params);
 	}
+=======
+>>>>>>> 2d1b654474387cbab8129f20668a87eea2d9ca37
 }

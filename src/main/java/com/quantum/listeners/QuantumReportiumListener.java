@@ -117,7 +117,12 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 	public Messages parseFailureJsonFile(String actualMessage) {
 		String jsonStr = null;
+<<<<<<< HEAD
 		String failureConfigLoc = ConfigurationManager.getBundle().getString("failureReasonConfig", "src/main/resources/failureReasons.json");
+=======
+		String failureConfigLoc = ConfigurationManager.getBundle().getString("failureReasonConfig",
+				"src/main/resources/failureReasons.json");
+>>>>>>> 2d1b654474387cbab8129f20668a87eea2d9ca37
 
 		File failureConfigFile = new File(failureConfigLoc);
 
@@ -126,7 +131,10 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 			return null;
 		}
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 2d1b654474387cbab8129f20668a87eea2d9ca37
 		GsonBuilder gsonBuilder = new GsonBuilder();
 		gsonBuilder.setLenient();
 		Gson gson = gsonBuilder.create();
@@ -143,21 +151,34 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 		for (Messages messages : response) {
 			if (messages.getStackTraceErrors() == null) {
-				System.out.println("Failure Reason JSON file has wrong formmat, please read here https://developers.perfectomobile.com/pages/viewpage.action?pageId=31103917: " + failureConfigLoc);
+				System.out.println(
+						"Failure Reason JSON file has wrong formmat, please read here https://developers.perfectomobile.com/pages/viewpage.action?pageId=31103917: "
+								+ failureConfigLoc);
 				return null;
 
 			}
 
+<<<<<<< HEAD
 			for (String error : ListUtils.emptyIfNull(messages.getStackTraceErrors()))	{
+=======
+			for (String error : ListUtils.emptyIfNull(messages.getStackTraceErrors())) {
+>>>>>>> 2d1b654474387cbab8129f20668a87eea2d9ca37
 				if (actualMessage.contains(error)) {
 					messages.setJsonFile(failureConfigLoc);
 					return messages;
 				}
 			}
+<<<<<<< HEAD
 			//			if (messages.getStackTraceErrors().toString().contains(actualMessage)) {
 			//				messages.setJsonFile(failureConfigLoc);
 			//				return messages;
 			//			}
+=======
+			// if (messages.getStackTraceErrors().toString().contains(actualMessage)) {
+			// messages.setJsonFile(failureConfigLoc);
+			// return messages;
+			// }
+>>>>>>> 2d1b654474387cbab8129f20668a87eea2d9ca37
 
 		}
 
@@ -189,7 +210,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 	@Override
 	public void onTestStart(ITestResult testResult) {
 		if (getBundle().getString("remote.server", "").contains("perfecto")) {
-
+			getBundle().setProperty("ScenarioExecution", testResult.getMethod().getMethodName());
 			// get custom fields "%name-value" from groups
 			// compile actual groups
 			String[] groups = testResult.getMethod().getGroups();
@@ -211,24 +232,30 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 				}
 			}
 
+<<<<<<< HEAD
 			if(ConfigurationManager.getBundle().getString("custom.field") != null) {
+=======
+			if (ConfigurationManager.getBundle().getString("custom.field") != null) {
+>>>>>>> 2d1b654474387cbab8129f20668a87eea2d9ca37
 				String customFieldValue = ConfigurationManager.getBundle().getString("custom.field");
 				String[] customFieldPairs = customFieldValue.split(",");
-				for(String customFieldPair : customFieldPairs) {
+				for (String customFieldPair : customFieldPairs) {
 					try {
 						cfc.add(new CustomField(
 								customFieldPair.split(getBundle().getString("custom.field.delimiter", "-"))[0],
 								customFieldPair.split(getBundle().getString("custom.field.delimiter", "-"))[1]));
 					} catch (Exception ex) {
 						new NullPointerException(
-								"Custom field key/value pair not delimited properly.  Example of proper default usage: %Developer-Jeremy.  Check application properties custom.field.delimiter and custom.field.identifier for custom values that may have been set.").printStackTrace();
+								"Custom field key/value pair not delimited properly.  Example of proper default usage: %Developer-Jeremy.  Check application properties custom.field.delimiter and custom.field.identifier for custom values that may have been set.")
+										.printStackTrace();
 					}
 				}
 			}
 
 			Builder testContext = new TestContext.Builder();
 			if (groupsFinal.size() > 0) {
-				testContext.withTestExecutionTags(groupsFinal.toString().replace('[', ' ').replace(']',' ').split(","));
+				testContext
+						.withTestExecutionTags(groupsFinal.toString().replace('[', ' ').replace(']', ' ').split(","));
 			}
 
 			if (cfc.size() > 0) {
@@ -248,6 +275,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 					String platformName = DriverUtils.getDriver().getCapabilities().getCapability("platformName")
 							.toString();
 					if (platformName != null && platformName.equalsIgnoreCase("android")
+<<<<<<< HEAD
 							|| platformName.equalsIgnoreCase("ios") || platformName.equalsIgnoreCase("any") || platformName.equalsIgnoreCase("linux")) {
 						ReportUtils.logStepStart("Start generate Har file");
 						DeviceUtils.generateHAR();
@@ -256,6 +284,18 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 						Object deviceName = DriverUtils.getDriver().getCapabilities().getCapability("deviceName");
 						if(deviceName!=null) {
 							if(deviceName.toString().toLowerCase().contains("iphone") || deviceName.toString().toLowerCase().contains("ipad")) {
+=======
+							|| platformName.equalsIgnoreCase("ios") || platformName.equalsIgnoreCase("any")
+							|| platformName.equalsIgnoreCase("linux")) {
+						ReportUtils.logStepStart("Start generate Har file");
+						DeviceUtils.generateHAR();
+					}
+					if (platformName != null && platformName.equalsIgnoreCase("mac")) {
+						Object deviceName = DriverUtils.getDriver().getCapabilities().getCapability("deviceName");
+						if (deviceName != null) {
+							if (deviceName.toString().toLowerCase().contains("iphone")
+									|| deviceName.toString().toLowerCase().contains("ipad")) {
+>>>>>>> 2d1b654474387cbab8129f20668a87eea2d9ca37
 								ReportUtils.logStepStart("Start generate Har file");
 								DeviceUtils.generateHAR();
 							}
@@ -289,7 +329,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 	@Override
 	public void afterExecute(StepExecutionTracker stepExecutionTracker) {
-		//logStepEnd();
+		// logStepEnd();
 		String msg = "END STEP: " + stepExecutionTracker.getStep().getDescription();
 		ConsoleUtils.logInfoBlocks(msg, ConsoleUtils.upper_block + " ", 10);
 	}
@@ -301,9 +341,12 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 	@Override
 	public void onTestSuccess(ITestResult testResult) {
+		getBundle().setProperty("ScenarioExecution", "FromListener");
+		getBundle().setProperty("device_not_available", false);
 		ReportiumClient client = getReportClient();
 		if (ConfigurationManager.getBundle().getPropertyValue("perfecto.harfile.enable").equals("true")) {
 			String platformName = DriverUtils.getDriver().getCapabilities().getCapability("platformName").toString();
+<<<<<<< HEAD
 			if (platformName != null &&platformName.equalsIgnoreCase("android") || platformName.equalsIgnoreCase("ios")
 					|| platformName.equalsIgnoreCase("any")|| platformName.equalsIgnoreCase("linux"))
 				DeviceUtils.stopGenerateHAR();
@@ -311,6 +354,16 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 				Object deviceName = DriverUtils.getDriver().getCapabilities().getCapability("deviceName");
 				if(deviceName!=null) {
 					if(deviceName.toString().toLowerCase().contains("iphone") || deviceName.toString().toLowerCase().contains("ipad")) {
+=======
+			if (platformName != null && platformName.equalsIgnoreCase("android") || platformName.equalsIgnoreCase("ios")
+					|| platformName.equalsIgnoreCase("any") || platformName.equalsIgnoreCase("linux"))
+				DeviceUtils.stopGenerateHAR();
+			if (platformName != null && platformName.equalsIgnoreCase("mac")) {
+				Object deviceName = DriverUtils.getDriver().getCapabilities().getCapability("deviceName");
+				if (deviceName != null) {
+					if (deviceName.toString().toLowerCase().contains("iphone")
+							|| deviceName.toString().toLowerCase().contains("ipad")) {
+>>>>>>> 2d1b654474387cbab8129f20668a87eea2d9ca37
 						ReportUtils.logStepStart("Start generate Har file");
 						DeviceUtils.stopGenerateHAR();
 					}
@@ -328,9 +381,12 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 	@Override
 	public void onTestFailure(ITestResult testResult) {
+		getBundle().setProperty("ScenarioExecution", "FromListener");
+		getBundle().setProperty("device_not_available", false);
 		ReportiumClient client = getReportClient();
 		if (ConfigurationManager.getBundle().getPropertyValue("perfecto.harfile.enable").equals("true")) {
 			String platformName = DriverUtils.getDriver().getCapabilities().getCapability("platformName").toString();
+<<<<<<< HEAD
 			if (platformName != null &&platformName.equalsIgnoreCase("android") || platformName.equalsIgnoreCase("ios")
 					|| platformName.equalsIgnoreCase("any") || platformName.equalsIgnoreCase("linux"))
 				DeviceUtils.stopGenerateHAR();
@@ -338,6 +394,16 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 				Object deviceName = DriverUtils.getDriver().getCapabilities().getCapability("deviceName");
 				if(deviceName!=null) {
 					if(deviceName.toString().toLowerCase().contains("iphone") || deviceName.toString().toLowerCase().contains("ipad")) {
+=======
+			if (platformName != null && platformName.equalsIgnoreCase("android") || platformName.equalsIgnoreCase("ios")
+					|| platformName.equalsIgnoreCase("any") || platformName.equalsIgnoreCase("linux"))
+				DeviceUtils.stopGenerateHAR();
+			if (platformName != null && platformName.equalsIgnoreCase("mac")) {
+				Object deviceName = DriverUtils.getDriver().getCapabilities().getCapability("deviceName");
+				if (deviceName != null) {
+					if (deviceName.toString().toLowerCase().contains("iphone")
+							|| deviceName.toString().toLowerCase().contains("ipad")) {
+>>>>>>> 2d1b654474387cbab8129f20668a87eea2d9ca37
 						ReportUtils.logStepStart("Start generate Har file");
 						DeviceUtils.stopGenerateHAR();
 					}
@@ -438,6 +504,8 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 	@Override
 	public void onTestSkipped(ITestResult result) {
+		getBundle().setProperty("ScenarioExecution", "FromListener");
+		getBundle().setProperty("device_not_available", false);
 		ReportiumClient client = getReportClient();
 		if (null != client) {
 			// By default all the skipped tests will be failed, if you want
@@ -615,7 +683,10 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 	public static List<String> getArgNames(String def) {
 		Pattern p = Pattern.compile(
 				"\\\"([a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\\\\|,.<>\\/? ]*)[${](([a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\\\\|,.<>\\/? ]*))}([a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\\\\|,.<>\\/? ]*)\\\"");
+<<<<<<< HEAD
 
+=======
+>>>>>>> 2d1b654474387cbab8129f20668a87eea2d9ca37
 		Matcher matcher = p.matcher(def);
 		List<String> args = new ArrayList<String>();
 		while (matcher.find()) {
