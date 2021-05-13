@@ -8,7 +8,9 @@ import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
+import com.qmetry.qaf.automation.ui.webdriver.QAFWebElement;
 import org.hamcrest.Matchers;
 import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.remote.DriverCommand;
@@ -846,5 +848,34 @@ public class DeviceUtils {
 		if (!toLogical.isEmpty()) pars.put("to.logical", toLogical);
 		if (!toNumber.isEmpty()) pars.put("to.number", toNumber);
 		getQAFDriver().executeScript("mobile:gateway:sms", pars);
+	}
+
+
+	public static void startVitals() {
+
+		Map<String, String> params = new HashMap<>();
+		getQAFDriver().executeScript("mobile:vitals:start", params);
+	}
+
+	public static void startVitals(List<String> vitals) {
+
+		Map<String, Object> params = new HashMap<>();
+		params.put("vitals", vitals);
+		getQAFDriver().executeScript("mobile:vitals:start", params);
+	}
+
+	public static void startVitals(List<String> vitals, Integer interval) {
+
+		Map<String, Object> params = new HashMap<>();
+		params.put("vitals", vitals);
+		params.put("interval", interval);
+
+		getQAFDriver().executeScript("mobile:vitals:start", params);
+	}
+
+	public static void stopVitals(String location, String by) {
+
+		Map<String, Object> params = new HashMap<>();
+		getQAFDriver().executeScript("mobile:vitals:stop", params);
 	}
 }

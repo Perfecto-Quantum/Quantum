@@ -51,6 +51,7 @@ public class DriverUtils {
 		return new WebDriverTestBase().getDriver();
 	}
 
+	@Deprecated
 	public boolean isRunningAndroid() {
 		if (getOS().equalsIgnoreCase("android")) {
 			return true;
@@ -58,7 +59,7 @@ public class DriverUtils {
 			return false;
 		}
 	}
-
+	@Deprecated
 	public boolean isRunningIOS() {
 		if (getOS().equalsIgnoreCase("ios")) {
 			return true;
@@ -66,6 +67,23 @@ public class DriverUtils {
 			return false;
 		}
 	}
+
+	public static boolean isAndroid() {
+		if (getOS().equalsIgnoreCase("android")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static boolean isIOS() {
+		if (getOS().equalsIgnoreCase("android")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 
 	/**
 	 * Switches to either a new WebDriver session with a mobile device / web browser
@@ -98,7 +116,7 @@ public class DriverUtils {
 		
 	}
 
-	private String getOS() {
+	private static String getOS() {
 		Map<String, String> params = new HashMap<>();
 		params.put("property", "os");
 		String properties = (String) DriverUtils.getDriver().executeScript("mobile:handset:info", params);

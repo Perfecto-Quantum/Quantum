@@ -2,7 +2,10 @@ package com.quantum.utils;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 
+import com.qmetry.qaf.automation.core.ConfigurationManager;
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.Capabilities;
 import org.testng.Reporter;
@@ -24,6 +27,8 @@ public class ConsoleUtils {
 	public static final String right_block = new String(Character.toChars(0x2590));
 	public static final String left_block = new String(Character.toChars(0x258C));
 	public static final String WARNING_PADDING = upper_block + lower_block;
+	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss");
+
 
 	public static String getDeviceDesc(Capabilities caps) {
 		if (ConfigurationUtils.isDevice(caps))
@@ -79,7 +84,7 @@ public class ConsoleUtils {
 	
 	public static synchronized void logThread(String msg) {
 		Reporter.log(msg, false);
-		System.out.println(Thread.currentThread().getName() + ": " + msg);
+		System.out.println(getTimestamp() + Thread.currentThread().getName() + ": " + msg);
 		System.out.flush();
 	}
 
@@ -137,6 +142,11 @@ public class ConsoleUtils {
 			System.err.flush();
 			msg = "\t";
 		}
+	}
+
+	private static synchronized String getTimestamp() {
+
+		return  ConfigurationManager.getBundle().getBoolean("logTimestamp", false)? sdf.format(new Timestamp(System.currentTimeMillis()))+" ":"";
 	}
 
 }
