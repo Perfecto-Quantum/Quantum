@@ -1,5 +1,7 @@
 package com.qmetry.qaf.automation.ui;
 
+import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
+
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -14,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -60,6 +63,7 @@ import com.qmetry.qaf.automation.ui.webdriver.ChromeDriverHelper;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 import com.qmetry.qaf.automation.ui.webdriver.QAFWebDriverCommandListener;
 import com.qmetry.qaf.automation.util.StringUtil;
+import com.quantum.listeners.DriverInitListener;
 
 import okhttp3.Authenticator;
 import okhttp3.Credentials;
@@ -182,7 +186,11 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 		LinkedHashSet<QAFWebDriverCommandListener> listners = new LinkedHashSet<QAFWebDriverCommandListener>();
 		String[] clistners = ConfigurationManager.getBundle()
 				.getStringArray(ApplicationProperties.WEBDRIVER_COMMAND_LISTENERS.key);
+		String val = ConfigurationManager.getBundle().getString("perfecto.capabilities.deviceSessionId", "");
 		for (String listenr : clistners) {
+			if(val.contains("-") && listenr.equals(DriverInitListener.class.getName())) {
+				continue;
+			}
 			try {
 				QAFWebDriverCommandListener cls = (QAFWebDriverCommandListener) Class.forName(listenr).newInstance();
 				listners.add(cls);
