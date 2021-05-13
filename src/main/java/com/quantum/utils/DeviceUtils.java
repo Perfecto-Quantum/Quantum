@@ -7,17 +7,15 @@ package com.quantum.utils;
 import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.LogFactoryImpl;
-import org.apache.log4j.Logger;
-import org.apache.log4j.Priority;
 import org.hamcrest.Matchers;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.Rectangle;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DriverCommand;
 import org.openqa.selenium.remote.RemoteExecuteMethod;
 import org.openqa.selenium.remote.RemoteWebElement;
@@ -913,5 +911,33 @@ public class DeviceUtils {
 			message = String.format("%s%n%s%n", message, errors);
 //			throw new AccessibilityException(message);
 		}
+	}
+
+	public static void startVitals() {
+
+		Map<String, String> params = new HashMap<>();
+		getQAFDriver().executeScript("mobile:vitals:start", params);
+	}
+
+	public static void startVitals(List<String> vitals) {
+
+		Map<String, Object> params = new HashMap<>();
+		params.put("vitals", vitals);
+		getQAFDriver().executeScript("mobile:vitals:start", params);
+	}
+
+	public static void startVitals(List<String> vitals, Integer interval) {
+
+		Map<String, Object> params = new HashMap<>();
+		params.put("vitals", vitals);
+		params.put("interval", interval);
+
+		getQAFDriver().executeScript("mobile:vitals:start", params);
+	}
+
+	public static void stopVitals(String location, String by) {
+
+		Map<String, Object> params = new HashMap<>();
+		getQAFDriver().executeScript("mobile:vitals:stop", params);
 	}
 }
