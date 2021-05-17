@@ -9,8 +9,15 @@ import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.impl.LogFactoryImpl;
+import org.apache.log4j.Logger;
+import org.apache.log4j.Priority;
 import org.hamcrest.Matchers;
+import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.OutputType;
 import org.openqa.selenium.Rectangle;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DriverCommand;
 import org.openqa.selenium.remote.RemoteExecuteMethod;
 import org.openqa.selenium.remote.RemoteWebElement;
@@ -21,6 +28,7 @@ import com.qmetry.qaf.automation.ui.WebDriverTestBase;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebElement;
 import com.qmetry.qaf.automation.util.Validator;
+import com.quantum.axe.AxeHelper;
 
 public class DeviceUtils {
 
@@ -760,11 +768,21 @@ public class DeviceUtils {
 	 */
 	public static void checkAccessibility(String tagName) {
 		//declare the Map for script parameters
-		Map<String, Object> params = new HashMap<>();
-
-		params.put("tag", tagName);
-		getQAFDriver().executeScript("mobile:checkAccessibility:audit", params);
-
+		String browserName = DriverUtils.getDriver().getCapabilities().getCapability("browserName").toString();
+		String platformName = DriverUtils.getDriver().getCapabilities().getCapability("platformName").toString();
+		if(platformName.equalsIgnoreCase("ios") && browserName.equalsIgnoreCase("safari")) {
+			Log logger = LogFactoryImpl.getLog(DeviceUtils.class);
+			logger.error("Accessibility testing is not supported for Safari browser on iPhone/iPad. Skipping Accessibility check.");
+		}else {
+			if(DriverUtils.getDriver().getCapabilities().getCapability("driverClass")!=null){
+				Map<String, Object> params = new HashMap<>();
+				params.put("tag", tagName);
+				getQAFDriver().executeScript("mobile:checkAccessibility:audit", params);
+			}
+			else {
+				startAxe();
+			}
+		}
 	}
 
 
@@ -846,5 +864,54 @@ public class DeviceUtils {
 		if (!toLogical.isEmpty()) pars.put("to.logical", toLogical);
 		if (!toNumber.isEmpty()) pars.put("to.number", toNumber);
 		getQAFDriver().executeScript("mobile:gateway:sms", pars);
+	}
+	
+	private static void startAxe() {
+		AxeHelper axe = new AxeHelper(DriverUtils.getDriver());
+		axe.runAxe();
+		axe.startHighlighter("violations");
+		final StringBuilder errors = new StringBuilder();
+		int errorCount = 0;
+		while (true) {
+			final Map<String, ?> violation = axe.nextHighlight();
+			System.out.println("violation: "+violation);
+			if (violation == null) {
+				break;
+			}
+
+			errorCount++;
+			final String ruleId = (String) violation.get("issue");
+			final Map<String, String> node = (Map<String, String>) violation.get("node");
+
+			final String impact = node.get("impact");
+			final String summary = node.get("failureSummary");
+			final String html = node.get("html");
+			final String selector = (String) violation.get("target");
+
+			final String message = String.format("%s - %s%n %s%n Selector:\t%s%n HTML:\t\t%s%n%n",
+					impact, ruleId, summary, selector, html);
+
+			DriverUtils.getDriver().getScreenshotAs(OutputType.BASE64);
+			ReportUtils.getReportClient().reportiumAssert(message,false);
+			errors.append(message);
+		}
+		
+		if (errorCount > 0) {
+			final Capabilities capabilities = DriverUtils.getDriver().getCapabilities();
+			final String platform = String.valueOf(capabilities.getCapability("platformName"));
+			final String version = String.valueOf(capabilities.getCapability("platformVersion"));
+			final String browserName = String.valueOf(capabilities.getCapability("browserName"));
+			final String browserVersion = String.valueOf(capabilities.getCapability("browserVersion"));
+			String browserVersionFormatted;
+			if ("null".equals(browserName)) {
+				browserVersionFormatted = "default browser";
+			} else {
+				browserVersionFormatted = browserName + "-" + browserVersion;
+			}
+			String message = String.format("%n%s-%s %s : %d violations on %s%nReport Link: %s%n",
+					platform, version, browserVersionFormatted, errorCount, "https://www.google.com/", ReportUtils.getReportClient().getReportUrl());
+			message = String.format("%s%n%s%n", message, errors);
+//			throw new AccessibilityException(message);
+		}
 	}
 }
