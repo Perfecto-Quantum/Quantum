@@ -32,7 +32,6 @@ package com.quantum.listeners;
 import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -51,6 +50,7 @@ import com.quantum.utils.DeviceUtils;
 import com.quantum.utils.ReportUtils;
 
 public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
+	public static final String DRIVER_START_TIMER = "DriverTimer";
 	@Override
 	public void beforeCommand(QAFExtendedWebDriver driver, CommandTracker commandTracker) {
 
@@ -58,12 +58,13 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 			boolean virtualDeviceCap = false;
 			boolean virtualDeviceName = false;
 			Map<String, Object> map = driver.getCapabilities().asMap();
-			for(String cap : map.keySet()) {
-				if(cap.equalsIgnoreCase("useVirtualDevice") ) {
-					virtualDeviceCap = (boolean)map.get(cap);
+			for (String cap : map.keySet()) {
+				if (cap.equalsIgnoreCase("useVirtualDevice")) {
+					virtualDeviceCap = (boolean) map.get(cap);
 				}
-				if(cap.contains("deviceName")) {
-					if(String.valueOf(map.get(cap)).toUpperCase().contains("EMULATOR") || String.valueOf(map.get(cap)).toUpperCase().contains("SIMULATOR")) 
+				if (cap.contains("deviceName")) {
+					if (String.valueOf(map.get(cap)).toUpperCase().contains("EMULATOR")
+							|| String.valueOf(map.get(cap)).toUpperCase().contains("SIMULATOR"))
 						virtualDeviceName = true;
 				}
 			}
@@ -207,12 +208,12 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 			}
 		}
 		if (ConfigurationUtils.getBaseBundle().getString("remote.server", "").contains("perfecto")) {
-			if(ConfigurationManager.getBundle().getString("perfecto.harfile.enable","false").equals("true")) {
+			if (ConfigurationManager.getBundle().getString("perfecto.harfile.enable", "false").equals("true")) {
 				Object platformName = ((DesiredCapabilities) desiredCapabilities).getCapability("platformName");
-				if(platformName!=null) {
-					if(platformName.toString().equalsIgnoreCase("windows"))
+				if (platformName != null) {
+					if (platformName.toString().equalsIgnoreCase("windows"))
 						((DesiredCapabilities) desiredCapabilities).setCapability("captureHAR", true);
-				}	
+				}
 			}
 		}
 
@@ -237,6 +238,8 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 			ConfigurationManager.getBundle().addProperty("executionId",
 					driver.getCapabilities().getCapability("executionId"));
 		}
+		ConfigurationManager.getBundle().setProperty(DRIVER_START_TIMER, System.currentTimeMillis());
+
 	}
 
 }

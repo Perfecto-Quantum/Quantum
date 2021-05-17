@@ -235,71 +235,99 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 
 	public void beforeInitialize(Capabilities desiredCapabilities) {
 
-		Device device = new Device();
-		Map<String, ?> capabilities = desiredCapabilities.asMap();
+//		String valPerfectoCap = ConfigurationManager.getBundle().getString("perfecto.capabilities.deviceSessionId", "");
+//		String valDriverCap = ConfigurationManager.getBundle().getString("driver.capabilities.deviceSessionId", "");
+//		boolean skipDriverInitList = false;
+//		Iterator<String> it = ConfigurationManager.getBundle().getKeys();
+//		System.out.println("Loading listeners");
+//		while (it.hasNext()) {
+//			System.out.println(it.next());
+//			String key = it.next();
+//			if (key.contains("capabilities.deviceSessionId") || key.contains("additional.capabilities")) {
+//				if (ConfigurationManager.getBundle().getString(key).contains("-")
+//						|| ConfigurationManager.getBundle().getString(key).contains("'useVirtualDevice':true")) {
+//					System.out.println("Executing on VD or Shared Session, therefore skipping DriverInitListener");
+//					skipDriverInitList = true;
+//				}
+//
+//			}
+//		}
+//		Condition for virtual device skip DriverInit Check
+//		String capPerfectoVD = ConfigurationManager.getBundle().getString("perfecto.additional.capabilities", "");
+//		String capDriverVD = ConfigurationManager.getBundle().getString("driver.additional.capabilities", "");
+//
+//		for (String listenr : clistners) {
+//			if ((valPerfectoCap.contains("-") || valDriverCap.contains("-"))
 
-		Map<String, String> credentials = new HashMap<>();
+//		if (!skipDriverInitList) {
+			Device device = new Device();
+			Map<String, ?> capabilities = desiredCapabilities.asMap();
 
-		if (capabilities.get("securityToken") != null) {
-			credentials.put("securityToken", capabilities.get("securityToken").toString());
-		}
+			Map<String, String> credentials = new HashMap<>();
 
-		if (capabilities.get("model") != null) {
-			device.addAttribute("model", capabilities.get("model").toString());
-		}
-
-		if (capabilities.get("deviceId") != null) {
-			device.addAttribute("deviceId", capabilities.get("deviceId").toString());
-		}
-
-		if (capabilities.get("deviceName") != null) {
-			device.addAttribute("deviceId", capabilities.get("deviceName").toString());
-		}
-
-		if (capabilities.get("os") != null) {
-			device.addAttribute("os", capabilities.get("os").toString());
-		}
-
-		if (capabilities.get("osVersion") != null) {
-			device.addAttribute("osVersion", capabilities.get("osVersion").toString());
-		}
-
-//		System.out.println(desiredCapabilities);
-
-//		waitForDeviceAvailable(device,credentials);
-		if (!ConfigurationManager.getBundle().getBoolean("device_not_available", false)) {
-
-			try {
-				boolean deviceAvailableFlag = waitForDeviceAvailable(device, credentials);
-				System.out.println("Device availability flag - " + deviceAvailableFlag);
-				if (!deviceAvailableFlag) {
-					System.out.println("Throwing the Device Not Available exception");
-					throw new SkipException("Device not available");
-				}
-			} catch (Exception e) {
-				try {
-					if (!getBundle().getString("ScenarioExecution", "FromListener").equalsIgnoreCase("FromListener")) {
-						System.out.println("Creating driver for report result"
-								+ getBundle().getString("ScenarioExecution", "FromListener"));
-						ConfigurationManager.getBundle().setProperty("device_not_available", true);
-						((DesiredCapabilities) desiredCapabilities).setCapability("scriptName",
-								getBundle().getString("ScenarioExecution", "FromListener"));
-						getBundle().setProperty("ScenarioExecution", "FromListener");
-						WebDriver driver = new RemoteWebDriver(
-								new URL(ConfigurationManager.getBundle().getString("remote.server")),
-								desiredCapabilities);
-						driver.quit();
-
-					}
-				} catch (MalformedURLException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				throw e;
+			if (capabilities.get("securityToken") != null) {
+				credentials.put("securityToken", capabilities.get("securityToken").toString());
 			}
-		} else {
-			throw new SkipException("Device not available");
-		}
+
+			if (capabilities.get("model") != null) {
+				device.addAttribute("model", capabilities.get("model").toString());
+			}
+
+			if (capabilities.get("deviceId") != null) {
+				device.addAttribute("deviceId", capabilities.get("deviceId").toString());
+			}
+
+			if (capabilities.get("deviceName") != null) {
+				device.addAttribute("deviceId", capabilities.get("deviceName").toString());
+			}
+
+			if (capabilities.get("os") != null) {
+				device.addAttribute("os", capabilities.get("os").toString());
+			}
+
+			if (capabilities.get("osVersion") != null) {
+				device.addAttribute("osVersion", capabilities.get("osVersion").toString());
+			}
+
+//						System.out.println(desiredCapabilities);
+
+//						waitForDeviceAvailable(device,credentials);
+			if (!ConfigurationManager.getBundle().getBoolean("device_not_available", false)) {
+
+				try {
+					boolean deviceAvailableFlag = waitForDeviceAvailable(device, credentials);
+					System.out.println("Device availability flag - " + deviceAvailableFlag);
+					if (!deviceAvailableFlag) {
+						System.out.println("Throwing the Device Not Available exception");
+						throw new SkipException("Device not available");
+					}
+				} catch (Exception e) {
+					try {
+						if (!getBundle().getString("ScenarioExecution", "FromListener")
+								.equalsIgnoreCase("FromListener")) {
+							System.out.println("Creating driver for report result"
+									+ getBundle().getString("ScenarioExecution", "FromListener"));
+							ConfigurationManager.getBundle().setProperty("device_not_available", true);
+							((DesiredCapabilities) desiredCapabilities).setCapability("scriptName",
+									getBundle().getString("ScenarioExecution", "FromListener"));
+							getBundle().setProperty("ScenarioExecution", "FromListener");
+							WebDriver driver = new RemoteWebDriver(
+									new URL(ConfigurationManager.getBundle().getString("remote.server")),
+									desiredCapabilities);
+							driver.quit();
+
+						}
+					} catch (MalformedURLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					throw e;
+				}
+			} else {
+				throw new SkipException("Device not available");
+			}
+
+//		}
 
 	}
 

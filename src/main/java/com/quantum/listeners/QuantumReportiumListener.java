@@ -441,6 +441,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 						.contains("com.qmetry.qaf.automation.step.client.excel.ExcelTestFactory")
 				|| testResult.getTestContext().getCurrentXmlTest().getXmlClasses().get(0).getName()
 						.contains("com.qmetry.qaf.automation.step.client.csv.KwdTestFactory")
+				|| resetDriver()
 
 		) {
 			Object testInstance = testResult.getInstance();
@@ -711,5 +712,21 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 			}
 		}
 		return description;
+	}
+
+	private boolean resetDriver() {
+		String driverResetTimerFlag = ConfigurationManager.getBundle().getString("perfecto.driver.restart.timer.flag",
+				"false");
+		int driverResetTimerValue = ConfigurationManager.getBundle().getInt("perfecto.driver.restart.timer.flag", 3600);
+		if (driverResetTimerFlag.equalsIgnoreCase("true")) {
+			long currentTime = System.currentTimeMillis();
+			long driverStartTime = ConfigurationManager.getBundle().getLong(PerfectoDriverListener.DRIVER_START_TIMER);
+			if ((currentTime - driverStartTime) / 1000 > driverResetTimerValue) {
+				System.out.println("Closing the driver and restarting the driver");
+				return true;
+			}
+			return false;
+		}
+		return false;
 	}
 }
