@@ -184,39 +184,8 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 		LinkedHashSet<QAFWebDriverCommandListener> listners = new LinkedHashSet<QAFWebDriverCommandListener>();
 		String[] clistners = ConfigurationManager.getBundle()
 				.getStringArray(ApplicationProperties.WEBDRIVER_COMMAND_LISTENERS.key);
-//		Condition for shared session ID skip DriverInit Check
-		String valPerfectoCap = ConfigurationManager.getBundle().getString("perfecto.capabilities.deviceSessionId", "");
-		String valDriverCap = ConfigurationManager.getBundle().getString("driver.capabilities.deviceSessionId", "");
-		boolean skipDriverInitList = false;
-		Iterator<String> it = ConfigurationManager.getBundle().getKeys();
-		System.out.println("Loading listeners");
-		while (it.hasNext()) {
-			try {
-				System.out.println(it.next());
-				String key = it.next();
-				if (key.contains("capabilities.deviceSessionId") || key.contains("additional.capabilities")) {
-					if (ConfigurationManager.getBundle().getString(key).contains("-")
-							|| ConfigurationManager.getBundle().getString(key).contains("'useVirtualDevice':true")) {
-						System.out.println("Executing on VD or Shared Session, therefore skipping DriverInitListener");
-						skipDriverInitList = true;
-						break;
-					}
-				}
-			} catch (Exception e) {
-				// Catch exception for when the value inside the key is not a string
-			}
-			
-		}
-//		Condition for virtual device skip DriverInit Check
-		String capPerfectoVD = ConfigurationManager.getBundle().getString("perfecto.additional.capabilities", "");
-		String capDriverVD = ConfigurationManager.getBundle().getString("driver.additional.capabilities", "");
 
 		for (String listenr : clistners) {
-			if (skipDriverInitList
-					&& listenr.equals(DriverInitListener.class.getName())) {
-				System.out.println("!!!!!Not running Driver Init listener check because a shared session or a virtual device session was detected.!!!!!");
-				continue;
-			}
 			try {
 				QAFWebDriverCommandListener cls = (QAFWebDriverCommandListener) Class.forName(listenr).newInstance();
 				listners.add(cls);

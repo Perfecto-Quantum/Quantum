@@ -135,7 +135,7 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "deprecation", "rawtypes" })
 	public static boolean waitForDeviceAvailable(Device deviceInformation, Map<String, String> credentials)
 			throws TimeoutException {
 
@@ -233,33 +233,22 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	public void beforeInitialize(Capabilities desiredCapabilities) {
-
-//		String valPerfectoCap = ConfigurationManager.getBundle().getString("perfecto.capabilities.deviceSessionId", "");
-//		String valDriverCap = ConfigurationManager.getBundle().getString("driver.capabilities.deviceSessionId", "");
-//		boolean skipDriverInitList = false;
-//		Iterator<String> it = ConfigurationManager.getBundle().getKeys();
-//		System.out.println("Loading listeners");
-//		while (it.hasNext()) {
-//			System.out.println(it.next());
-//			String key = it.next();
-//			if (key.contains("capabilities.deviceSessionId") || key.contains("additional.capabilities")) {
-//				if (ConfigurationManager.getBundle().getString(key).contains("-")
-//						|| ConfigurationManager.getBundle().getString(key).contains("'useVirtualDevice':true")) {
-//					System.out.println("Executing on VD or Shared Session, therefore skipping DriverInitListener");
-//					skipDriverInitList = true;
-//				}
-//
-//			}
-//		}
-//		Condition for virtual device skip DriverInit Check
-//		String capPerfectoVD = ConfigurationManager.getBundle().getString("perfecto.additional.capabilities", "");
-//		String capDriverVD = ConfigurationManager.getBundle().getString("driver.additional.capabilities", "");
-//
-//		for (String listenr : clistners) {
-//			if ((valPerfectoCap.contains("-") || valDriverCap.contains("-"))
-
-//		if (!skipDriverInitList) {
+		boolean skipDriverInitList = false;
+		Iterator<String> it = ConfigurationManager.getBundle().getKeys();
+		while (it.hasNext()) {
+			String key = it.next();
+			if (key.contains("capabilities.deviceSessionId") || key.contains("additional.capabilities")) {
+				System.out.println("Value - " + ConfigurationManager.getBundle().getString(key));
+				if (ConfigurationManager.getBundle().getString(key).contains("-")
+						|| ConfigurationManager.getBundle().getString(key).contains("'useVirtualDevice':true")) {
+					System.out.println("Executing on VD or Shared Session, therefore skipping DriverInitListener");
+					skipDriverInitList = true;
+				}
+			}
+		}
+		if (!skipDriverInitList) {
 			Device device = new Device();
 			Map<String, ?> capabilities = desiredCapabilities.asMap();
 
@@ -288,12 +277,7 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 			if (capabilities.get("osVersion") != null) {
 				device.addAttribute("osVersion", capabilities.get("osVersion").toString());
 			}
-
-//						System.out.println(desiredCapabilities);
-
-//						waitForDeviceAvailable(device,credentials);
 			if (!ConfigurationManager.getBundle().getBoolean("device_not_available", false)) {
-
 				try {
 					boolean deviceAvailableFlag = waitForDeviceAvailable(device, credentials);
 					System.out.println("Device availability flag - " + deviceAvailableFlag);
@@ -318,7 +302,6 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 
 						}
 					} catch (MalformedURLException e1) {
-						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
 					throw e;
@@ -326,32 +309,23 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 			} else {
 				throw new SkipException("Device not available");
 			}
-
-//		}
-
+		}
 	}
 
 	public static class Device {
-
 		private Map<String, String> deviceAttributes;
-
 		public Device() {
 			this.deviceAttributes = new HashMap<>();
 		}
-
 		void addAttribute(String attributeName, String attributeValue) {
 			deviceAttributes.put(attributeName, attributeValue);
 		}
-
 		public Map<String, String> getDeviceAttributes() {
 			return this.deviceAttributes;
 		}
-
 		@Override
 		public String toString() {
-
 			return deviceAttributes.toString();
 		}
-
 	}
 }

@@ -28,6 +28,8 @@ import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebElement;
 import com.qmetry.qaf.automation.util.Validator;
 import com.quantum.axe.AxeHelper;
 
+import io.appium.java_client.android.nativekey.AndroidKey;
+
 public class DeviceUtils {
 
 	private static final String REPOSITORY_KEY = "perfecto.repository.folder";
@@ -547,7 +549,6 @@ public class DeviceUtils {
 	public static void stopGenerateHAR() {
 		Map<String, Object> params = new HashMap<>();
 		getQAFDriver().executeScript("mobile:vnetwork:stop", params);
-
 	}
 
 	public static void audioInject(String file) {
@@ -914,29 +915,24 @@ public class DeviceUtils {
 	}
 
 	public static void startVitals() {
-
 		Map<String, String> params = new HashMap<>();
 		getQAFDriver().executeScript("mobile:vitals:start", params);
 	}
 
 	public static void startVitals(List<String> vitals) {
-
 		Map<String, Object> params = new HashMap<>();
 		params.put("vitals", vitals);
 		getQAFDriver().executeScript("mobile:vitals:start", params);
 	}
 
 	public static void startVitals(List<String> vitals, Integer interval) {
-
 		Map<String, Object> params = new HashMap<>();
 		params.put("vitals", vitals);
 		params.put("interval", interval);
-
 		getQAFDriver().executeScript("mobile:vitals:start", params);
 	}
 
-	public static void stopVitals(String location, String by) {
-
+	public static void stopVitals() {
 		Map<String, Object> params = new HashMap<>();
 		getQAFDriver().executeScript("mobile:vitals:stop", params);
 	}

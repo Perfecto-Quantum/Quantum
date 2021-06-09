@@ -48,6 +48,7 @@ import com.qmetry.qaf.automation.keys.ApplicationProperties;
 import com.qmetry.qaf.automation.step.QAFTestStepListener;
 import com.qmetry.qaf.automation.step.StepExecutionTracker;
 import com.qmetry.qaf.automation.step.TestStep;
+import com.qmetry.qaf.automation.step.client.Scenario;
 import com.qmetry.qaf.automation.step.client.TestNGScenario;
 import com.qmetry.qaf.automation.step.client.text.BDDDefinitionHelper.ParamType;
 import com.qmetry.qaf.automation.ui.WebDriverTestCase;
@@ -441,7 +442,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 						.contains("com.qmetry.qaf.automation.step.client.excel.ExcelTestFactory")
 				|| testResult.getTestContext().getCurrentXmlTest().getXmlClasses().get(0).getName()
 						.contains("com.qmetry.qaf.automation.step.client.csv.KwdTestFactory")
-				|| resetDriver()
+				|| resetDriver(testResult)
 
 		) {
 			Object testInstance = testResult.getInstance();
@@ -714,14 +715,28 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 		return description;
 	}
 
-	private boolean resetDriver() {
+	private boolean resetDriver(ITestResult result) {
 		String driverResetTimerFlag = ConfigurationManager.getBundle().getString("perfecto.driver.restart.timer.flag",
 				"false");
-		int driverResetTimerValue = ConfigurationManager.getBundle().getInt("perfecto.driver.restart.timer.flag", 3600);
-		if (driverResetTimerFlag.equalsIgnoreCase("true")) {
+		int driverResetTimerValue = ConfigurationManager.getBundle().getInt("perfecto.driver.restart.timer.value",
+				3600);
+
+		boolean driverResetTag = false;
+		Scenario sc = (Scenario) result.getInstance();
+		String[] m_groups = sc.getM_groups();
+		for (String tag : m_groups) {
+			if (tag.equalsIgnoreCase("@RestartDriverAfterTimeout")) {
+				System.out.println("Driver Reset tag found!");
+				driverResetTag = true;
+			}
+		}
+
+		if (driverResetTimerFlag.equalsIgnoreCase("true") || driverResetTag) {
 			long currentTime = System.currentTimeMillis();
 			long driverStartTime = ConfigurationManager.getBundle().getLong(PerfectoDriverListener.DRIVER_START_TIMER);
-			if ((currentTime - driverStartTime) / 1000 > driverResetTimerValue) {
+
+//			Check the timer and the tag for restart @RestartDriverAfterTimeout
+			if ((currentTime - driverStartTime) / 1000 > driverResetTimerValue || driverResetTag) {
 				System.out.println("Closing the driver and restarting the driver");
 				return true;
 			}

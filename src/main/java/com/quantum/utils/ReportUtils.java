@@ -153,16 +153,17 @@ public class ReportUtils {
 			executions = retrieveTestExecutions(getToken(), executionId);
 			counter++;
 		}
-
-		for (int i = 0; i < executions.getAsJsonArray("resources").size(); i++) {
-			JsonObject testExecution = executions.getAsJsonArray("resources").get(i).getAsJsonObject();
-			// String testId = testExecution.get("id").getAsString();
-			String testName = testExecution.get("name").getAsString().replace(" ", "_");
-			JsonObject platforms = testExecution.getAsJsonArray("platforms").get(0).getAsJsonObject();
-			String deviceName = platforms.get("deviceId").getAsString();
-			downloadVideo(deviceName + "_" + (testName.length() >= 100 ? testName.substring(1, 100) : testName),
-					executions);
-		}
+		System.out.println(
+				"ENHANCEMENT - From Quantum version 1.23.0, only 1 video will be downloaded for the entire driver session instead of individual videos for individual tests. ");
+		// for (int i = 0; i < executions.getAsJsonArray("resources").size(); i++) {
+		JsonObject testExecution = executions.getAsJsonArray("resources").get(0).getAsJsonObject();
+		// String testId = testExecution.get("id").getAsString();
+		String testName = testExecution.get("name").getAsString().replace(" ", "_");
+		JsonObject platforms = testExecution.getAsJsonArray("platforms").get(0).getAsJsonObject();
+		String deviceName = platforms.get("deviceId").getAsString();
+		downloadVideo(deviceName + "_" + (testName.length() >= 100 ? testName.substring(1, 100) : testName),
+				executions);
+		// }
 
 	}
 
@@ -211,29 +212,33 @@ public class ReportUtils {
 			InetAddress addr;
 			addr = InetAddress.getLocalHost();
 			String hostname = addr.getHostName();
+			try {
+				NTCredentials ntCreds = new NTCredentials(ConfigurationManager.getBundle().getString("proxyUser", ""),
+						ConfigurationManager.getBundle().getString("proxyPassword", ""), hostname,
+						ConfigurationManager.getBundle().getString("proxyDomain", ""));
 
-			NTCredentials ntCreds = new NTCredentials(
-					ConfigurationManager.getBundle().getString("proxyUser").toString(),
-					ConfigurationManager.getBundle().getString("proxyPassword").toString(), hostname,
-					ConfigurationManager.getBundle().getString("proxyDomain").toString());
+				CredentialsProvider credsProvider = new BasicCredentialsProvider();
+				credsProvider
+						.setCredentials(
+								new AuthScope(ConfigurationManager.getBundle().getString("proxyHost").toString(),
+										Integer.parseInt(
+												ConfigurationManager.getBundle().getString("proxyPort").toString())),
+								ntCreds);
+				HttpClientBuilder clientBuilder = HttpClientBuilder.create();
 
-			CredentialsProvider credsProvider = new BasicCredentialsProvider();
-			credsProvider
-					.setCredentials(
-							new AuthScope(ConfigurationManager.getBundle().getString("proxyHost").toString(),
-									Integer.parseInt(
-											ConfigurationManager.getBundle().getString("proxyPort").toString())),
-							ntCreds);
-			HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+				clientBuilder.useSystemProperties();
+				clientBuilder.setProxy(new HttpHost(ConfigurationManager.getBundle().getString("proxyHost").toString(),
+						Integer.parseInt(ConfigurationManager.getBundle().getString("proxyPort").toString())));
+				clientBuilder.setDefaultCredentialsProvider(credsProvider);
+				clientBuilder.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
 
-			clientBuilder.useSystemProperties();
-			clientBuilder.setProxy(new HttpHost(ConfigurationManager.getBundle().getString("proxyHost").toString(),
-					Integer.parseInt(ConfigurationManager.getBundle().getString("proxyPort").toString())));
-			clientBuilder.setDefaultCredentialsProvider(credsProvider);
-			clientBuilder.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
+				CloseableHttpClient httpClient = clientBuilder.build();
+				getExecutionsResponse = httpClient.execute(getExecutions);
+			} catch (Exception e) {
+				System.out.println(
+						"ERROR -----------> proxyPort key was not mentioned along with the proxyHost configuration for report downloading");
+			}
 
-			CloseableHttpClient httpClient = clientBuilder.build();
-			getExecutionsResponse = httpClient.execute(getExecutions);
 		} else {
 			HttpClient httpClient = HttpClientBuilder.create().build();
 			getExecutionsResponse = httpClient.execute(getExecutions);
@@ -264,29 +269,33 @@ public class ReportUtils {
 			InetAddress addr;
 			addr = InetAddress.getLocalHost();
 			String hostname = addr.getHostName();
+			try {
+				NTCredentials ntCreds = new NTCredentials(ConfigurationManager.getBundle().getString("proxyUser", ""),
+						ConfigurationManager.getBundle().getString("proxyPassword", ""), hostname,
+						ConfigurationManager.getBundle().getString("proxyDomain", ""));
 
-			NTCredentials ntCreds = new NTCredentials(
-					ConfigurationManager.getBundle().getString("proxyUser").toString(),
-					ConfigurationManager.getBundle().getString("proxyPassword").toString(), hostname,
-					ConfigurationManager.getBundle().getString("proxyDomain").toString());
+				CredentialsProvider credsProvider = new BasicCredentialsProvider();
+				credsProvider
+						.setCredentials(
+								new AuthScope(ConfigurationManager.getBundle().getString("proxyHost").toString(),
+										Integer.parseInt(
+												ConfigurationManager.getBundle().getString("proxyPort").toString())),
+								ntCreds);
+				HttpClientBuilder clientBuilder = HttpClientBuilder.create();
 
-			CredentialsProvider credsProvider = new BasicCredentialsProvider();
-			credsProvider
-					.setCredentials(
-							new AuthScope(ConfigurationManager.getBundle().getString("proxyHost").toString(),
-									Integer.parseInt(
-											ConfigurationManager.getBundle().getString("proxyPort").toString())),
-							ntCreds);
-			HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+				clientBuilder.useSystemProperties();
+				clientBuilder.setProxy(new HttpHost(ConfigurationManager.getBundle().getString("proxyHost").toString(),
+						Integer.parseInt(ConfigurationManager.getBundle().getString("proxyPort").toString())));
+				clientBuilder.setDefaultCredentialsProvider(credsProvider);
+				clientBuilder.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
 
-			clientBuilder.useSystemProperties();
-			clientBuilder.setProxy(new HttpHost(ConfigurationManager.getBundle().getString("proxyHost").toString(),
-					Integer.parseInt(ConfigurationManager.getBundle().getString("proxyPort").toString())));
-			clientBuilder.setDefaultCredentialsProvider(credsProvider);
-			clientBuilder.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
+				CloseableHttpClient httpClient = clientBuilder.build();
+				getCommandsResponse = httpClient.execute(getCommands);
+			} catch (Exception e) {
+				System.out.println(
+						"ERROR -----------> proxyPort key was not mentioned along with the proxyHost configuration for report downloading");
+			}
 
-			CloseableHttpClient httpClient = clientBuilder.build();
-			getCommandsResponse = httpClient.execute(getCommands);
 		} else {
 			HttpClient httpClient = HttpClientBuilder.create().build();
 			getCommandsResponse = httpClient.execute(getCommands);
@@ -317,12 +326,9 @@ public class ReportUtils {
 	 * will be incoming as a parameter and is handled in a different method. Updated
 	 * this method to go with the v2 download APIs.
 	 * 
-	 * @param testId
-	 *            - Test id of the single test report.
-	 * @param fileName
-	 *            - Name of the pdf file that will be downloaded.
-	 * @param accessToken
-	 *            - Security token of the user.
+	 * @param testId      - Test id of the single test report.
+	 * @param fileName    - Name of the pdf file that will be downloaded.
+	 * @param accessToken - Security token of the user.
 	 * @throws Exception
 	 */
 	private static void downloadTestReport(String testId, String fileName, String accessToken) throws Exception {
@@ -462,12 +468,8 @@ public class ReportUtils {
 					ConfigurationManager.getBundle().getString("proxyDomain", ""));
 
 			CredentialsProvider credsProvider = new BasicCredentialsProvider();
-			credsProvider
-					.setCredentials(
-							new AuthScope(ConfigurationManager.getBundle().getString("proxyHost"),
-									Integer.parseInt(
-											ConfigurationManager.getBundle().getString("proxyPort"))),
-							ntCreds);
+			credsProvider.setCredentials(new AuthScope(ConfigurationManager.getBundle().getString("proxyHost"),
+					Integer.parseInt(ConfigurationManager.getBundle().getString("proxyPort"))), ntCreds);
 			HttpClientBuilder clientBuilder = HttpClientBuilder.create();
 
 			clientBuilder.useSystemProperties();
@@ -497,8 +499,7 @@ public class ReportUtils {
 	}
 
 	@SuppressWarnings("unused")
-	private static void downloadVideo(String deviceId, JsonObject testExecution)
-			throws Exception {
+	private static void downloadVideo(String deviceId, JsonObject testExecution) throws Exception {
 		JsonObject resources = testExecution.getAsJsonArray("resources").get(0).getAsJsonObject();
 		JsonArray videos = resources.getAsJsonArray("videos");
 
@@ -515,8 +516,7 @@ public class ReportUtils {
 		}
 	}
 
-	private static void downloadAttachments(String deviceId, JsonObject testExecution)
-			throws Exception {
+	private static void downloadAttachments(String deviceId, JsonObject testExecution) throws Exception {
 		// Example for downloading device logs
 
 		JsonObject resources = testExecution.getAsJsonArray("resources").get(0).getAsJsonObject();
@@ -544,7 +544,8 @@ public class ReportUtils {
 				String path = artifact.get("path").getAsString();
 				String fileName = artifact.get("fileName").getAsString().replace(" ", "_");
 				URIBuilder uriBuilder = new URIBuilder(path);
-				downloadFile(deviceId + "_" + testId, uriBuilder.build(), "_" + fileName + ".zip", "accessibility reports");
+				downloadFile(deviceId + "_" + testId, uriBuilder.build(), "_" + fileName + ".zip",
+						"accessibility reports");
 			}
 		}
 	}
@@ -581,25 +582,20 @@ public class ReportUtils {
 
 		if (ConfigurationManager.getBundle().getString("proxyHost") != null
 				&& !ConfigurationManager.getBundle().getString("proxyHost").toString().equals("")) {
-			if(ConfigurationManager.getBundle().getString("proxyPort") == null) {
+			if (ConfigurationManager.getBundle().getString("proxyPort") == null) {
 				throw new Exception("Please mention the NTLM port in the application properties file");
 			}
 			InetAddress addr;
 			addr = InetAddress.getLocalHost();
 			String hostname = addr.getHostName();
 
-			NTCredentials ntCreds = new NTCredentials(
-					ConfigurationManager.getBundle().getString("proxyUser",""),
-					ConfigurationManager.getBundle().getString("proxyPassword",""), hostname,
-					ConfigurationManager.getBundle().getString("proxyDomain",""));
+			NTCredentials ntCreds = new NTCredentials(ConfigurationManager.getBundle().getString("proxyUser", ""),
+					ConfigurationManager.getBundle().getString("proxyPassword", ""), hostname,
+					ConfigurationManager.getBundle().getString("proxyDomain", ""));
 
 			CredentialsProvider credsProvider = new BasicCredentialsProvider();
-			credsProvider
-					.setCredentials(
-							new AuthScope(ConfigurationManager.getBundle().getString("proxyHost"),
-									Integer.parseInt(
-											ConfigurationManager.getBundle().getString("proxyPort"))),
-							ntCreds);
+			credsProvider.setCredentials(new AuthScope(ConfigurationManager.getBundle().getString("proxyHost"),
+					Integer.parseInt(ConfigurationManager.getBundle().getString("proxyPort"))), ntCreds);
 			HttpClientBuilder clientBuilder = HttpClientBuilder.create();
 
 			clientBuilder.useSystemProperties();
@@ -656,10 +652,8 @@ public class ReportUtils {
 	 * will mark the scenario as failed at the end and also display all the failure
 	 * messages
 	 * 
-	 * @param message
-	 *            - Assertion message to be displayed in the DZ
-	 * @param status
-	 *            - Assertion flag status - true or false (pass or fail)
+	 * @param message - Assertion message to be displayed in the DZ
+	 * @param status  - Assertion flag status - true or false (pass or fail)
 	 */
 	public static void logVerify(String message, boolean status) {
 		try {
@@ -675,13 +669,10 @@ public class ReportUtils {
 	/**
 	 * Added this method to report verifications with throwable exception.
 	 * 
-	 * @param message
-	 *            - Assertion message to be displayed in the DZ
-	 * @param status
-	 *            - Assertion flag status - true or false (pass or fail)
-	 * @param e
-	 *            - If the exception will be passed then the stacktrace will be
-	 *            attached on failure flag in DZ
+	 * @param message - Assertion message to be displayed in the DZ
+	 * @param status  - Assertion flag status - true or false (pass or fail)
+	 * @param e       - If the exception will be passed then the stacktrace will be
+	 *                attached on failure flag in DZ
 	 */
 	public static void logVerify(String message, boolean status, Throwable e) {
 		try {
@@ -700,10 +691,8 @@ public class ReportUtils {
 	 * Using this method will add an assertion and stop the execution of the
 	 * scenario in case of failure.
 	 * 
-	 * @param message
-	 *            - Assertion message to be displayed in the DZ
-	 * @param status
-	 *            - Assertion flag status - true or false (pass or fail)
+	 * @param message - Assertion message to be displayed in the DZ
+	 * @param status  - Assertion flag status - true or false (pass or fail)
 	 */
 	public static void logAssert(String message, boolean status) {
 		logVerify(message, status);
@@ -715,13 +704,10 @@ public class ReportUtils {
 	/**
 	 * Added this method to report assertions with throwable exception.
 	 * 
-	 * @param message
-	 *            - Assertion message to be displayed in the DZ
-	 * @param status
-	 *            - Assertion flag status - true or false (pass or fail)
-	 * @param e-
-	 *            If the exception will be passed then the stacktrace will be
-	 *            attached on failure flag in DZ
+	 * @param message - Assertion message to be displayed in the DZ
+	 * @param status  - Assertion flag status - true or false (pass or fail)
+	 * @param e-      If the exception will be passed then the stacktrace will be
+	 *                attached on failure flag in DZ
 	 */
 	public static void logAssert(String message, boolean status, Throwable e) {
 		logVerify(message, status, e);

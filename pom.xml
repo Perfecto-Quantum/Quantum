@@ -13,13 +13,13 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<reportium-sdk.version>2.3</reportium-sdk.version>
 		<selenium.version>3.141.59</selenium.version>
-		<testng.version>7.3.0</testng.version>
+		<testng.version>6.10</testng.version>
 		<cukes.version>1.2.5</cukes.version>
 		<org.json.version>20160810</org.json.version>
 		<perfectomobile.version>18.3.0.3</perfectomobile.version>
 		<intellij.perfectomobile.version>18.4.0.0 </intellij.perfectomobile.version>
-		<qaf.version>2.1.15</qaf.version>
-		<qafsupport.version>2.1.15</qafsupport.version>
+		<qaf.version>3.0.0</qaf.version>
+		<qafsupport.version>3.0.0</qafsupport.version>
 		<appium.client.version>7.3.0</appium.client.version>
 	</properties>
 
@@ -127,6 +127,7 @@
 			<artifactId>http-client</artifactId>
 			<version>${perfectomobile.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>com.qmetry</groupId>
 			<artifactId>qaf</artifactId>
@@ -136,24 +137,26 @@
 					<groupId>info.cukes</groupId>
 					<artifactId>cucumber-java</artifactId>
 				</exclusion>
-				<!-- <exclusion> -->
-				<!-- <groupId>org.seleniumhq.selenium</groupId> -->
-				<!-- <artifactId>selenium-remote-driver</artifactId> -->
-				<!-- </exclusion> -->
-				<!-- <exclusion> -->
-				<!-- <groupId>org.seleniumhq.selenium</groupId> -->
-				<!-- <artifactId>selenium-api</artifactId> -->
-				<!-- </exclusion> -->
-				<!-- <exclusion> -->
-				<!-- <groupId>org.seleniumhq.selenium</groupId> -->
-				<!-- <artifactId>selenium-java</artifactId> -->
-				<!-- </exclusion> -->
+				<exclusion>
+					<groupId>org.testng</groupId>
+					<artifactId>testng</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.qmetry</groupId>
 			<artifactId>qaf-support</artifactId>
 			<version>${qafsupport.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>info.cukes</groupId>
+					<artifactId>cucumber-java</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.testng</groupId>
+					<artifactId>testng</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.perfectomobile</groupId>
@@ -180,6 +183,12 @@
 			<groupId>com.perfecto.reporting-sdk</groupId>
 			<artifactId>reportium-testng</artifactId>
 			<version>${reportium-sdk.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.testng</groupId>
+					<artifactId>testng</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>dom4j</groupId>
@@ -212,26 +221,27 @@
 			<version>29.0-jre</version>
 		</dependency>
 		<dependency>
-		    <groupId>org.apache.commons</groupId>
-		    <artifactId>commons-collections4</artifactId>
-		    <version>4.1</version>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+			<version>4.1</version>
 		</dependency>
-	
+
 		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations -->
 		<dependency>
-		    <groupId>com.fasterxml.jackson.core</groupId>
-		    <artifactId>jackson-annotations</artifactId>
-		    <version>2.7.0</version>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>2.7.0</version>
 		</dependency>
 		<dependency>
-		    <groupId>com.fasterxml.jackson.core</groupId>
-		    <artifactId>jackson-core</artifactId>
-		    <version>2.7.0</version>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>2.7.0</version>
 		</dependency>
 		<dependency>
-		    <groupId>com.fasterxml.jackson.core</groupId>
-		    <artifactId>jackson-databind</artifactId>
-		    <version>2.9.10.7</version>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.9.10.7</version>
 		</dependency>
+
 	</dependencies>
 </project>
