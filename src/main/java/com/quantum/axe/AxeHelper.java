@@ -1,21 +1,18 @@
 package com.quantum.axe;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.apache.commons.io.IOUtils;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import org.apache.commons.io.IOUtils;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -189,7 +186,7 @@ public class AxeHelper {
   public AxeTestResultContainer axeEverything() throws InterruptedException {
     final String script = String.format(runAxeScript);
     // log.info("{}", script);
-    final Object result = driver.executeScript(script, Collections.EMPTY_MAP);
+    driver.executeScript(script, Collections.EMPTY_MAP);
 //    log.info("Axe run: {}", result);
 
     // Poll for a result...

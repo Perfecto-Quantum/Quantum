@@ -866,7 +866,7 @@ public class DeviceUtils {
 	}
 	
 	private static void startAxe() {
-		AxeHelper axe = new AxeHelper(DriverUtils.getDriver());
+		AxeHelper axe = new AxeHelper(DeviceUtils.getQAFDriver());
 		axe.runAxe();
 		axe.startHighlighter("violations");
 		final StringBuilder errors = new StringBuilder();

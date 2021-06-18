@@ -1137,7 +1137,7 @@ public class Utils {
      *
      * @param element : element to be clicked
      */
-    public static void javascriptClick(QAFWebElement element) {
+    public static void javaScriptClick(QAFWebElement element) {
         JavascriptExecutor executor = DeviceUtils.getQAFDriver();
         executor.executeScript("arguments[0].click();", element);
     }
@@ -1147,7 +1147,7 @@ public class Utils {
      *
      * @param element : element to be clicked
      */
-    public static void javascriptClickEvent(QAFWebElement element) {
+    public static void javaScriptClickEvent(QAFWebElement element) {
         JavascriptExecutor js = (JavascriptExecutor) DeviceUtils.getQAFDriver();
         String onClickScript = "if(document.createEvent){var evObj = document.createEvent('MouseEvents');evObj.initEvent('click',true, false);arguments[0].dispatchEvent(evObj);} else if(document.createEventObject){ arguments[0].fireEvent('onclick');}";
         String mouseHoverScript = "if(document.createEvent){var evObj = document.createEvent('MouseEvents');evObj.initEvent('mouseover',true, false); arguments[0].dispatchEvent(evObj);} else if(document.createEventObject){ arguments[0].fireEvent('onmouseover');}";
@@ -1162,7 +1162,7 @@ public class Utils {
      *
      * @param element : element to be clicked
      */
-    public static void javascriptScrollToElement(QAFWebElement element) {
+    public static void javaScriptScrollToElement(QAFWebElement element) {
         JavascriptExecutor executor = DeviceUtils.getQAFDriver();
         executor.executeScript("arguments[0].scrollIntoView();", element);
     }
