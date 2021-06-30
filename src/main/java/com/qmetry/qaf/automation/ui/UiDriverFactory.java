@@ -63,6 +63,7 @@ import com.qmetry.qaf.automation.ui.webdriver.QAFWebDriverCommandListener;
 import com.qmetry.qaf.automation.util.StringUtil;
 import com.quantum.listeners.DriverInitListener;
 
+import io.appium.java_client.remote.AppiumCommandExecutor;
 import okhttp3.Authenticator;
 import okhttp3.Credentials;
 import okhttp3.Request;
@@ -577,7 +578,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			beforeInitialize(desiredCapabilities, listners);
 
 			try {
-				HttpCommandExecutor executor = new HttpCommandExecutor(new HashMap<String, CommandInfo>(), urls,
+				HttpCommandExecutor executor = new AppiumCommandExecutor(new HashMap<String, CommandInfo>(), urls,
 						factory);
 				return new QAFExtendedWebDriver(executor, desiredCapabilities, reporter);
 
