@@ -722,13 +722,17 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 				3600);
 
 		boolean driverResetTag = false;
-		Scenario sc = (Scenario) result.getInstance();
-		String[] m_groups = sc.getM_groups();
-		for (String tag : m_groups) {
-			if (tag.equalsIgnoreCase("@RestartDriverAfterTimeout")) {
-				System.out.println("Driver Reset tag found!");
-				driverResetTag = true;
+		try {
+			Scenario sc = (Scenario) result.getInstance();
+			String[] m_groups = sc.getM_groups();
+			for (String tag : m_groups) {
+				if (tag.equalsIgnoreCase("@RestartDriverAfterTimeout")) {
+					System.out.println("Driver Reset tag found!");
+					driverResetTag = true;
+				}
 			}
+		} catch (Exception e) {
+//			System.out.println("Gherkin scenarios were not found so skipping the reset driver tag check.");
 		}
 
 		if (driverResetTimerFlag.equalsIgnoreCase("true") || driverResetTag) {
