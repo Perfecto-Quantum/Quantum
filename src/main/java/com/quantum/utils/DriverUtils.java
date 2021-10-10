@@ -77,7 +77,7 @@ public class DriverUtils {
 	}
 
 	public static boolean isIOS() {
-		if (getOS().equalsIgnoreCase("android")) {
+		if (getOS().equalsIgnoreCase("ios")) {
 			return true;
 		} else {
 			return false;
