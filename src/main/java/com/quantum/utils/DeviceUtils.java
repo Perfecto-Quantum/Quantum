@@ -9,6 +9,7 @@ import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.LogFactoryImpl;
@@ -22,6 +23,7 @@ import org.openqa.selenium.remote.RemoteWebElement;
 
 import com.perfectomobile.httpclient.device.DeviceParameter;
 import com.perfectomobile.httpclient.device.DeviceResult;
+import com.qmetry.qaf.automation.core.ConfigurationManager;
 import com.qmetry.qaf.automation.ui.WebDriverTestBase;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebElement;
@@ -720,13 +722,17 @@ public class DeviceUtils {
 	 * @return integer value of scale
 	 */
 	public static int getScale() {
-		// Gets the resolution of the current device
-		String deviceRes = getDeviceProperty("resolution");
-		// Gets the width of the root application viewport
-		int appWidth = new QAFExtendedWebElement("xpath=/*/*").getSize().getWidth();
-		// compares the resolution to the application dimensions to find out what the
-		// pixel scale is
-		return Math.round(Integer.parseInt(deviceRes.split("\\*")[0]) / appWidth);
+		Object i = ConfigurationManager.getBundle().getProperty("scaleFactor");
+		if(ConfigurationManager.getBundle().getProperty("scaleFactor")==null) {
+			// Gets the resolution of the current device
+			String deviceRes = getDeviceProperty("resolution");
+			// Gets the width of the root application viewport
+			int appWidth = new QAFExtendedWebElement("xpath=/*/*").getSize().getWidth();
+			// compares the resolution to the application dimensions to find out what the
+			// pixel scale is
+			ConfigurationManager.getBundle().addProperty("scaleFactor", Math.round(Integer.parseInt(deviceRes.split("\\*")[0]) / appWidth));
+		}
+		return ConfigurationManager.getBundle().getInt("scaleFactor");
 	}
 
 	/**
@@ -935,5 +941,9 @@ public class DeviceUtils {
 	public static void stopVitals() {
 		Map<String, Object> params = new HashMap<>();
 		getQAFDriver().executeScript("mobile:vitals:stop", params);
+	}
+	
+	public static Set<String> getContextHandles() {
+		return DriverUtils.getAppiumDriver().getContextHandles();
 	}
 }
