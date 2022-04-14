@@ -154,6 +154,20 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 			} catch (Exception ex) {
 
 			}
+			String deviceIdKey = ConfigurationManager.getBundle().getString("deviceIdKey", "");
+			if(!deviceIdKey.equals("")) {
+				Map<String, String> deviceIdCap = (Map<String, String>)ConfigurationManager.getBundle().getProperty("deviceIdCap");
+				String deviceIdValue = deviceIdCap.get(deviceIdKey);
+				if(deviceIdValue.isEmpty()) {
+					deviceIdValue = ConfigurationManager.getBundle().getString("devicethread"+Thread.currentThread().hashCode(), "");
+				}else {
+					deviceIdValue=deviceIdValue+","+ConfigurationManager.getBundle().getString("devicethread"+Thread.currentThread().hashCode(), "");
+				}
+				
+				deviceIdCap.put(deviceIdKey, deviceIdValue);
+				ConfigurationManager.getBundle().setProperty("deviceIdCap", deviceIdCap);
+			}
+
 		}
 
 	}

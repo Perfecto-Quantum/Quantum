@@ -193,6 +193,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 	public void onTestStart(ITestResult testResult) {
 		if (getBundle().getString("remote.server", "").contains("perfecto")) {
 			getBundle().setProperty("ScenarioExecution", testResult.getMethod().getMethodName());
+			getBundle().setProperty("TestResuleInstance",testResult);
 			// get custom fields "%name-value" from groups
 			// compile actual groups
 			String[] groups = testResult.getMethod().getGroups();
@@ -225,23 +226,23 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 					} catch (Exception ex) {
 						new NullPointerException(
 								"Custom field key/value pair not delimited properly.  Example of proper default usage: %Developer-Jeremy.  Check application properties custom.field.delimiter and custom.field.identifier for custom values that may have been set.")
-										.printStackTrace();
+						.printStackTrace();
 					}
 				}
 			}
-
+			getBundle().setProperty("tagAndCustomFields", groupsFinal);
 			Builder testContext = new TestContext.Builder();
 			if (groupsFinal.size() > 0) {
 				testContext
-						.withTestExecutionTags(groupsFinal.toString().replace('[', ' ').replace(']', ' ').split(","));
+				.withTestExecutionTags(groupsFinal.toString().replace('[', ' ').replace(']', ' ').split(","));
 			}
 
 			if (cfc.size() > 0) {
 				testContext.withCustomFields(cfc);
 			}
-
-			createReportiumClient(testResult).testStart(
-					testResult.getMethod().getMethodName() + getDataDrivenText(testResult), testContext.build());
+			String name = testResult.getMethod().getMethodName() + getDataDrivenText(testResult);
+			createReportiumClient(testResult).testStart(name
+					, testContext.build());
 
 			if (testResult.getParameters().length > 0 && getBundle().getBoolean("addFullDataToReport", false)) {
 				logStepStart("Test Data used");
@@ -281,7 +282,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 		if (method.isTestMethod()) {
 			// Before execution of test method
 			ConsoleUtils.surroundWithSquare("TEST STARTED: " + getTestName(testResult)
-					+ (testResult.getParameters().length > 0 ? " [" + testResult.getParameters()[0] + "]" : ""));
+			+ (testResult.getParameters().length > 0 ? " [" + testResult.getParameters()[0] + "]" : ""));
 
 		}
 	}
@@ -437,14 +438,14 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 		if ((testResult.getTestContext().getCurrentXmlTest().getParallel().toString().equalsIgnoreCase("methods")
 				& testResult.getTestClass().getName().toLowerCase().contains("scenario"))
 				|| ConfigurationManager.getBundle().getString("global.datadriven.parallel", "false")
-						.equalsIgnoreCase("true")
+				.equalsIgnoreCase("true")
 				|| testResult.getTestContext().getCurrentXmlTest().getXmlClasses().get(0).getName()
-						.contains("com.qmetry.qaf.automation.step.client.excel.ExcelTestFactory")
+				.contains("com.qmetry.qaf.automation.step.client.excel.ExcelTestFactory")
 				|| testResult.getTestContext().getCurrentXmlTest().getXmlClasses().get(0).getName()
-						.contains("com.qmetry.qaf.automation.step.client.csv.KwdTestFactory")
+				.contains("com.qmetry.qaf.automation.step.client.csv.KwdTestFactory")
 				|| resetDriver(testResult)
 
-		) {
+				) {
 			Object testInstance = testResult.getInstance();
 			((WebDriverTestCase) testInstance).getTestBase().tearDown();
 		}
@@ -517,7 +518,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 		ConsoleUtils.logWarningBlocks(
 				"REPORTIUM URL: " + getReportClient().getReportUrl().replace("[", "%5B").replace("]", "%5D"));
 		ConsoleUtils.surroundWithSquare(endText + getTestName(testResult)
-				+ (testResult.getParameters().length > 0 ? " [" + testResult.getParameters()[0] + "]" : ""));
+		+ (testResult.getParameters().length > 0 ? " [" + testResult.getParameters()[0] + "]" : ""));
 
 	}
 
@@ -539,16 +540,18 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 	protected ReportiumClient createReportiumClient(ITestResult testResult) {
 		ReportiumClient reportiumClient = new ReportiumClientFactory().createLoggerClient();
 
+		getBundle().setProperty("testNGITestListener", testResult);
 		String suiteName = testResult.getTestContext().getSuite().getName();
 		String prjName = getBundle().getString("project.name", suiteName);
 		String prjVer = getBundle().getString("project.ver", "1.0");
 		String xmlTestName = testResult.getTestContext().getName();
 		String allTags = xmlTestName + "," + suiteName
 				+ (System.getProperty("reportium-tags") == null ? "" : "," + System.getProperty("reportium-tags"));
-
+		System.out.println("all tags:"+allTags);
+		getBundle().setProperty("allTags", allTags);
 		Object testInstance = testResult.getInstance();
-
 		HashMap<String, WebDriver> driverList = new HashMap<String, WebDriver>();
+		getBundle().setProperty("mydriverList", driverList);
 		String driverNameList = ConfigurationManager.getBundle().getString("driverNameList", "");
 
 		if (driverNameList.isEmpty()) {
@@ -572,7 +575,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 						getBundle().getInt("BUILD_NUMBER",
 								System.getProperty("reportium-job-number") == null ? 0
 										: Integer.parseInt(System.getProperty("reportium-job-number"))))
-												.withBranch(System.getProperty("reportium-job-branch")));
+						.withBranch(System.getProperty("reportium-job-branch")));
 		for (String driverName : driverList.keySet()) {
 
 			perfectoExecutionContextBuilder.withWebDriver(driverList.get(driverName), driverName);
@@ -652,66 +655,70 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 		// if (step instanceof CustomStep) {
 
-		Object[] actualArgs = step.getActualArgs();
-		String def = step.getDescription();
+		try {
+			Object[] actualArgs = step.getActualArgs();
+			String def = step.getDescription();
 
-		if ((actualArgs != null) && (actualArgs.length > 0)) {
-			Map<String, Object> paramMap = new HashMap<>();
-			paramMap.putAll(step.getStepExecutionTracker().getContext());
-			List<String> paramNames = getArgNames(def);
+			if ((actualArgs != null) && (actualArgs.length > 0)) {
+				Map<String, Object> paramMap = new HashMap<>();
+				paramMap.putAll(step.getStepExecutionTracker().getContext());
+				List<String> paramNames = getArgNames(def);
 
-			System.out.println(paramNames);
+				System.out.println(paramNames);
 
-			if ((paramNames != null) && (!paramNames.isEmpty())) {
+				if ((paramNames != null) && (!paramNames.isEmpty())) {
 
-				for (int i = 0; i < paramNames.size(); i++) {
-					String paramName = paramNames.get(i).trim();
-					// remove starting { and ending } from parameter name
-					paramName = paramName.substring(1, paramName.length() - 1).split(":", 2)[0];
+					for (int i = 0; i < paramNames.size(); i++) {
+						String paramName = paramNames.get(i).trim();
+						// remove starting { and ending } from parameter name
+						paramName = paramName.substring(1, paramName.length() - 1).split(":", 2)[0];
 
-					// in case of data driven test args[0] should not be overriden
-					// with steps args[0]
-					if ((actualArgs[i] instanceof String)) {
+						// in case of data driven test args[0] should not be overriden
+						// with steps args[0]
+						if ((actualArgs[i] instanceof String)) {
 
-						String pstr = (String) actualArgs[i];
+							String pstr = (String) actualArgs[i];
 
-						if (pstr.startsWith("${") && pstr.endsWith("}")) {
-							String pname = pstr.substring(2, pstr.length() - 1);
-							actualArgs[i] = paramMap.containsKey(pstr) ? paramMap.get(pstr)
-									: paramMap.containsKey(pname) ? paramMap.get(pname)
-											: getBundle().containsKey(pstr) ? getBundle().getObject(pstr)
-													: getBundle().getObject(pname);
-						} else if (pstr.indexOf("$") >= 0) {
-							pstr = getBundle().getSubstitutor().replace(pstr);
-							actualArgs[i] = StrSubstitutor.replace(pstr, paramMap);
-						}
-						// continue;
-						ParamType ptype = ParamType.getType(pstr);
-						if (ptype.equals(ParamType.MAP)) {
-							Map<String, Object> kv = new Gson().fromJson(pstr, Map.class);
-							paramMap.put(paramName, kv);
-							for (String key : kv.keySet()) {
-								paramMap.put(paramName + "." + key, kv.get(key));
+							if (pstr.startsWith("${") && pstr.endsWith("}")) {
+								String pname = pstr.substring(2, pstr.length() - 1);
+								actualArgs[i] = paramMap.containsKey(pstr) ? paramMap.get(pstr)
+										: paramMap.containsKey(pname) ? paramMap.get(pname)
+												: getBundle().containsKey(pstr) ? getBundle().getObject(pstr)
+														: getBundle().getObject(pname);
+							} else if (pstr.indexOf("$") >= 0) {
+								pstr = getBundle().getSubstitutor().replace(pstr);
+								actualArgs[i] = StrSubstitutor.replace(pstr, paramMap);
 							}
-						} else if (ptype.equals(ParamType.LIST)) {
-							List<Object> lst = new Gson().fromJson(pstr, List.class);
-							paramMap.put(paramName, lst);
-							for (int li = 0; li < lst.size(); li++) {
-								paramMap.put(paramName + "[" + li + "]", lst.get(li));
+							// continue;
+							ParamType ptype = ParamType.getType(pstr);
+							if (ptype.equals(ParamType.MAP)) {
+								Map<String, Object> kv = new Gson().fromJson(pstr, Map.class);
+								paramMap.put(paramName, kv);
+								for (String key : kv.keySet()) {
+									paramMap.put(paramName + "." + key, kv.get(key));
+								}
+							} else if (ptype.equals(ParamType.LIST)) {
+								List<Object> lst = new Gson().fromJson(pstr, List.class);
+								paramMap.put(paramName, lst);
+								for (int li = 0; li < lst.size(); li++) {
+									paramMap.put(paramName + "[" + li + "]", lst.get(li));
+								}
 							}
 						}
+
+						paramMap.put("${args[" + i + "]}", actualArgs[i]);
+						paramMap.put("args[" + i + "]", actualArgs[i]);
+						paramMap.put(paramName, actualArgs[i]);
+
 					}
 
-					paramMap.put("${args[" + i + "]}", actualArgs[i]);
-					paramMap.put("args[" + i + "]", actualArgs[i]);
-					paramMap.put(paramName, actualArgs[i]);
+					description = StrSubstitutor.replace(description, paramMap);
 
 				}
-
-				description = StrSubstitutor.replace(description, paramMap);
-
 			}
-		}
+
+		} catch (Exception e) {
+		}		
 		return description;
 	}
 
@@ -732,14 +739,14 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 				}
 			}
 		} catch (Exception e) {
-//			System.out.println("Gherkin scenarios were not found so skipping the reset driver tag check.");
+			//			System.out.println("Gherkin scenarios were not found so skipping the reset driver tag check.");
 		}
 
 		if (driverResetTimerFlag.equalsIgnoreCase("true") || driverResetTag) {
 			long currentTime = System.currentTimeMillis();
 			long driverStartTime = ConfigurationManager.getBundle().getLong(PerfectoDriverListener.DRIVER_START_TIMER);
 
-//			Check the timer and the tag for restart @RestartDriverAfterTimeout
+			//			Check the timer and the tag for restart @RestartDriverAfterTimeout
 			if ((currentTime - driverStartTime) / 1000 > driverResetTimerValue || driverResetTag) {
 				System.out.println("Closing the driver and restarting the driver");
 				return true;

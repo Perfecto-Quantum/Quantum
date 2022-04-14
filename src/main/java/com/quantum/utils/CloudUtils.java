@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -31,8 +32,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.NTCredentials;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
@@ -41,8 +46,11 @@ import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.ProxyAuthenticationStrategy;
 import org.json.JSONObject;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.OutputType;
@@ -120,7 +128,7 @@ public class CloudUtils {
 				k = "os";
 			if (new ArrayList<>(
 					Arrays.asList("model", "os", "platformName", "deviceName", "platformVersion", "deviceId", "inUse"))
-							.contains(k))
+					.contains(k))
 				inputParameters.add(new ParameterValue(k, v + ""));
 		});
 
@@ -134,7 +142,7 @@ public class CloudUtils {
 	public static Iterator<Object[]> getConnectedDevices(Map<String, ?> mapValues) {
 		List<Object[]> deviceResultList = new ArrayList<>();
 		CloudUtils.getDeviceList(CloudUtils.convertMapToInputParameters(mapValues))
-				.forEach(deviceResult -> deviceResultList.add(new Object[] { deviceResult }));
+		.forEach(deviceResult -> deviceResultList.add(new Object[] { deviceResult }));
 		return deviceResultList.iterator();
 	}
 
@@ -222,31 +230,58 @@ public class CloudUtils {
 			System.out.println("Got exception " + ex);
 		}
 	}
-	
+
 	/**
 	 * Uploads a file to the media repository. Example:
 	 * uploadMedia("C:\\test\\ApiDemos.apk", "PRIVATE:apps/ApiDemos.apk");
-	 * @throws URISyntaxException 
+	 * @throws Exception 
 	 */
-	public static void uploadMedia(String path, String repositoryKey) throws URISyntaxException, ClientProtocolException, IOException {
+	public static void uploadMedia(String path, String repositoryKey) throws Exception {
 		URI uri = new URI(ConfigurationManager.getBundle().getString("remote.server"));
-	    String hostName = uri.getHost();
-	    String encodedPassword = URLEncoder.encode(getCredentials(ConfigurationUtils.getDesiredDeviceCapabilities()).getOfflineToken(), "UTF-8");
-	    sendRequest(hostName, encodedPassword, new File(path), repositoryKey);
+		String hostName = uri.getHost();
+		String encodedPassword = ReportUtils.getToken();
+		sendRequest(hostName, encodedPassword, new File(path), repositoryKey);
 	}
-	
+
 	@SuppressWarnings("unused")
-	private static void sendRequest(String host, String token, File file, String repositoryKey) throws URISyntaxException, ClientProtocolException, IOException {
+	private static void sendRequest(String host, String token, File file, String repositoryKey) throws Exception {
 		if(host.contains(".perfectomobile.com")) {
 			host = host.replace(".perfectomobile.com", "");
 		}
 		URIBuilder taskUriBuilder = new URIBuilder("https://"+host+".app.perfectomobile.com/repository/api/v1/artifacts");
 
-		DefaultHttpClient httpClient = null;
+		CloseableHttpClient httpClient = null;
 		HttpPost httppost = null;
 		HttpResponse response = null;
 
-		httpClient = new DefaultHttpClient();
+		if (ConfigurationManager.getBundle().getString("proxyHost") != null
+				&& !ConfigurationManager.getBundle().getString("proxyHost").equals("")) {
+
+			if (ConfigurationManager.getBundle().getString("proxyPort") == null) {
+				throw new Exception("Please mention the NTLM port in the application properties file");
+			}
+			InetAddress addr;
+			addr = InetAddress.getLocalHost();
+			String hostname = addr.getHostName();
+
+			NTCredentials ntCreds = new NTCredentials(ConfigurationManager.getBundle().getString("proxyUser", ""),
+					ConfigurationManager.getBundle().getString("proxyPassword", ""), hostname,
+					ConfigurationManager.getBundle().getString("proxyDomain", ""));
+
+			CredentialsProvider credsProvider = new BasicCredentialsProvider();
+			credsProvider.setCredentials(new AuthScope(ConfigurationManager.getBundle().getString("proxyHost"),
+					Integer.parseInt(ConfigurationManager.getBundle().getString("proxyPort"))), ntCreds);
+			HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+
+			clientBuilder.useSystemProperties();
+			clientBuilder.setProxy(new HttpHost(ConfigurationManager.getBundle().getString("proxyHost"),
+					Integer.parseInt(ConfigurationManager.getBundle().getString("proxyPort"))));
+			clientBuilder.setDefaultCredentialsProvider(credsProvider);
+			clientBuilder.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
+			httpClient = clientBuilder.build();
+		}else {
+			httpClient = new DefaultHttpClient();
+		}
 
 		httppost = new HttpPost(taskUriBuilder.build());
 
@@ -277,10 +312,10 @@ public class CloudUtils {
 	 * Uploads a file to the media repository. Example:
 	 * uploadMedia("demo.perfectomobile.com", "john@perfectomobile.com", "123456",
 	 * "C:\\test\\ApiDemos.apk", "PRIVATE:apps/ApiDemos.apk");
-	 * @throws URISyntaxException 
+	 * @throws Exception 
 	 */
 	public static void uploadMedia(String host, String user, String token, String path, String repositoryKey)
-			throws IOException, URISyntaxException {
+			throws Exception {
 		sendRequest(host, token, new File(path), repositoryKey);
 	}
 
@@ -289,10 +324,10 @@ public class CloudUtils {
 	 * "http://file.appsapk.com/wp-content/uploads/downloads/Sudoku%20Free.apk") ;
 	 * uploadMedia("demo.perfectomobile.com", "john@perfectomobile.com", "123456",
 	 * url, "PRIVATE:apps/ApiDemos.apk");
-	 * @throws URISyntaxException 
+	 * @throws Exception 
 	 */
 	public static void uploadMedia(String host, String user, String token, URL mediaURL, String repositoryKey)
-			throws IOException, URISyntaxException {
+			throws Exception {
 		File file = new File(mediaURL.toURI());
 		sendRequest(host, token, file, repositoryKey);
 	}
