@@ -9,6 +9,7 @@ import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.LogFactoryImpl;
@@ -22,6 +23,7 @@ import org.openqa.selenium.remote.RemoteWebElement;
 
 import com.perfectomobile.httpclient.device.DeviceParameter;
 import com.perfectomobile.httpclient.device.DeviceResult;
+import com.qmetry.qaf.automation.core.ConfigurationManager;
 import com.qmetry.qaf.automation.ui.WebDriverTestBase;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebElement;
@@ -89,8 +91,8 @@ public class DeviceUtils {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("file", getBundle().getString("repoKey", repoKey));
 		if (!instrument.isEmpty()) params.put("instrument",  instrument);
-        if (!sensorInstrument.isEmpty())params.put("sensorInstrument", sensorInstrument);
-        if (!resignEnable.isEmpty())params.put("resign", resignEnable);
+		if (!sensorInstrument.isEmpty())params.put("sensorInstrument", sensorInstrument);
+		if (!resignEnable.isEmpty())params.put("resign", resignEnable);
 
 		String resultStr = (String) getQAFDriver().executeScript("mobile:application:install", params);
 		System.out.println(resultStr);
@@ -118,8 +120,8 @@ public class DeviceUtils {
 	public static void installInstrumantedAppOnAndroid(String repoKey, String instrument, String sensorInstrument, String certificateFile, String certificateUser, String certificatePassword, String certificateParams) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("file", getBundle().getString("repoKey", repoKey));
-        if (!getBundle().getString(instrument, instrument).isEmpty()) params.put("instrument",  instrument);
-        if (!sensorInstrument.isEmpty())params.put("sensorInstrument", sensorInstrument);
+		if (!getBundle().getString(instrument, instrument).isEmpty()) params.put("instrument",  instrument);
+		if (!sensorInstrument.isEmpty())params.put("sensorInstrument", sensorInstrument);
 
 		if (getBundle().getString(instrument, instrument).equals("instrument")) {
 
@@ -720,13 +722,17 @@ public class DeviceUtils {
 	 * @return integer value of scale
 	 */
 	public static int getScale() {
-		// Gets the resolution of the current device
-		String deviceRes = getDeviceProperty("resolution");
-		// Gets the width of the root application viewport
-		int appWidth = new QAFExtendedWebElement("xpath=/*/*").getSize().getWidth();
-		// compares the resolution to the application dimensions to find out what the
-		// pixel scale is
-		return Math.round(Integer.parseInt(deviceRes.split("\\*")[0]) / appWidth);
+		Object i = ConfigurationManager.getBundle().getProperty("scaleFactor");
+		if(ConfigurationManager.getBundle().getProperty("scaleFactor")==null) {
+			// Gets the resolution of the current device
+			String deviceRes = getDeviceProperty("resolution");
+			// Gets the width of the root application viewport
+			int appWidth = new QAFExtendedWebElement("xpath=/*/*").getSize().getWidth();
+			// compares the resolution to the application dimensions to find out what the
+			// pixel scale is
+			ConfigurationManager.getBundle().addProperty("scaleFactor", Math.round(Integer.parseInt(deviceRes.split("\\*")[0]) / appWidth));
+		}
+		return ConfigurationManager.getBundle().getInt("scaleFactor");
 	}
 
 	/**
@@ -850,7 +856,7 @@ public class DeviceUtils {
 	 *  @param toLogical - user | none	The user currently running the script.
 	 *  @param toNumber	 - 	The destination phone number. It is possible to select multiple phone numbers.
 	 * 						Format -  +[country code][area code][phone number]
-	*
+	 *
 	 */
 	public static void cloudSMS( String body, String toHandset, String toUser, String toLogical , String toNumber )  throws Exception {
 		if (toHandset.isEmpty() && toUser.isEmpty() && toLogical.isEmpty()  && toNumber.isEmpty())
@@ -864,7 +870,7 @@ public class DeviceUtils {
 		if (!toNumber.isEmpty()) pars.put("to.number", toNumber);
 		getQAFDriver().executeScript("mobile:gateway:sms", pars);
 	}
-	
+
 	private static void startAxe() {
 		AxeHelper axe = new AxeHelper(DeviceUtils.getQAFDriver());
 		axe.runAxe();
@@ -894,7 +900,7 @@ public class DeviceUtils {
 			ReportUtils.getReportClient().reportiumAssert(message,false);
 			errors.append(message);
 		}
-		
+
 		if (errorCount > 0) {
 			final Capabilities capabilities = DriverUtils.getDriver().getCapabilities();
 			final String platform = String.valueOf(capabilities.getCapability("platformName"));
@@ -910,7 +916,7 @@ public class DeviceUtils {
 			String message = String.format("%n%s-%s %s : %d violations on %s%nReport Link: %s%n",
 					platform, version, browserVersionFormatted, errorCount, "https://www.google.com/", ReportUtils.getReportClient().getReportUrl());
 			message = String.format("%s%n%s%n", message, errors);
-//			throw new AccessibilityException(message);
+			//			throw new AccessibilityException(message);
 		}
 	}
 
@@ -935,5 +941,51 @@ public class DeviceUtils {
 	public static void stopVitals() {
 		Map<String, Object> params = new HashMap<>();
 		getQAFDriver().executeScript("mobile:vitals:stop", params);
+	}
+
+	public static Set<String> getContextHandles() {
+		return DriverUtils.getAppiumDriver().getContextHandles();
+	}
+
+	public static void switchToWebView() {
+		boolean flag = false;
+		String switchedContext="";
+		for (Object context : AppiumUtils.getAppiumDriver().getContextHandles()) {
+			if (context.toString().contains("WEBVIEW")||context.toString().contains("CHROMIUM")) {
+				if(!flag) {
+					switchedContext = context.toString();
+					DeviceUtils.switchToContext(context.toString());
+					System.out.println("Switched to context : "+context.toString());
+				}
+				else {
+					System.out.println("Other Webviews available: '"+switchedContext+"'");
+				}
+			}
+		}
+		
+	}
+	
+	/**
+	 * Uploads File from repository to Desktop Web Instance 
+	 * uploadFileToDesktop("PUBLIC:fileToUpload.zip");
+	 * returns The location on the VM that the file was uploaded to
+	 */
+	public static String uploadFileToDesktop(String filePath) {
+		Map param = new HashMap();
+		param.put("fileLocation", filePath);
+		Object MyFile = DeviceUtils.getQAFDriver().executeScript("perfecto:file:upload", param);
+		return String.valueOf(MyFile);
+	}
+	
+	/**
+	 * Copies File from repository to Device file system 
+	 * uploadFileToMobile("PUBLIC:image.png","phone:/Media/image.png");
+	 */
+	public static void uploadFileToMobile(String repositoryFile, String handsetFile) {
+		//declare the Map for script parameters
+		Map<String, Object> params = new HashMap<>();
+		params.put("handsetFile", handsetFile);
+		params.put("repositoryFile", repositoryFile);
+		DriverUtils.getDriver().executeScript("mobile:media:put", params);
 	}
 }

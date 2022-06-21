@@ -69,7 +69,7 @@ public class ReportUtils {
 			.replace("http://", "").replace("https://", "");
 
 	@SuppressWarnings("unchecked")
-	private static String getToken() throws Exception {
+	public static String getToken() throws Exception {
 		String accessToken = "";
 		for (Iterator<String> i = getBundle().getKeys(); i.hasNext();) {
 			String key = i.next();

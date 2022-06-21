@@ -15,12 +15,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -30,6 +32,26 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.NTCredentials;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.ProxyAuthenticationStrategy;
+import org.json.JSONObject;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -106,7 +128,7 @@ public class CloudUtils {
 				k = "os";
 			if (new ArrayList<>(
 					Arrays.asList("model", "os", "platformName", "deviceName", "platformVersion", "deviceId", "inUse"))
-							.contains(k))
+					.contains(k))
 				inputParameters.add(new ParameterValue(k, v + ""));
 		});
 
@@ -120,7 +142,7 @@ public class CloudUtils {
 	public static Iterator<Object[]> getConnectedDevices(Map<String, ?> mapValues) {
 		List<Object[]> deviceResultList = new ArrayList<>();
 		CloudUtils.getDeviceList(CloudUtils.convertMapToInputParameters(mapValues))
-				.forEach(deviceResult -> deviceResultList.add(new Object[] { deviceResult }));
+		.forEach(deviceResult -> deviceResultList.add(new Object[] { deviceResult }));
 		return deviceResultList.iterator();
 	}
 
@@ -212,25 +234,89 @@ public class CloudUtils {
 	/**
 	 * Uploads a file to the media repository. Example:
 	 * uploadMedia("C:\\test\\ApiDemos.apk", "PRIVATE:apps/ApiDemos.apk");
-	 * @throws URISyntaxException 
+	 * @throws Exception 
 	 */
-	public static void uploadMedia(String path, String repositoryKey)
-			throws IOException, URISyntaxException {
-		File file = new File(path);
-		byte[] content = readFile(file);
-		uploadMedia(content, repositoryKey);
+	public static void uploadMedia(String path, String repositoryKey) throws Exception {
+		URI uri = new URI(ConfigurationManager.getBundle().getString("remote.server"));
+		String hostName = uri.getHost();
+		String encodedPassword = ReportUtils.getToken();
+		sendRequest(hostName, encodedPassword, new File(path), repositoryKey);
+	}
+
+	@SuppressWarnings("unused")
+	private static void sendRequest(String host, String token, File file, String repositoryKey) throws Exception {
+		if(host.contains(".perfectomobile.com")) {
+			host = host.replace(".perfectomobile.com", "");
+		}
+		URIBuilder taskUriBuilder = new URIBuilder("https://"+host+".app.perfectomobile.com/repository/api/v1/artifacts");
+
+		CloseableHttpClient httpClient = null;
+		HttpPost httppost = null;
+		HttpResponse response = null;
+
+		if (ConfigurationManager.getBundle().getString("proxyHost") != null
+				&& !ConfigurationManager.getBundle().getString("proxyHost").equals("")) {
+
+			if (ConfigurationManager.getBundle().getString("proxyPort") == null) {
+				throw new Exception("Please mention the NTLM port in the application properties file");
+			}
+			InetAddress addr;
+			addr = InetAddress.getLocalHost();
+			String hostname = addr.getHostName();
+
+			NTCredentials ntCreds = new NTCredentials(ConfigurationManager.getBundle().getString("proxyUser", ""),
+					ConfigurationManager.getBundle().getString("proxyPassword", ""), hostname,
+					ConfigurationManager.getBundle().getString("proxyDomain", ""));
+
+			CredentialsProvider credsProvider = new BasicCredentialsProvider();
+			credsProvider.setCredentials(new AuthScope(ConfigurationManager.getBundle().getString("proxyHost"),
+					Integer.parseInt(ConfigurationManager.getBundle().getString("proxyPort"))), ntCreds);
+			HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+
+			clientBuilder.useSystemProperties();
+			clientBuilder.setProxy(new HttpHost(ConfigurationManager.getBundle().getString("proxyHost"),
+					Integer.parseInt(ConfigurationManager.getBundle().getString("proxyPort"))));
+			clientBuilder.setDefaultCredentialsProvider(credsProvider);
+			clientBuilder.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
+			httpClient = clientBuilder.build();
+		}else {
+			httpClient = new DefaultHttpClient();
+		}
+
+		httppost = new HttpPost(taskUriBuilder.build());
+
+		httppost.setHeader("Perfecto-Authorization", token);
+
+		MultipartEntity mpEntity = new MultipartEntity();
+
+		ContentBody inputStream = new FileBody(file, ContentType.APPLICATION_OCTET_STREAM);
+
+		JSONObject req = new JSONObject();
+		req.put("artifactLocator", repositoryKey);
+		req.put("override", true);
+		//req.put(ARTIFACT_NAME_LOCATOR_KEY, appFileName);
+
+		String rp = req.toString();
+
+		ContentBody requestPart = new StringBody(rp, ContentType.APPLICATION_JSON);
+
+		mpEntity.addPart("inputStream", inputStream);
+		mpEntity.addPart("requestPart", requestPart);
+		httppost.setEntity(mpEntity);
+		response = httpClient.execute(httppost);
+		int statusCode = response.getStatusLine().getStatusCode();
+		System.out.println("Status code:"+statusCode);
 	}
 
 	/**
 	 * Uploads a file to the media repository. Example:
 	 * uploadMedia("demo.perfectomobile.com", "john@perfectomobile.com", "123456",
 	 * "C:\\test\\ApiDemos.apk", "PRIVATE:apps/ApiDemos.apk");
+	 * @throws Exception 
 	 */
 	public static void uploadMedia(String host, String user, String token, String path, String repositoryKey)
-			throws IOException {
-		File file = new File(path);
-		byte[] content = readFile(file);
-		uploadMedia(host, user, token, content, repositoryKey);
+			throws Exception {
+		sendRequest(host, token, new File(path), repositoryKey);
 	}
 
 	/**
@@ -238,48 +324,12 @@ public class CloudUtils {
 	 * "http://file.appsapk.com/wp-content/uploads/downloads/Sudoku%20Free.apk") ;
 	 * uploadMedia("demo.perfectomobile.com", "john@perfectomobile.com", "123456",
 	 * url, "PRIVATE:apps/ApiDemos.apk");
+	 * @throws Exception 
 	 */
 	public static void uploadMedia(String host, String user, String token, URL mediaURL, String repositoryKey)
-			throws IOException {
-		byte[] content = readURL(mediaURL);
-		uploadMedia(host, user, token, content, repositoryKey);
-	}
-
-	/**
-	 * Uploads content to the media repository. Example:
-	 * uploadMedia("demo.perfectomobile.com", "john@perfectomobile.com", "123456",
-	 * content, "PRIVATE:apps/ApiDemos.apk");
-	 */
-	public static void uploadMedia(String host, String user, String token, byte[] content, String repositoryKey)
-			throws UnsupportedEncodingException, MalformedURLException, IOException {
-		if (content != null) {
-			String encodedUser = URLEncoder.encode(user, "UTF-8");
-			String encodedPassword = URLEncoder.encode(token, "UTF-8");
-			String urlStr = HTTPS + host + MEDIA_REPOSITORY + repositoryKey + "?" + UPLOAD_OPERATION + "&user="
-					+ encodedUser + "&securityToken=" + encodedPassword;
-			URL url = new URL(urlStr);
-
-			sendRequest(content, url);
-		}
-	}
-	
-	public static void uploadMedia(byte[] content, String repositoryKey)
-			throws UnsupportedEncodingException, MalformedURLException, IOException, URISyntaxException {
-		if (content != null) {
-			String encodedUser = URLEncoder.encode(getCredentials(ConfigurationUtils.getDesiredDeviceCapabilities()).getUser(), "UTF-8");
-			String encodedPassword = URLEncoder.encode(getCredentials(ConfigurationUtils.getDesiredDeviceCapabilities()).getOfflineToken(), "UTF-8");
-			
-			
-			URI uri = new URI(ConfigurationManager.getBundle().getString("remote.server"));
-		    String hostName = uri.getHost();
-		    
-		    String urlStr = HTTPS + hostName + MEDIA_REPOSITORY + repositoryKey + "?" + UPLOAD_OPERATION + "&user="
-					+ encodedUser + "&securityToken=" + encodedPassword;
-			
-			URL url = new URL(urlStr);
-
-			sendRequest(content, url);
-		}
+			throws Exception {
+		File file = new File(mediaURL.toURI());
+		sendRequest(host, token, file, repositoryKey);
 	}
 
 	@SuppressWarnings("unused")
@@ -298,21 +348,6 @@ public class CloudUtils {
 					.encode(getBundle().getString(e.getValue(), e.getValue()), StandardCharsets.UTF_8.displayName()));
 		}
 		return sb.toString();
-	}
-
-	private static void sendRequest(byte[] content, URL url) throws IOException {
-		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-		connection.setDoOutput(true);
-		connection.setRequestProperty("Content-Type", "application/octet-stream");
-		connection.connect();
-		ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-		outStream.write(content);
-		outStream.writeTo(connection.getOutputStream());
-		outStream.close();
-		int code = connection.getResponseCode();
-		if (code > HttpURLConnection.HTTP_OK) {
-			handleError(connection);
-		}
 	}
 
 	private static void handleError(HttpURLConnection connection) throws IOException {
