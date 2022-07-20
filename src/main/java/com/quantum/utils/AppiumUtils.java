@@ -1,5 +1,6 @@
 package com.quantum.utils;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -226,23 +227,23 @@ public final class AppiumUtils {
 	// For instance Month, Day, Year for a birthday would have this loop 3 times
 	// dynamically selecting each scroll wheel
 	// Code here shouldn't be modified
-	@SuppressWarnings("rawtypes")
-	public static void androidScrollKeys(String[] list) {
-		AndroidDriver driver = getAndroidDriver();
-		for (int i = 0; i < list.length; i++) {
-
-			By meX = By.xpath("//android.widget.NumberPicker[" + (i + 1) + "]/android.widget.EditText[1]");
-			fluentWait(driver, meX);
-			WebElement me = driver.findElement(meX);
-
-			TouchAction touchAction6 = new TouchAction(driver);
-			touchAction6.longPress(LongPressOptions.longPressOptions().withElement(ElementOption.element(me)))
-					.release();
-			driver.performTouchAction(touchAction6);
-
-			driver.getKeyboard().pressKey(convertAndroidMonthName(list[i]) + "");
-		}
-	}
+//	@SuppressWarnings("rawtypes")
+//	public static void androidScrollKeys(String[] list) {
+//		AndroidDriver driver = getAndroidDriver();
+//		for (int i = 0; i < list.length; i++) {
+//
+//			By meX = By.xpath("//android.widget.NumberPicker[" + (i + 1) + "]/android.widget.EditText[1]");
+//			fluentWait(driver, meX);
+//			WebElement me = driver.findElement(meX);
+//
+//			TouchAction touchAction6 = new TouchAction(driver);
+//			touchAction6.longPress(LongPressOptions.longPressOptions().withElement(ElementOption.element(me)))
+//					.release();
+//			driver.performTouchAction(touchAction6);
+//
+//			driver.pressKey(convertAndroidMonthName(list[i]) + "");
+//		}
+//	}
 
 	// Used to get the integer for a month based on the string of the month
 	private static int getMonthInt(String month) {
@@ -392,8 +393,8 @@ public final class AppiumUtils {
 	private static MobileElement fluentWait(AppiumDriver driver, By xpath) {
 		MobileElement waitElement = null;
 
-		FluentWait<RemoteWebDriver> fwait = new FluentWait<RemoteWebDriver>(driver).withTimeout(15, TimeUnit.SECONDS)
-				.pollingEvery(500, TimeUnit.MILLISECONDS).ignoring(NoSuchElementException.class)
+		FluentWait<RemoteWebDriver> fwait = new FluentWait<RemoteWebDriver>(driver).withTimeout(Duration.ofSeconds(15))
+				.pollingEvery(Duration.ofMillis(500)).ignoring(NoSuchElementException.class)
 				.ignoring(TimeoutException.class);
 
 		try {

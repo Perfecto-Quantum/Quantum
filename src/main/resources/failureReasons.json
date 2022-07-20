@@ -1,0 +1,172 @@
+[
+   {
+      "CustomError": "Session aborted",
+      "StackTraceErrors":[
+         "Session aborted after 5 minutes due to user inactivity."   
+      ]
+       
+   },
+   
+   
+    { 
+      "CustomError" : "Index out of bound",
+      "StackTraceErrors":[ 
+         "Stack Trace: java.lang.IndexOutOfBoundsException"
+      ]
+      
+   },
+   
+   
+   { 
+      "CustomError" : "Perfecto Issue",
+      "StackTraceErrors":[ 
+         "500 Internal Server Error - Perfecto Mobile"
+         
+         
+      ]
+   },
+   
+    { 
+      "CustomError" : "Menu Nav Auto Issue",
+      "StackTraceErrors":[ 
+         "Step:Then Click on iUNFI Pending Orders w.r.t exact text displayed on UI failed",
+          "Step: Then I navigate through",
+          "I click on more Options link"
+         
+        
+          
+      ]
+      
+   },
+   
+   { 
+      "CustomError" : "Application Issue",
+      "StackTraceErrors":[ 
+         "Stack Trace: java.lang.AssertionError: Ellipse icon is not displayed",
+        "Stack Trace: java.lang.AssertionError: Product 1 is not present",
+		"Stack Trace: java.lang.AssertionError: Item Details not displayed",	
+		"Step:Then Click on plus image in the cart page failed. Stack Trace: org.openqa.selenium.TimeoutException: Timed out after 65 seconds: Wait time out for By.xpath: //*[@class=\"MuiFab-label\"] to be present",    
+    "Stack Trace: java.lang.AssertionError: ListView or Overview page items not displayed",
+    "Stack Trace: org.openqa.selenium.ScriptTimeoutException: NettyHttpHandler request execution error",
+    "Step:Then Validate if the dept \"1\" is displayed with image,link,title,count underneath it",
+    "Step:Then I validate \"Selected Lists\" text is displayed failed",
+    "Step:Then I validate item \"0999987\" is displayed under \"valid\" list section failed",
+    "Step:Then Wait until item is added to cart failed",
+    "Step:Then I select check box against list name \"AutomationList1\" failed"
+    ]
+      
+   },
+   
+    { 
+      "CustomError" : "Test Data Issue",
+      "StackTraceErrors":[ 
+       "Stack Trace: java.lang.AssertionError: Select All is not worked as expected. Actual :"
+      
+            
+      ]
+      
+   },
+   
+   { 
+      "CustomError" : "Upload File Issue",
+      "StackTraceErrors":[ 
+       "Stack Trace: org.openqa.selenium.InvalidArgumentException: invalid argument: File not found",
+       "From Public Repo to Cloud failed. Stack Trace: org.openqa.selenium.WebDriverException: Request GET",
+"Step:Then I validate Uploaded File",
+"Step:Then I validate \"Items Destination\" text is displayed in desktop"
+           
+      ]
+      
+   },
+   
+    { 
+      "CustomError" : "Account Selection Issue",
+      "StackTraceErrors":[ 
+       "Stack Trace: java.lang.AssertionError: Account switcher drop down is not opened",
+    "Step:Then I select Account"
+           
+      ]
+      
+   },
+   
+   
+   
+   { 
+      "CustomError" : "Pending Order Acc Issue",
+      "StackTraceErrors":[ 
+       "Step:Then Click on \"Move to iUNFI Pending Order\" w.r.t text present on UI failed"
+           
+      ]
+      
+   },
+   
+   { 
+      "CustomError" : "Automation Script Issue",
+      "StackTraceErrors":[ 
+         "Stack Trace: org.openqa.selenium.JavascriptException: ",
+         "com.qmetry.qaf.automation.step.StepNotFoundException:",
+        
+         "Step:Then Select brand \"1\" in the list of brands and validate the URL",
+    "is not deleted from My List page",
+    "Step:Then Click on list",
+    "Step:Then I click on Calender icon and validate the calender wiget is displayed", 
+    "Stack Trace: org.openqa.selenium.TimeoutException: Timed out after 15 seconds waiting for presence of element located by: By.xpath: //*[contains(text(),'Make List(s) Private')]",  
+    "Step:Then I clear all the lists that are already created", 
+    " Stack Trace: org.openqa.selenium.WebDriverException: Failed to execute command text select: Needle not found for expected value:",
+    "TestStep implementation not found.",
+    "Step:Then Click on \"Clear all filters\" w.r.t text present on UI",
+    "Stack Trace: org.openqa.selenium.WebDriverException: Failed to execute command text select: Needle not found for expected value",
+"Step:Then Click on \"Share List(s)\" w.r.t exact text displayed on UI",
+    "Stack Trace: org.openqa.selenium.WebDriverException: Failed to execute command button-text click: Needle not found for expected value:",
+    "Stack Trace: java.lang.ClassCastException:",
+    "Stack Trace: java.lang.NullPointerException",
+    "Stack Trace: java.util.IllegalFormatConversionException:"
+      ]
+      
+   },
+   
+  
+    
+    { 
+      "CustomError" : "Data validation issue",
+      "StackTraceErrors":[ 
+         "Stack Trace: java.lang.AssertionError",
+         "There was some validation failure in the scenario which did not provide any throwable object"
+         
+      ]
+      
+   },
+   { 
+      "CustomError" : "Element not found",
+      "StackTraceErrors":[ 
+         "Stack Trace: org.openqa.selenium.TimeoutException",
+         "Stack Trace: org.openqa.selenium.ElementNotVisibleException",
+          "Stack Trace: org.openqa.selenium.json.JsonException: java.lang.reflect.InvocationTargetException"
+          
+      ]
+      
+   },
+   
+   
+   
+   
+    { 
+      "CustomError" : "Print Button Issue",
+      "StackTraceErrors":[ 
+         "Step:Then Validate Print Screen failed"
+    
+          
+      ]
+      
+   }
+   
+   
+   
+   
+   
+]
+
+
+
+
+

@@ -618,9 +618,6 @@ public class ReportUtils {
 
 				DateFormat dateFormat = new SimpleDateFormat("MMddyyyyHHmmss");
 				Date date = new Date();
-				if (!new File(dir).exists()) {
-					new File(dir).mkdir();
-				}
 				File file = new File(dir, fileName + "_" + dateFormat.format(date) + suffix);
 				fileOutputStream = new FileOutputStream(file);
 				IOUtils.copy(response.getEntity().getContent(), fileOutputStream);

@@ -51,6 +51,7 @@ import com.quantum.utils.ReportUtils;
 
 public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 	public static final String DRIVER_START_TIMER = "DriverTimer";
+
 	@Override
 	public void beforeCommand(QAFExtendedWebDriver driver, CommandTracker commandTracker) {
 
@@ -186,18 +187,18 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 		}
 
 		String pureAppiumBehavior = getBundle().getString("pureAppiumBehavior", "ignore");
-		if (desiredCapabilities.getPlatform() != null) {
+		if (desiredCapabilities.getPlatformName() != null) {
 			if (pureAppiumBehavior.equalsIgnoreCase("native")) {
-				if (desiredCapabilities.getPlatform().toString().equalsIgnoreCase("android")) {
+				if (desiredCapabilities.getPlatformName().toString().equalsIgnoreCase("android")) {
 					((DesiredCapabilities) desiredCapabilities).setCapability("enableAppiumBehavior", true);
 				}
 			} else if (pureAppiumBehavior.equalsIgnoreCase("hybrid")) {
-				if (desiredCapabilities.getPlatform().toString().equalsIgnoreCase("android")) {
+				if (desiredCapabilities.getPlatformName().toString().equalsIgnoreCase("android")) {
 					((DesiredCapabilities) desiredCapabilities).setCapability("enableAppiumBehavior", true);
 				}
 				((DesiredCapabilities) desiredCapabilities).setCapability("useAppiumForHybrid", true);
 			} else if (pureAppiumBehavior.equalsIgnoreCase("web")) {
-				if (desiredCapabilities.getPlatform().toString().equalsIgnoreCase("android")) {
+				if (desiredCapabilities.getPlatformName().toString().equalsIgnoreCase("android")) {
 					((DesiredCapabilities) desiredCapabilities).setCapability("enableAppiumBehavior", true);
 				}
 				((DesiredCapabilities) desiredCapabilities).setCapability("useAppiumForWeb", true);

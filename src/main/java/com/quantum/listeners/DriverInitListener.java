@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -173,8 +174,8 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 		int deviceAvailableCheckPollTime = ConfigurationManager.getBundle()
 				.getInt("device.available.api.check.poll.time", 3);
 
-		Wait wait = new FluentWait<String>(availableDevicesUrl).withTimeout(deviceAvailableTimeout, TimeUnit.SECONDS)
-				.pollingEvery(deviceAvailableCheckPollTime, TimeUnit.SECONDS).ignoring(Exception.class);
+		Wait wait = new FluentWait<String>(availableDevicesUrl).withTimeout(Duration.ofSeconds(deviceAvailableTimeout))
+				.pollingEvery(Duration.ofSeconds(deviceAvailableCheckPollTime)).ignoring(Exception.class);
 //		FluentWait<String> deviceWait = new FluentWait<String>(availableDevicesUrl);
 //		deviceWait.withTimeout(deviceAvailableTimeout, TimeUnit.SECONDS);
 //		deviceWait.pollingEvery(deviceAvailableCheckPollTime, TimeUnit.SECONDS);
@@ -314,15 +315,19 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 
 	public static class Device {
 		private Map<String, String> deviceAttributes;
+
 		public Device() {
 			this.deviceAttributes = new HashMap<>();
 		}
+
 		void addAttribute(String attributeName, String attributeValue) {
 			deviceAttributes.put(attributeName, attributeValue);
 		}
+
 		public Map<String, String> getDeviceAttributes() {
 			return this.deviceAttributes;
 		}
+
 		@Override
 		public String toString() {
 			return deviceAttributes.toString();

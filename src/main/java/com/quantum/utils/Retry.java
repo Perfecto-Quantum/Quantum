@@ -56,7 +56,7 @@ public class Retry implements IRetryAnalyzer {
 		int retryCount = getRetryCount();
 		boolean shouldRetry = (result.getStatus() == ITestResult.FAILURE)
 				&& (ApplicationProperties.RETRY_CNT.getIntVal(0) > retryCount);
-
+		
 		return shouldRetry;
 	}
 
