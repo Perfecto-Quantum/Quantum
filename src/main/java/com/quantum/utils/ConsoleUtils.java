@@ -55,8 +55,8 @@ public class ConsoleUtils {
 	
 	public static String getVersion(Capabilities caps) {
 		return caps.getCapability("platformVersion") == null ? 
-				(caps.getVersion() == null || caps.getVersion().isEmpty() ?
-						caps.getBrowserName() : caps.getVersion())
+				(caps.getBrowserVersion() == null || caps.getBrowserVersion().isEmpty() ?
+						caps.getBrowserName() : caps.getBrowserVersion())
 				: caps.getCapability("platformVersion") + "";
 	}
 

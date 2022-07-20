@@ -6,6 +6,7 @@ package com.quantum.utils;
 
 import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +28,6 @@ import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebElement;
 import com.qmetry.qaf.automation.util.Validator;
 import com.quantum.axe.AxeHelper;
-
-import io.appium.java_client.android.nativekey.AndroidKey;
 
 public class DeviceUtils {
 
@@ -56,7 +55,6 @@ public class DeviceUtils {
 		getQAFDriver().executeScript("mobile:application:install", params);
 	}
 
-
 	public static void installAppOnDevice(DeviceResult device) {
 		getBundle().setProperty("getQAFDriver().name", "appiumRemotegetQAFDriver()");
 
@@ -80,46 +78,69 @@ public class DeviceUtils {
 
 	/**
 	 *
-	 * @param repoKey - The full repository path, including directory and file name, where to locate the application.
-	 * @param instrument - Perform instrumentation.. Possible values :noinstrument (default) | instrument.
-	 * @param sensorInstrument - Enable device sensor. Possible values: nosensor (default)| sensor.
-	 * @param resignEnable - Re-sign the app with a Perfecto code-signing certificate that has the cloud device provisioned. Possible values false (default) | true.
+	 * @param repoKey          - The full repository path, including directory and
+	 *                         file name, where to locate the application.
+	 * @param instrument       - Perform instrumentation.. Possible values
+	 *                         :noinstrument (default) | instrument.
+	 * @param sensorInstrument - Enable device sensor. Possible values: nosensor
+	 *                         (default)| sensor.
+	 * @param resignEnable     - Re-sign the app with a Perfecto code-signing
+	 *                         certificate that has the cloud device provisioned.
+	 *                         Possible values false (default) | true.
 	 */
 	public static void installApp(String repoKey, String instrument, String sensorInstrument, String resignEnable) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("file", getBundle().getString("repoKey", repoKey));
-		if (!instrument.isEmpty()) params.put("instrument",  instrument);
-        if (!sensorInstrument.isEmpty())params.put("sensorInstrument", sensorInstrument);
-        if (!resignEnable.isEmpty())params.put("resign", resignEnable);
+		if (!instrument.isEmpty())
+			params.put("instrument", instrument);
+		if (!sensorInstrument.isEmpty())
+			params.put("sensorInstrument", sensorInstrument);
+		if (!resignEnable.isEmpty())
+			params.put("resign", resignEnable);
 
 		String resultStr = (String) getQAFDriver().executeScript("mobile:application:install", params);
 		System.out.println(resultStr);
 	}
 
-
-
 	/**
 	 *
-	 * For Android devices:
-	 *  - The appplication manifest.xml file must include internet access permission: <uses-permission android:name="android.permission.INTERNET"/>
-	 *   - The application will automatically be signed with an Android debug key to enable native object automation.
-	 * @param repoKey - The full repository path, including directory and file name, where to locate the application.
-	 * @param instrument - Perform instrumentation.. Possible values :noinstrument (default) | instrument.
-	 * @param sensorInstrument - Enable device sensor. Possible values: nosensor (default)| sensor.
-	 * @param certificateFile - The repository path, including directory and file name, of the certificate for certifying the application after instrumentation. This is the Keystore file in Android devices.
-	 * @param certificateUser - The user for certifying the application after instrumentation.This is the Key Alias in Android devices.
-	 * @param certificatePassword - The password for certifying the application after instrumentation. This is the Keystore Password in Android devices.
-	 * @param certificateParams - The key password parameter for certifying the application after instrumentation. This is the Key Password in Android devices.
-	The value must be preceded with "keypass".
+	 * For Android devices: - The appplication manifest.xml file must include
+	 * internet access permission:
+	 * <uses-permission android:name="android.permission.INTERNET"/> - The
+	 * application will automatically be signed with an Android debug key to enable
+	 * native object automation.
+	 * 
+	 * @param repoKey             - The full repository path, including directory
+	 *                            and file name, where to locate the application.
+	 * @param instrument          - Perform instrumentation.. Possible values
+	 *                            :noinstrument (default) | instrument.
+	 * @param sensorInstrument    - Enable device sensor. Possible values: nosensor
+	 *                            (default)| sensor.
+	 * @param certificateFile     - The repository path, including directory and
+	 *                            file name, of the certificate for certifying the
+	 *                            application after instrumentation. This is the
+	 *                            Keystore file in Android devices.
+	 * @param certificateUser     - The user for certifying the application after
+	 *                            instrumentation.This is the Key Alias in Android
+	 *                            devices.
+	 * @param certificatePassword - The password for certifying the application
+	 *                            after instrumentation. This is the Keystore
+	 *                            Password in Android devices.
+	 * @param certificateParams   - The key password parameter for certifying the
+	 *                            application after instrumentation. This is the Key
+	 *                            Password in Android devices. The value must be
+	 *                            preceded with "keypass".
 	 *
 	 */
 
-
-	public static void installInstrumantedAppOnAndroid(String repoKey, String instrument, String sensorInstrument, String certificateFile, String certificateUser, String certificatePassword, String certificateParams) {
+	public static void installInstrumantedAppOnAndroid(String repoKey, String instrument, String sensorInstrument,
+			String certificateFile, String certificateUser, String certificatePassword, String certificateParams) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("file", getBundle().getString("repoKey", repoKey));
-        if (!getBundle().getString(instrument, instrument).isEmpty()) params.put("instrument",  instrument);
-        if (!sensorInstrument.isEmpty())params.put("sensorInstrument", sensorInstrument);
+		if (!getBundle().getString(instrument, instrument).isEmpty())
+			params.put("instrument", instrument);
+		if (!sensorInstrument.isEmpty())
+			params.put("sensorInstrument", sensorInstrument);
 
 		if (getBundle().getString(instrument, instrument).equals("instrument")) {
 
@@ -295,6 +316,24 @@ public class DeviceUtils {
 	public static String getCurrentContext() {
 		RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(getQAFDriver());
 		return (String) executeMethod.execute(DriverCommand.GET_CURRENT_CONTEXT_HANDLE, null);
+	}
+
+	/**
+	 * @return Get all Available Context Handles - "NATIVE_APP", "WEBVIEW", "VISUAL"
+	 */
+	public static String getCurrentContextHandles() {
+		RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(getQAFDriver());
+		ArrayList<String> al = (ArrayList<String>) executeMethod.execute(DriverCommand.GET_CONTEXT_HANDLES, null);
+		StringBuffer sb = new StringBuffer();
+
+		for (String s : al) {
+			sb.append(s);
+			sb.append(",");
+		}
+		String str = sb.toString();
+		System.out.println(str);
+
+		return str;
 	}
 
 	// device utils
@@ -599,7 +638,7 @@ public class DeviceUtils {
 	/**
 	 * Moves the pickerwheel in one step using a default of 0.15
 	 * 
-	 * @param element    - WebElement that holds the XCUIElementTypePicker
+	 * @param element   - WebElement that holds the XCUIElementTypePicker
 	 * @param direction - Direction to spin the spinner, either next or previous
 	 *                  defaults to next
 	 */
@@ -610,7 +649,7 @@ public class DeviceUtils {
 	/**
 	 * Moves the pickerwheel in one step
 	 * 
-	 * @param element    - WebElement that holds the XCUIElementTypePicker
+	 * @param element   - WebElement that holds the XCUIElementTypePicker
 	 * @param direction - Direction to spin the spinner, either next or previous
 	 *                  defaults to next
 	 * @param offset    - the offset of the picker this represents 1 slide
@@ -759,112 +798,142 @@ public class DeviceUtils {
 		return (view.getY() + view.getHeight());
 	}
 
-
 	/**
-	 * Performs an audit of the accessibility features in the application. To check the entire application, this command needs to be repeated for each application screen.
+	 * Performs an audit of the accessibility features in the application. To check
+	 * the entire application, this command needs to be repeated for each
+	 * application screen.
 	 *
-	 * @param tagName - The tag that is appended to the name of the audit report to help match it to the application screen.
+	 * @param tagName - The tag that is appended to the name of the audit report to
+	 *                help match it to the application screen.
 	 */
 	public static void checkAccessibility(String tagName) {
-		//declare the Map for script parameters
+		// declare the Map for script parameters
 		String browserName = DriverUtils.getDriver().getCapabilities().getCapability("browserName").toString();
 		String platformName = DriverUtils.getDriver().getCapabilities().getCapability("platformName").toString();
-		if(platformName.equalsIgnoreCase("ios") && browserName.equalsIgnoreCase("safari")) {
+		if (platformName.equalsIgnoreCase("ios") && browserName.equalsIgnoreCase("safari")) {
 			Log logger = LogFactoryImpl.getLog(DeviceUtils.class);
-			logger.error("Accessibility testing is not supported for Safari browser on iPhone/iPad. Skipping Accessibility check.");
-		}else {
-			if(DriverUtils.getDriver().getCapabilities().getCapability("driverClass")!=null){
+			logger.error(
+					"Accessibility testing is not supported for Safari browser on iPhone/iPad. Skipping Accessibility check.");
+		} else {
+			if (DriverUtils.getDriver().getCapabilities().getCapability("driverClass") != null) {
 				Map<String, Object> params = new HashMap<>();
 				params.put("tag", tagName);
 				getQAFDriver().executeScript("mobile:checkAccessibility:audit", params);
-			}
-			else {
+			} else {
 				startAxe();
 			}
 		}
 	}
 
-
 	/**
-	 * Generates an external voice call recording to the selected destination
-	 * It is possible to select multiple destinations that may include devices, users, and phone numbers.
-	 * There is no default. To use, at least one destination must be selected.
+	 * Generates an external voice call recording to the selected destination It is
+	 * possible to select multiple destinations that may include devices, users, and
+	 * phone numbers. There is no default. To use, at least one destination must be
+	 * selected.
 	 *
-	 *  @param toHandset - The destination device. It is possible to select multiple devices.
-	 *  @param toUser - The user for this command. It is possible to select multiple users.
-	 *  @param toLogical - user | none	The user currently running the script.
-	 *  @param toNumber	 - 	The destination phone number. It is possible to select multiple phone numbers.
-	 * 						Format -  +[country code][area code][phone number]
+	 * @param toHandset - The destination device. It is possible to select multiple
+	 *                  devices.
+	 * @param toUser    - The user for this command. It is possible to select
+	 *                  multiple users.
+	 * @param toLogical - user | none The user currently running the script.
+	 * @param toNumber  - The destination phone number. It is possible to select
+	 *                  multiple phone numbers. Format - +[country code][area
+	 *                  code][phone number]
 	 *
 	 */
-	public static void cloudCall( String toHandset, String toUser, String toLogical , String toNumber )  throws Exception {
-		if (toHandset.isEmpty() && toUser.isEmpty() && toLogical.isEmpty()  && toNumber.isEmpty())
+	public static void cloudCall(String toHandset, String toUser, String toLogical, String toNumber) throws Exception {
+		if (toHandset.isEmpty() && toUser.isEmpty() && toLogical.isEmpty() && toNumber.isEmpty())
 			throw new Exception("Please select at least one destination");
 
 		Map<String, Object> pars = new HashMap<>();
-		if (!toHandset.isEmpty()) pars.put("to.handset", toHandset);
-		if (!toUser.isEmpty()) pars.put("to.user", toUser);
-		if (!toLogical.isEmpty()) pars.put("to.logical", toLogical);
-		if (!toNumber.isEmpty()) pars.put("to.number", toNumber);
+		if (!toHandset.isEmpty())
+			pars.put("to.handset", toHandset);
+		if (!toUser.isEmpty())
+			pars.put("to.user", toUser);
+		if (!toLogical.isEmpty())
+			pars.put("to.logical", toLogical);
+		if (!toNumber.isEmpty())
+			pars.put("to.number", toNumber);
 		getQAFDriver().executeScript("mobile:gateway:call", pars);
 	}
 
 	/**
-	 * Sends an email message to the selected destination
-	 * 	It is possible to select multiple destinations that may include email addresses, devices, and users.
-	 *	There is no default.
-	 *	At least one destination must be selected. If not specified, the message subject and body are be defaulted to none and “test email”.
+	 * Sends an email message to the selected destination It is possible to select
+	 * multiple destinations that may include email addresses, devices, and users.
+	 * There is no default. At least one destination must be selected. If not
+	 * specified, the message subject and body are be defaulted to none and “test
+	 * email”.
 	 *
 	 * Confirm that the destination device is configured to receive email messages.
 	 *
-	 *  @param subject - The message subject for this command. <default is "none">.
-	 *  @param body - The message text for this command. <default is "test email">.
-	 *  @param toHandset - The destination device. It is possible to select multiple devices.
-	 *  @param toAddress - The email address for this command.
-	 *  @param toUser - The user for this command. It is possible to select multiple users.
-	 *  @param toLogical - user | none	The user currently running the script.
+	 * @param subject   - The message subject for this command. <default is "none">.
+	 * @param body      - The message text for this command. <default is "test
+	 *                  email">.
+	 * @param toHandset - The destination device. It is possible to select multiple
+	 *                  devices.
+	 * @param toAddress - The email address for this command.
+	 * @param toUser    - The user for this command. It is possible to select
+	 *                  multiple users.
+	 * @param toLogical - user | none The user currently running the script.
 	 *
 	 */
-	public static void cloudEmail(String subject, String body, String toHandset, String toAddress, String toUser, String toLogical )  throws Exception {
+	public static void cloudEmail(String subject, String body, String toHandset, String toAddress, String toUser,
+			String toLogical) throws Exception {
 		if (toHandset.isEmpty() && toAddress.isEmpty() && toUser.isEmpty() && toLogical.isEmpty())
 			throw new Exception("Please select at least one destination");
 
 		Map<String, Object> pars = new HashMap<>();
-		if (!subject.isEmpty()) pars.put("subject", subject);
-		if (!body.isEmpty()) pars.put("body", body);
-		if (!toHandset.isEmpty()) pars.put("to.handset", toHandset);
-		if (!toAddress.isEmpty()) pars.put("to.address", toAddress);
-		if (!toUser.isEmpty()) pars.put("to.user", toUser);
-		if (!toLogical.isEmpty()) pars.put("to.logical", toLogical);
+		if (!subject.isEmpty())
+			pars.put("subject", subject);
+		if (!body.isEmpty())
+			pars.put("body", body);
+		if (!toHandset.isEmpty())
+			pars.put("to.handset", toHandset);
+		if (!toAddress.isEmpty())
+			pars.put("to.address", toAddress);
+		if (!toUser.isEmpty())
+			pars.put("to.user", toUser);
+		if (!toLogical.isEmpty())
+			pars.put("to.logical", toLogical);
 		getQAFDriver().executeScript("mobile:gateway:email", pars);
 	}
 
 	/**
-	 * Sends an SMS message to the selected destination.
-	 * It is possible to select multiple destinations that may include devices, users, and phones.
-	 * There is no default. To use, at least one destination must be selected.
+	 * Sends an SMS message to the selected destination. It is possible to select
+	 * multiple destinations that may include devices, users, and phones. There is
+	 * no default. To use, at least one destination must be selected.
 	 *
-	 *  @param body - The message text for this command. <default is "test email">.
-	 *  @param toHandset - The destination device. It is possible to select multiple devices.
-	 *  @param toUser - The user for this command. It is possible to select multiple users.
-	 *  @param toLogical - user | none	The user currently running the script.
-	 *  @param toNumber	 - 	The destination phone number. It is possible to select multiple phone numbers.
-	 * 						Format -  +[country code][area code][phone number]
-	*
+	 * @param body      - The message text for this command. <default is "test
+	 *                  email">.
+	 * @param toHandset - The destination device. It is possible to select multiple
+	 *                  devices.
+	 * @param toUser    - The user for this command. It is possible to select
+	 *                  multiple users.
+	 * @param toLogical - user | none The user currently running the script.
+	 * @param toNumber  - The destination phone number. It is possible to select
+	 *                  multiple phone numbers. Format - +[country code][area
+	 *                  code][phone number]
+	 *
 	 */
-	public static void cloudSMS( String body, String toHandset, String toUser, String toLogical , String toNumber )  throws Exception {
-		if (toHandset.isEmpty() && toUser.isEmpty() && toLogical.isEmpty()  && toNumber.isEmpty())
+	public static void cloudSMS(String body, String toHandset, String toUser, String toLogical, String toNumber)
+			throws Exception {
+		if (toHandset.isEmpty() && toUser.isEmpty() && toLogical.isEmpty() && toNumber.isEmpty())
 			throw new Exception("Please select at least one destination");
 
 		Map<String, Object> pars = new HashMap<>();
-		if (!body.isEmpty()) pars.put("body", body);
-		if (!toHandset.isEmpty()) pars.put("to.handset", toHandset);
-		if (!toUser.isEmpty()) pars.put("to.user", toUser);
-		if (!toLogical.isEmpty()) pars.put("to.logical", toLogical);
-		if (!toNumber.isEmpty()) pars.put("to.number", toNumber);
+		if (!body.isEmpty())
+			pars.put("body", body);
+		if (!toHandset.isEmpty())
+			pars.put("to.handset", toHandset);
+		if (!toUser.isEmpty())
+			pars.put("to.user", toUser);
+		if (!toLogical.isEmpty())
+			pars.put("to.logical", toLogical);
+		if (!toNumber.isEmpty())
+			pars.put("to.number", toNumber);
 		getQAFDriver().executeScript("mobile:gateway:sms", pars);
 	}
-	
+
 	private static void startAxe() {
 		AxeHelper axe = new AxeHelper(DeviceUtils.getQAFDriver());
 		axe.runAxe();
@@ -873,7 +942,7 @@ public class DeviceUtils {
 		int errorCount = 0;
 		while (true) {
 			final Map<String, ?> violation = axe.nextHighlight();
-			System.out.println("violation: "+violation);
+			System.out.println("violation: " + violation);
 			if (violation == null) {
 				break;
 			}
@@ -887,14 +956,14 @@ public class DeviceUtils {
 			final String html = node.get("html");
 			final String selector = (String) violation.get("target");
 
-			final String message = String.format("%s - %s%n %s%n Selector:\t%s%n HTML:\t\t%s%n%n",
-					impact, ruleId, summary, selector, html);
+			final String message = String.format("%s - %s%n %s%n Selector:\t%s%n HTML:\t\t%s%n%n", impact, ruleId,
+					summary, selector, html);
 
 			DriverUtils.getDriver().getScreenshotAs(OutputType.BASE64);
-			ReportUtils.getReportClient().reportiumAssert(message,false);
+			ReportUtils.getReportClient().reportiumAssert(message, false);
 			errors.append(message);
 		}
-		
+
 		if (errorCount > 0) {
 			final Capabilities capabilities = DriverUtils.getDriver().getCapabilities();
 			final String platform = String.valueOf(capabilities.getCapability("platformName"));
@@ -907,8 +976,9 @@ public class DeviceUtils {
 			} else {
 				browserVersionFormatted = browserName + "-" + browserVersion;
 			}
-			String message = String.format("%n%s-%s %s : %d violations on %s%nReport Link: %s%n",
-					platform, version, browserVersionFormatted, errorCount, "https://www.google.com/", ReportUtils.getReportClient().getReportUrl());
+			String message = String.format("%n%s-%s %s : %d violations on %s%nReport Link: %s%n", platform, version,
+					browserVersionFormatted, errorCount, "https://www.google.com/",
+					ReportUtils.getReportClient().getReportUrl());
 			message = String.format("%s%n%s%n", message, errors);
 //			throw new AccessibilityException(message);
 		}

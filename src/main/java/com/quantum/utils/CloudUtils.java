@@ -152,62 +152,62 @@ public class CloudUtils {
 				.replace("/nexperience/perfectomobile/wd/hub", "");
 	}
 
-	/**
-	 * Download the report. type - pdf, html, csv, xml Example:
-	 * downloadReport(driver, "pdf", "C:\\test\\report");
-	 */
+//	/**
+//	 * Download the report. type - pdf, html, csv, xml Example:
+//	 * downloadReport(driver, "pdf", "C:\\test\\report");
+//	 */
+//
+//	public static void downloadReport(String type, String fileName) throws IOException {
+//		try {
+//			String command = "mobile:report:download";
+//			Map<String, Object> params = new HashMap<String, Object>();
+//			params.put("type", type);
+//			String report = (String) new WebDriverTestBase().getDriver().executeScript(command, params);
+//			File reportFile = new File(fileName + "." + type);
+//			BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(reportFile));
+//			byte[] reportBytes = OutputType.BYTES.convertFromBase64Png(report);
+//			output.write(reportBytes);
+//			output.close();
+//		} catch (Exception ex) {
+//			System.out.println("Got exception " + ex);
+//		}
+//	}
 
-	public static void downloadReport(String type, String fileName) throws IOException {
-		try {
-			String command = "mobile:report:download";
-			Map<String, Object> params = new HashMap<String, Object>();
-			params.put("type", type);
-			String report = (String) new WebDriverTestBase().getDriver().executeScript(command, params);
-			File reportFile = new File(fileName + "." + type);
-			BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(reportFile));
-			byte[] reportBytes = OutputType.BYTES.convertFromBase64Png(report);
-			output.write(reportBytes);
-			output.close();
-		} catch (Exception ex) {
-			System.out.println("Got exception " + ex);
-		}
-	}
-
-	/**
-	 * Download all the report attachments with a certain type. type - video, image,
-	 * vital, network Examples: downloadAttachment(driver, "video",
-	 * "C:\\test\\report\\video", "flv"); downloadAttachment(driver, "image",
-	 * "C:\\test\\report\\images", "jpg");
-	 */
-	public static void downloadAttachment(String type, String fileName, String suffix) throws IOException {
-		try {
-			String command = "mobile:report:attachment";
-			boolean done = false;
-			int index = 0;
-
-			while (!done) {
-				Map<String, Object> params = new HashMap<String, Object>();
-
-				params.put("type", type);
-				params.put("index", Integer.toString(index));
-
-				String attachment = (String) new WebDriverTestBase().getDriver().executeScript(command, params);
-
-				if (attachment == null) {
-					done = true;
-				} else {
-					File file = new File(fileName + index + "." + suffix);
-					BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(file));
-					byte[] bytes = OutputType.BYTES.convertFromBase64Png(attachment);
-					output.write(bytes);
-					output.close();
-					index++;
-				}
-			}
-		} catch (Exception ex) {
-			System.out.println("Got exception " + ex);
-		}
-	}
+//	/**
+//	 * Download all the report attachments with a certain type. type - video, image,
+//	 * vital, network Examples: downloadAttachment(driver, "video",
+//	 * "C:\\test\\report\\video", "flv"); downloadAttachment(driver, "image",
+//	 * "C:\\test\\report\\images", "jpg");
+//	 */
+//	public static void downloadAttachment(String type, String fileName, String suffix) throws IOException {
+//		try {
+//			String command = "mobile:report:attachment";
+//			boolean done = false;
+//			int index = 0;
+//
+//			while (!done) {
+//				Map<String, Object> params = new HashMap<String, Object>();
+//
+//				params.put("type", type);
+//				params.put("index", Integer.toString(index));
+//
+//				String attachment = (String) new WebDriverTestBase().getDriver().executeScript(command, params);
+//
+//				if (attachment == null) {
+//					done = true;
+//				} else {
+//					File file = new File(fileName + index + "." + suffix);
+//					BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(file));
+//					byte[] bytes = OutputType.BYTES.convertFromBase64Png(attachment);
+//					output.write(bytes);
+//					output.close();
+//					index++;
+//				}
+//			}
+//		} catch (Exception ex) {
+//			System.out.println("Got exception " + ex);
+//		}
+//	}
 
 	/**
 	 * Uploads a file to the media repository. Example:

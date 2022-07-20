@@ -6,20 +6,20 @@
 
 	<groupId>com.quantum</groupId>
 	<artifactId>quantum-support</artifactId>
-	<version>1.23.0</version>
+	<version>1.3.0b</version>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<reportium-sdk.version>2.3</reportium-sdk.version>
-		<selenium.version>3.141.59</selenium.version>
+		<selenium.version>4.1.0</selenium.version>
 		<testng.version>6.10</testng.version>
 		<cukes.version>1.2.5</cukes.version>
 		<org.json.version>20160810</org.json.version>
-		<perfectomobile.version>18.3.0.3</perfectomobile.version>
+		<perfectomobile.version>18.6.0.0</perfectomobile.version>
 		<intellij.perfectomobile.version>18.4.0.0 </intellij.perfectomobile.version>
-		<qaf.version>3.0.0</qaf.version>
-		<qafsupport.version>3.0.0</qafsupport.version>
+		<qaf.version>3.1.0</qaf.version>
+		<qafsupport.version>3.1.0</qafsupport.version>
 		<appium.client.version>7.3.0</appium.client.version>
 	</properties>
 
@@ -103,20 +103,11 @@
 			<version>${cukes.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.seleniumhq.selenium</groupId>
-			<artifactId>selenium-remote-driver</artifactId>
-			<version>${selenium.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.seleniumhq.selenium</groupId>
-			<artifactId>selenium-api</artifactId>
-			<version>${selenium.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>io.appium</groupId>
 			<artifactId>java-client</artifactId>
 			<version>${appium.client.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
@@ -127,6 +118,32 @@
 			<artifactId>http-client</artifactId>
 			<version>${perfectomobile.version}</version>
 		</dependency>
+
+
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-java</artifactId>
+			<version>4.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-remote-driver</artifactId>
+			<version>4.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-api</artifactId>
+			<version>${selenium.version}</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-server -->
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-support</artifactId>
+			<version>4.1.0</version>
+		</dependency>
+
+
 
 		<dependency>
 			<groupId>com.qmetry</groupId>
@@ -158,6 +175,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+
 		<dependency>
 			<groupId>com.perfectomobile</groupId>
 			<artifactId>pm-webdriver</artifactId>
@@ -191,7 +209,7 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>dom4j</groupId>
+			<groupId>org.dom4j</groupId>
 			<artifactId>dom4j</artifactId>
 			<version>2.1.3</version>
 		</dependency>
@@ -200,18 +218,9 @@
 			<artifactId>slf4j-api</artifactId>
 			<version>1.7.7</version>
 		</dependency>
-		<dependency>
-			<groupId>org.seleniumhq.selenium</groupId>
-			<artifactId>selenium-support</artifactId>
-			<version>${selenium.version}</version>
-		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-server -->
-		<dependency>
-			<groupId>org.seleniumhq.selenium</groupId>
-			<artifactId>selenium-server</artifactId>
-			<version>${selenium.version}</version>
-		</dependency>
+
+
 
 
 		<!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
