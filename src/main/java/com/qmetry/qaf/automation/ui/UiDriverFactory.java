@@ -477,11 +477,19 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			} catch (MalformedURLException e) {
 				throw new RuntimeException(e.getMessage(), e);
 			}
+			ClientConfig config;
+			if (!proxyUser.isEmpty() || !proxyUser.equalsIgnoreCase("")) {
+				config = ClientConfig.defaultConfig().baseUrl(urls)
+						.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)))
+						.readTimeout(Duration.ofSeconds(60)).authenticateAs(
+								(org.openqa.selenium.Credentials) UsernameAndPassword.of(proxyUser, proxyPassword));
 
-			ClientConfig config = ClientConfig.defaultConfig().baseUrl(urls)
-					.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)))
-					.readTimeout(Duration.ofSeconds(60))
-					.authenticateAs((org.openqa.selenium.Credentials) UsernameAndPassword.of("", ""));
+			} else {
+				config = ClientConfig.defaultConfig().baseUrl(urls)
+						.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)))
+						.readTimeout(Duration.ofSeconds(60));
+
+			}
 
 			Factory factory = (Factory) new NettyClientFactory().createClient(config);
 			/************** NEW end ****************/
@@ -557,11 +565,19 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 				throw new RuntimeException(e.getMessage(), e);
 			}
 
-			ClientConfig config = ClientConfig.defaultConfig().baseUrl(urls)
-					.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)))
-					.readTimeout(Duration.ofSeconds(60))
-					.authenticateAs((org.openqa.selenium.Credentials) UsernameAndPassword.of(proxyUser, proxyPassword));
+			ClientConfig config;
+			if (!proxyUser.isEmpty() || !proxyUser.equalsIgnoreCase("")) {
+				config = ClientConfig.defaultConfig().baseUrl(urls)
+						.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)))
+						.readTimeout(Duration.ofSeconds(60)).authenticateAs(
+								(org.openqa.selenium.Credentials) UsernameAndPassword.of(proxyUser, proxyPassword));
 
+			} else {
+				config = ClientConfig.defaultConfig().baseUrl(urls)
+						.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)))
+						.readTimeout(Duration.ofSeconds(60));
+
+			}
 			Factory factory = (Factory) new NettyClientFactory().createClient(config);
 
 			beforeInitialize(desiredCapabilities, listners);
