@@ -108,6 +108,7 @@ public class DriverUtils {
 			driverName = driverName.substring(0,driverName.lastIndexOf("Driver"));
 		}
 		TestBaseProvider.instance().get().setDriver(driverName + "Driver");
+		DeviceUtils.getQAFDriver();
 		String envResources = ConfigurationManager.getBundle()
 				.getString(driverName.replaceAll("(?i)remote", "") + ".env.resources");
 		ConfigurationManager.getBundle().setProperty("env.resources", envResources);
