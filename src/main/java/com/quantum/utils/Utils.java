@@ -7,15 +7,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.JavascriptExecutor;
+
 import com.qmetry.qaf.automation.core.ConfigurationManager;
 import com.qmetry.qaf.automation.core.QAFTestBase;
-
 import com.qmetry.qaf.automation.ui.webdriver.QAFWebElement;
 import com.quantum.steps.PerfectoApplicationSteps;
 
@@ -1058,7 +1059,7 @@ public class Utils {
 	public static void switchAirPlaneModeOnOff(boolean status) {
 		// if (ConfigurationManager.getBundle().getString("OSType", "not
 		// mentioned").equalsIgnoreCase("iOS")) {
-		if (DeviceUtils.getQAFDriver().getCapabilities().getPlatformName().equals(Platform.IOS)) {
+		if (DeviceUtils.getQAFDriver().getCapabilities().getPlatform().equals(Platform.IOS)) {
 
 			Map<String, Object> appName = new HashMap<>();
 			appName.put("identifier", "com.apple.Preferences");
