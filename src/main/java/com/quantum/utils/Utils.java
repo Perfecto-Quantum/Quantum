@@ -1062,7 +1062,7 @@ public class Utils {
 		if (DeviceUtils.getQAFDriver().getCapabilities().getPlatformName().equals(Platform.IOS)) {
 
 			Map<String, Object> appName = new HashMap<>();
-			appName.put("name", "Settings");
+			appName.put("identifier", "com.apple.Preferences");
 			DeviceUtils.getQAFDriver().executeScript("mobile:application:open", appName);
 			QAFTestBase.pause(1000);
 			DeviceUtils.getQAFDriver().executeScript("mobile:application:close", appName);
@@ -1083,7 +1083,7 @@ public class Utils {
 				ConfigurationManager.getBundle().setProperty("currentAirplaneStatus", "false");
 
 			}
-			DeviceUtils.closeApp("Settings", "name");
+			DeviceUtils.closeApp("identifier", "com.apple.Preferences");
 			try {
 				Thread.sleep(2000);
 			} catch (InterruptedException e) {
