@@ -31,9 +31,9 @@ package com.quantum.listeners;
 
 import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -113,7 +113,6 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 							System.out.println("downloading test reports");
 							ReportUtils.generateTestReport(ConfigurationManager.getBundle().getString("executionId"));
 						} catch (Exception e) {
-							// TODO Auto-generated catch block
 							ConsoleUtils.logError(e.toString());
 						}
 					}
@@ -125,7 +124,6 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 							ReportUtils
 									.generateSummaryReports(ConfigurationManager.getBundle().getString("executionId"));
 						} catch (Exception e) {
-							// TODO Auto-generated catch block
 							ConsoleUtils.logError(e.toString());
 						}
 					}
@@ -135,7 +133,6 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 							System.out.println("downloading video");
 							ReportUtils.downloadReportVideo(ConfigurationManager.getBundle().getString("executionId"));
 						} catch (Exception e) {
-							// TODO Auto-generated catch block
 							ConsoleUtils.logError(e.toString());
 						}
 					}
@@ -146,7 +143,6 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 							ReportUtils.downloadReportAttachments(
 									ConfigurationManager.getBundle().getString("executionId"));
 						} catch (Exception e) {
-							// TODO Auto-generated catch block
 							ConsoleUtils.logError(e.toString());
 						}
 					}
@@ -232,8 +228,8 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 		// ConsoleUtils.logWarningBlocks("DEVICE PROPERTIES: " + dcaps.toString());
 		ConsoleUtils.logWarningBlocks("DEVICE PROPERTIES: " + driver.getCapabilities().toString());
 
-		Long implicitWait = ConfigurationManager.getBundle().getLong("seleniun.wait.implicit", 0);
-		driver.manage().timeouts().implicitlyWait(implicitWait, TimeUnit.MILLISECONDS);
+		long implicitWait = ConfigurationManager.getBundle().getLong("seleniun.wait.implicit", 0);
+		driver.manage().timeouts().implicitlyWait(Duration.ofMillis(implicitWait));
 
 		if (ConfigurationManager.getBundle().getString("remote.server").toLowerCase().contains(".perfectomobile.com")) {
 			ConfigurationManager.getBundle().addProperty("executionId",

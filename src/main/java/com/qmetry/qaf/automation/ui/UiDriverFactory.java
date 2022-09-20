@@ -56,6 +56,7 @@ import com.qmetry.qaf.automation.ui.selenium.webdriver.SeleniumDriverFactory;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 import com.qmetry.qaf.automation.ui.webdriver.QAFWebDriverCommandListener;
 import com.qmetry.qaf.automation.util.StringUtil;
+import com.quantum.utils.QuantumPatch;
 
 import io.appium.java_client.remote.AppiumCommandExecutor;
 import io.github.bonigarcia.wdm.WebDriverManager;
@@ -78,7 +79,6 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			try {
 				return getDriver(cmdLogger, stb);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -234,16 +234,29 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			Constructor<? extends WebDriver> constructor = of.getConstructor(URL.class, Capabilities.class);
 			return constructor.newInstance(new URL(urlStr), capabilities);
 		} catch (Exception ex) {
+			
+			logger.error(ex.getMessage());
 			try {
+				
+				logger.info("Retrying the Driver initialization - 1");
 				Constructor<? extends WebDriver> constructor = of.getConstructor(Capabilities.class);
 				return constructor.newInstance(capabilities);
 			} catch (Exception e) {
+				
+				logger.error(e.getMessage());
+				
 				if (e.getCause() != null && e.getCause() instanceof WebDriverException) {
 					throw (WebDriverException) e.getCause();
 				}
+				
+				logger.info("Retrying the Driver initialization - 2");
+				
 				try {
 					return of.newInstance();
 				} catch (Exception e1) {
+					
+					logger.error(e1.getMessage());
+					logger.info("Retrying the Driver initialization - 3");
 					try {
 						// give it another try
 						Constructor<? extends WebDriver> constructor = of.getConstructor(URL.class, Capabilities.class);
@@ -295,13 +308,27 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 		private DesiredCapabilities desiredCapabilities;
 
-		private Class<? extends WebDriver> driverCls = null;
+		
+		// Replaced with getDriverCls and getDriverCls method call to fix Parallel execution issues.
+//		private Class<? extends WebDriver> driverCls = null;
+		
+		@SuppressWarnings("unchecked")
+		private Class<? extends WebDriver> getDriverCls() {
+			return (Class<? extends WebDriver>) ConfigurationManager.getBundle().getProperty("DriverCLS");
+		}
+		
+		
+		private void setDriverCls(Class<? extends WebDriver> driverCls) {
+			ConfigurationManager.getBundle().setProperty("DriverCLS", driverCls);
+		}
+		
+		
 		private String browserName = name();
 
 		private Browsers(Capabilities desiredCapabilities) {
 			this.desiredCapabilities = new DesiredCapabilities(desiredCapabilities.asMap());
 			this.desiredCapabilities.setCapability(CapabilityType.SUPPORTS_JAVASCRIPT, true);
-			this.desiredCapabilities.setCapability(CapabilityType.TAKES_SCREENSHOT, true);
+//			this.desiredCapabilities.setCapability(CapabilityType.TAKES_SCREENSHOT, true);
 			// this.desiredCapabilities.setCapability(CapabilityType.SUPPORTS_FINDING_BY_CSS,
 			// true);
 
@@ -310,10 +337,11 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 		@SuppressWarnings("unchecked")
 		private Browsers(Capabilities desiredCapabilities, String drivercls) {
 			this(desiredCapabilities);
-			if (null == driverCls) {
+			
+			if (null == getDriverCls()) {
 				// not overridden by extra capability
 				try {
-					driverCls = (Class<? extends WebDriver>) Class.forName(drivercls);
+					setDriverCls((Class<? extends WebDriver>) Class.forName(drivercls));
 				} catch (Exception e) {
 					// throw new AutomationError(e);
 				}
@@ -323,9 +351,9 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 		private Browsers(Capabilities desiredCapabilities, Class<? extends WebDriver> driver) {
 			this(desiredCapabilities);
-			if (null == driverCls) {
+			if (null == getDriverCls()) {
 				// not overridden by extra capability
-				driverCls = driver;
+				setDriverCls(driver);
 			}
 		}
 
@@ -339,10 +367,13 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 					.fromJson(ApplicationProperties.DRIVER_ADDITIONAL_CAPABILITIES.getStringVal("{}"), Map.class);
 			capabilities.putAll(extraCapabilities);
 
+			
 			// individual capability property for all driver
 			Configuration config = ConfigurationManager.getBundle()
 					.subset(ApplicationProperties.DRIVER_CAPABILITY_PREFIX.key);
 			capabilities.putAll(new ConfigurationMap(config));
+			
+			
 			// #332 add default capabilities for standard driver
 			if (!name().equalsIgnoreCase(other.name())) {
 				String driverCapsKey = String.format(ApplicationProperties.DRIVER_ADDITIONAL_CAPABILITIES_FORMAT.key,
@@ -351,16 +382,23 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 						Map.class);
 				capabilities.putAll(extraCapabilities);
 			}
+			
 			// capabilities specific to this driver
 			String driverCapsKey = String.format(ApplicationProperties.DRIVER_ADDITIONAL_CAPABILITIES_FORMAT.key,
 					browserName);
 			extraCapabilities = gson.fromJson(ConfigurationManager.getBundle().getString(driverCapsKey, "{}"),
 					Map.class);
 			capabilities.putAll(extraCapabilities);
+			
 			// individual capability property with driver name prefix
 			String driverCapKey = String.format(ApplicationProperties.DRIVER_CAPABILITY_PREFIX_FORMAT.key, browserName);
 			config = ConfigurationManager.getBundle().subset(driverCapKey);
-			capabilities.putAll(new ConfigurationMap(config));
+			
+			// ======== Patch for Appium 2.0 vendor specific prefix ========
+			
+			QuantumPatch.capabilitiesPatchAppium2(config, capabilities);
+						
+			// ======== Patch for Appium 2.0 vendor specific prefix completes ======== 
 
 			Object driverclass = capabilities.get(ApplicationProperties.CAPABILITY_NAME_DRIVER_CLASS.key);
 			if (null == driverclass) {// backward compatibility only
@@ -368,11 +406,12 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			}
 			if (null != driverclass) {
 				try {
-					driverCls = (Class<? extends WebDriver>) Class.forName(String.valueOf(driverclass));
+					setDriverCls((Class<? extends WebDriver>) Class.forName(String.valueOf(driverclass)));
 				} catch (Exception e) {
 					// throw new AutomationError(e);
 				}
 			}
+			
 			for (String key : capabilities.keySet()) {
 				Object value = capabilities.get(key);
 				if (value instanceof String) {
@@ -430,8 +469,8 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 				 */
 
 //				Test the driver creation
-				setUpDriverExecutable(driverCls);
-				WebDriver driver = getDriverObj(driverCls, desiredCapabilities, urlstr);// driverCls.newInstance();
+				setUpDriverExecutable(getDriverCls());
+				WebDriver driver = getDriverObj(getDriverCls(), desiredCapabilities, urlstr);// driverCls.newInstance();
 				return new QAFExtendedWebDriver(driver, reporter);
 			} catch (Throwable e) {
 				onInitializationFailure(desiredCapabilities, e, listners);
@@ -457,7 +496,8 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			}
 		}
 
-		@SuppressWarnings({ "deprecation", "unused" })
+//		@SuppressWarnings({"unused" })
+		@Deprecated
 		private QAFExtendedWebDriver proxyConnectForNormalDriver(String url, WebDriverCommandLogger reporter)
 				throws Exception {
 			logger.info("Proxy Driver Connect");
@@ -466,7 +506,10 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 			String proxyHost = ConfigurationManager.getBundle().getString("ntlmProxyHost");
 			int proxyPort = Integer.parseInt(ConfigurationManager.getBundle().getString("ntlmProxyPort"));
-//			Need to know if there are any customers having Domain separately or can they mention it in username
+			
+//			TODO: Need to know if there are any customers having Domain separately or can they mention it in username
+			@SuppressWarnings("unused")
+			
 			String proxyUserDomain = ConfigurationManager.getBundle().getString("ntlmProxyDomain");
 			String proxyUser = ConfigurationManager.getBundle().getString("ntlmProxyUser");
 			String proxyPassword = ConfigurationManager.getBundle().getString("ntlmProxyPassword");
@@ -497,7 +540,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			beforeInitialize(desiredCapabilities, listners);
 
 			try {
-				WebDriver driver = getDriverProxyObj(driverCls, desiredCapabilities, urls, factory);// driverCls.newInstance();
+				WebDriver driver = getDriverProxyObj(getDriverCls(), desiredCapabilities, urls, factory);// driverCls.newInstance();
 				return new QAFExtendedWebDriver(driver, reporter);
 
 			} catch (Throwable e) {
@@ -546,7 +589,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			}
 		}
 
-		@SuppressWarnings("deprecation")
+//		@SuppressWarnings("deprecation")
 		private QAFExtendedWebDriver proxyConnect(String url, WebDriverCommandLogger reporter) throws Exception {
 			logger.info("Proxy Driver Connect");
 			DesiredCapabilities desiredCapabilities = getDesiredCapabilities();
@@ -554,8 +597,12 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 			String proxyHost = ConfigurationManager.getBundle().getString("ntlmProxyHost");
 			int proxyPort = Integer.parseInt(ConfigurationManager.getBundle().getString("ntlmProxyPort"));
-//			Need to know if there are any customers having Domain separately or can they mention it in username
+			
+//			TODO: Need to know if there are any customers having Domain separately or can they mention it in username
+			@SuppressWarnings("unused")
 			String proxyUserDomain = ConfigurationManager.getBundle().getString("ntlmProxyDomain");
+			
+			
 			String proxyUser = ConfigurationManager.getBundle().getString("ntlmProxyUser");
 			String proxyPassword = ConfigurationManager.getBundle().getString("ntlmProxyPassword");
 			URL urls;
@@ -593,6 +640,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			}
 		}
 
+		@Deprecated
 		private String getWorkstation() {
 			Map<String, String> env = System.getenv();
 			if (env.containsKey("COMPUTERNAME")) {

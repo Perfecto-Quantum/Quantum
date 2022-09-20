@@ -938,25 +938,35 @@ public class DeviceUtils {
 		AxeHelper axe = new AxeHelper(DeviceUtils.getQAFDriver());
 		axe.runAxe();
 		axe.startHighlighter("violations");
-		final StringBuilder errors = new StringBuilder();
+		StringBuilder errors = new StringBuilder();
 		int errorCount = 0;
+		
+		Map<String, ?> violation;
+		
+		String impact;
+		String summary;
+		String html;
+		String selector;
+
+		String message;
+		
 		while (true) {
-			final Map<String, ?> violation = axe.nextHighlight();
+			violation = axe.nextHighlight();
 			System.out.println("violation: " + violation);
 			if (violation == null) {
 				break;
 			}
 
 			errorCount++;
-			final String ruleId = (String) violation.get("issue");
-			final Map<String, String> node = (Map<String, String>) violation.get("node");
+			String ruleId = (String) violation.get("issue");
+			Map<String, String> node = (Map<String, String>) violation.get("node");
 
-			final String impact = node.get("impact");
-			final String summary = node.get("failureSummary");
-			final String html = node.get("html");
-			final String selector = (String) violation.get("target");
+			impact = node.get("impact");
+			summary = node.get("failureSummary");
+			html = node.get("html");
+			selector = (String) violation.get("target");
 
-			final String message = String.format("%s - %s%n %s%n Selector:\t%s%n HTML:\t\t%s%n%n", impact, ruleId,
+			message = String.format("%s - %s%n %s%n Selector:\t%s%n HTML:\t\t%s%n%n", impact, ruleId,
 					summary, selector, html);
 
 			DriverUtils.getDriver().getScreenshotAs(OutputType.BASE64);
@@ -971,14 +981,16 @@ public class DeviceUtils {
 			final String browserName = String.valueOf(capabilities.getCapability("browserName"));
 			final String browserVersion = String.valueOf(capabilities.getCapability("browserVersion"));
 			String browserVersionFormatted;
+			
 			if ("null".equals(browserName)) {
 				browserVersionFormatted = "default browser";
 			} else {
 				browserVersionFormatted = browserName + "-" + browserVersion;
 			}
-			String message = String.format("%n%s-%s %s : %d violations on %s%nReport Link: %s%n", platform, version,
+			message = String.format("%n%s-%s %s : %d violations on %s%nReport Link: %s%n", platform, version,
 					browserVersionFormatted, errorCount, "https://www.google.com/",
 					ReportUtils.getReportClient().getReportUrl());
+			
 			message = String.format("%s%n%s%n", message, errors);
 //			throw new AccessibilityException(message);
 		}

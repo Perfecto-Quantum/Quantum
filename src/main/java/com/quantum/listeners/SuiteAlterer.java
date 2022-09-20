@@ -1,44 +1,20 @@
 package com.quantum.listeners;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.StringReader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 import org.testng.IAlterSuiteListener;
-import org.testng.TestListenerAdapter;
-import org.testng.TestNG;
 import org.testng.xml.XmlClass;
 import org.testng.xml.XmlSuite;
 import org.testng.xml.XmlTest;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import com.qmetry.qaf.automation.core.ConfigurationManager;
 
 public class SuiteAlterer implements IAlterSuiteListener {
 
@@ -47,7 +23,7 @@ public class SuiteAlterer implements IAlterSuiteListener {
 
 		XmlSuite originalSuite = suites.get(0);
 		XmlSuite newSuite = originalSuite.shallowCopy();
-		List<XmlSuite> tempSuite = new ArrayList<XmlSuite>();
+//		List<XmlSuite> tempSuite = new ArrayList<XmlSuite>();
 		boolean inList = false;
 		List<XmlTest> originalTest = originalSuite.getTests();
 		List<XmlTest> finalTest = new ArrayList<XmlTest>();
@@ -100,18 +76,18 @@ public class SuiteAlterer implements IAlterSuiteListener {
 					Map<String, String> testPars = originalTest.get(z).getAllParameters();
 
 					Map<String, String> testParams = new HashMap<String, String>();
-					Iterator it2 = testPars.entrySet().iterator();
+					Iterator<Entry<String, String>> it2 = testPars.entrySet().iterator();
 					while (it2.hasNext()) {
-						Map.Entry pair = (Map.Entry) it2.next();
+						Map.Entry<String, String> pair = it2.next();
 
 						testParams.put(pair.getKey().toString(), pair.getValue().toString());
 					}
 
 					// params
 					Map<String, String> temp = parameterList.get(r);
-					Iterator it = temp.entrySet().iterator();
+					Iterator<Entry<String, String>> it = temp.entrySet().iterator();
 					while (it.hasNext()) {
-						Map.Entry pair = (Map.Entry) it.next();
+						Map.Entry<String, String> pair = it.next();
 						if (!pair.getKey().toString().equals("includedGroups")
 								&& !pair.getKey().toString().equals("excludedGroups")
 								&& !pair.getKey().toString().equals("thread-count")) {
@@ -133,7 +109,7 @@ public class SuiteAlterer implements IAlterSuiteListener {
 					// include list
 					List<String> testIncludeList = getTestIncludeGroupList(originalTest.get(z));
 					List<String> includeList = new ArrayList<>();
-					Iterator it3 = testIncludeList.iterator();
+					Iterator<String> it3 = testIncludeList.iterator();
 					while (it3.hasNext()) {
 
 						includeList.add(it3.next().toString());
@@ -142,7 +118,7 @@ public class SuiteAlterer implements IAlterSuiteListener {
 					temp = parameterList.get(r);
 					it = temp.entrySet().iterator();
 					while (it.hasNext()) {
-						Map.Entry pair = (Map.Entry) it.next();
+						Map.Entry<String, String> pair = it.next();
 						if (pair.getKey().toString().equals("includedGroups")) {
 							String[] includeArray = pair.getValue().toString().split(",");
 							for (int j = 0; j < includeArray.length; j++) {
@@ -155,7 +131,7 @@ public class SuiteAlterer implements IAlterSuiteListener {
 					// exclude list
 					List<String> testExcludeList = getTestExcludeGroupList(originalTest.get(z));
 					List<String> excludeList = new ArrayList<>();
-					Iterator it4 = testExcludeList.iterator();
+					Iterator<String> it4 = testExcludeList.iterator();
 					while (it4.hasNext()) {
 
 						excludeList.add(it4.next().toString());
@@ -163,7 +139,7 @@ public class SuiteAlterer implements IAlterSuiteListener {
 
 					it = temp.entrySet().iterator();
 					while (it.hasNext()) {
-						Map.Entry pair = (Map.Entry) it.next();
+						Map.Entry<String, String> pair = it.next();
 						if (pair.getKey().toString().equals("excludedGroups")) {
 							String[] excludeArray = pair.getValue().toString().split(",");
 							for (int j = 0; j < excludeArray.length; j++) {
@@ -174,7 +150,7 @@ public class SuiteAlterer implements IAlterSuiteListener {
 
 					// finalize tests
 					List<XmlClass> testClass = originalTest.get(z).getClasses();
-					List<XmlClass> testClass1 = new ArrayList<XmlClass>();
+//					List<XmlClass> testClass1 = new ArrayList<XmlClass>();
 
 					newTest.setClasses(testClass);
 
@@ -203,15 +179,15 @@ public class SuiteAlterer implements IAlterSuiteListener {
 				newTest.setName(originalTest.get(z).getName().split(":")[0]);
 
 				List<XmlClass> testClass = originalTest.get(z).getClasses();
-				List<XmlClass> testClass1 = new ArrayList<XmlClass>();
+//				List<XmlClass> testClass1 = new ArrayList<XmlClass>();
 
 				newTest.setClasses(testClass);
 
 				Map<String, String> testPars = originalTest.get(z).getAllParameters();
 				Map<String, String> testParams = new HashMap<String, String>();
-				Iterator it2 = testPars.entrySet().iterator();
+				Iterator<Entry<String, String>> it2 = testPars.entrySet().iterator();
 				while (it2.hasNext()) {
-					Map.Entry pair = (Map.Entry) it2.next();
+					Map.Entry<String, String> pair = it2.next();
 					testParams.put(pair.getKey().toString(), pair.getValue().toString());
 				}
 
@@ -299,7 +275,7 @@ public class SuiteAlterer implements IAlterSuiteListener {
 
 		List<String> testPars = originalTest.getIncludedGroups();
 
-		Iterator it2 = testPars.iterator();
+		Iterator<String> it2 = testPars.iterator();
 		while (it2.hasNext()) {
 
 			hasParams.add(it2.next().toString());
@@ -314,7 +290,7 @@ public class SuiteAlterer implements IAlterSuiteListener {
 
 		List<String> testPars = originalTest.getExcludedGroups();
 
-		Iterator it2 = testPars.iterator();
+		Iterator<String> it2 = testPars.iterator();
 		while (it2.hasNext()) {
 
 			hasParams.add(it2.next().toString());
@@ -330,9 +306,9 @@ public class SuiteAlterer implements IAlterSuiteListener {
 
 			Map<String, String> testPars = originalTest.get(z).getAllParameters();
 
-			Iterator it2 = testPars.entrySet().iterator();
+			Iterator<Entry<String,String>> it2 = testPars.entrySet().iterator();
 			while (it2.hasNext()) {
-				Map.Entry pair = (Map.Entry) it2.next();
+				Map.Entry<String, String> pair = it2.next();
 				if (pair.getKey().toString().equals("csvParams")) {
 					hasParams.add(originalTest.get(z).getName());
 				}
@@ -346,10 +322,10 @@ public class SuiteAlterer implements IAlterSuiteListener {
 	public List<Map<String, String>> getParameterList(XmlTest test) throws IOException {
 		Map<String, String> testPars = test.getAllParameters();
 
-		Iterator it2 = testPars.entrySet().iterator();
+		Iterator<Entry<String, String>> it2 = testPars.entrySet().iterator();
 		String path = null;
 		while (it2.hasNext()) {
-			Map.Entry pair = (Map.Entry) it2.next();
+			Map.Entry<String, String> pair = it2.next();
 			if (pair.getKey().toString().equals("csvParams")) {
 				path = pair.getValue().toString();
 				break;

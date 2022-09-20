@@ -117,7 +117,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 	}
 
 	public Messages parseFailureJsonFile(String actualMessage) {
-		String jsonStr = null;
+//		String jsonStr = null;
 		String failureConfigLoc = ConfigurationManager.getBundle().getString("failureReasonConfig",
 				"src/main/resources/failureReasons.json");
 
@@ -136,7 +136,6 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 		try {
 			reader = new JsonReader(new FileReader(failureConfigLoc));
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			System.out.println("Problem parsing Failure Reason JSON file: " + failureConfigLoc);
 			e.printStackTrace();
 		}

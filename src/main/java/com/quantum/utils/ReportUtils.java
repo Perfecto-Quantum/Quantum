@@ -574,7 +574,7 @@ public class ReportUtils {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
+//	@SuppressWarnings("deprecation")
 	private static void downloadFileToFS(HttpGet httpGet, String fileName, String suffix, String description)
 			throws Exception {
 
