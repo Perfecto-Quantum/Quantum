@@ -3,6 +3,8 @@ package com.quantum.utils;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationMap;
@@ -19,13 +21,23 @@ public class VendorPrefixPatchPerfecto implements VendorPrefixPatch{
 		Configuration perfectoCaps = new HierarchicalConfiguration();
 		String capName;
 		
-		List<String> ignoreList = Arrays.asList(new String[]{"browserName","driverClass","automationVersion"});
+		List<String> ignoreList = Arrays.asList(new String[]{"user","browserName","driverClass","automationVersion"});
+		
+		Pattern pattern = Pattern.compile("^perfecto:", Pattern.CASE_INSENSITIVE);
+		
+		Matcher matcher;
 		
 		while(iter.hasNext()) {
 			
 			capName = iter.next();
 			if(!ignoreList.contains(capName)) {
-				perfectoCaps.addProperty("perfecto:" + capName, config.getProperty(capName));
+				
+				matcher = pattern.matcher(capName);
+				
+				if(!matcher.find()) {
+					perfectoCaps.addProperty("perfecto:" + capName, config.getProperty(capName));
+				}
+				
 			}else {
 				perfectoCaps.addProperty(capName, config.getProperty(capName));
 			}
