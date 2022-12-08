@@ -35,12 +35,11 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.ie.InternetExplorerOptions;
 import org.openqa.selenium.opera.OperaOptions;
-import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.CommandInfo;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.HttpCommandExecutor;
 import org.openqa.selenium.remote.http.ClientConfig;
-import org.openqa.selenium.remote.http.HttpClient.Factory;
+import org.openqa.selenium.remote.http.HttpClient;
 import org.openqa.selenium.safari.SafariOptions;
 
 import com.google.gson.Gson;
@@ -178,7 +177,9 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 		for (String listenr : clistners) {
 			try {
-				QAFWebDriverCommandListener cls = (QAFWebDriverCommandListener) Class.forName(listenr).newInstance();
+				QAFWebDriverCommandListener cls = (QAFWebDriverCommandListener) Class.forName(listenr).getConstructor().newInstance();
+						
+//						newInstance();
 				listners.add(cls);
 			} catch (Exception e) {
 				logger.error("Unable to register listener class " + listenr, e);
@@ -187,7 +188,8 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 		clistners = ConfigurationManager.getBundle().getStringArray(ApplicationProperties.QAF_LISTENERS.key);
 		for (String listener : clistners) {
 			try {
-				QAFListener cls = (QAFListener) Class.forName(listener).newInstance();
+				QAFListener cls = (QAFListener) Class.forName(listener).getConstructor().newInstance();
+//						.newInstance();
 				if (QAFWebDriverCommandListener.class.isAssignableFrom(cls.getClass()))
 					listners.add((QAFWebDriverCommandListener) cls);
 			} catch (Exception e) {
@@ -252,7 +254,8 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 				logger.info("Retrying the Driver initialization - 2");
 				
 				try {
-					return of.newInstance();
+					return of.getConstructor().newInstance();
+//							.newInstance();
 				} catch (Exception e1) {
 					
 					logger.error(e1.getMessage());
@@ -327,7 +330,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 		private Browsers(Capabilities desiredCapabilities) {
 			this.desiredCapabilities = new DesiredCapabilities(desiredCapabilities.asMap());
-			this.desiredCapabilities.setCapability(CapabilityType.SUPPORTS_JAVASCRIPT, true);
+//			this.desiredCapabilities.setCapability(CapabilityType.SUPPORTS_JAVASCRIPT, true);
 //			this.desiredCapabilities.setCapability(CapabilityType.TAKES_SCREENSHOT, true);
 			// this.desiredCapabilities.setCapability(CapabilityType.SUPPORTS_FINDING_BY_CSS,
 			// true);
@@ -394,10 +397,18 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			String driverCapKey = String.format(ApplicationProperties.DRIVER_CAPABILITY_PREFIX_FORMAT.key, browserName);
 			config = ConfigurationManager.getBundle().subset(driverCapKey);
 			
-			// ======== Patch for Appium 2.0 vendor specific prefix ========
+			// ======== Patch for Appium 2.0 and Selenium 4 vendor specific prefix ========
 			
-			QuantumPatch.capabilitiesPatchAppium2(config, capabilities);
-						
+			QuantumPatch quantumPatch = new QuantumPatch();
+			
+			Platform platform = desiredCapabilities.getPlatformName();
+			
+			if(Platform.ANDROID.equals(platform) || Platform.IOS.equals(platform)) {
+				quantumPatch.capabilitiesPatchAppium2(config, capabilities);
+			}else {
+				quantumPatch.capabilitiesPatchSelenium4(config, capabilities);
+			}
+			
 			// ======== Patch for Appium 2.0 vendor specific prefix completes ======== 
 
 			Object driverclass = capabilities.get(ApplicationProperties.CAPABILITY_NAME_DRIVER_CLASS.key);
@@ -497,7 +508,6 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 		}
 
 //		@SuppressWarnings({"unused" })
-		@Deprecated
 		private QAFExtendedWebDriver proxyConnectForNormalDriver(String url, WebDriverCommandLogger reporter)
 				throws Exception {
 			logger.info("Proxy Driver Connect");
@@ -521,6 +531,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 				throw new RuntimeException(e.getMessage(), e);
 			}
 			ClientConfig config;
+			
 			if (!proxyUser.isEmpty() || !proxyUser.equalsIgnoreCase("")) {
 				config = ClientConfig.defaultConfig().baseUrl(urls)
 						.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)))
@@ -534,7 +545,8 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 			}
 
-			Factory factory = (Factory) new NettyClientFactory().createClient(config);
+			HttpClient.Factory factory = new NettyClientFactory();
+		
 			/************** NEW end ****************/
 
 			beforeInitialize(desiredCapabilities, listners);
@@ -550,13 +562,13 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 		}
 
 		private static WebDriver getDriverProxyObj(Class<? extends WebDriver> of, Capabilities capabilities, URL url,
-				Factory factory) {
+				HttpClient.Factory factory) {
 			try {
 				// give it first try
 				// Constructor<? extends WebDriver> constructor =
 				// of.getConstructor(HttpCommandExecutor.class,
 				// Capabilities.class);
-				Constructor<? extends WebDriver> constructor = of.getConstructor(URL.class, Factory.class,
+				Constructor<? extends WebDriver> constructor = of.getConstructor(URL.class, HttpClient.Factory.class,
 						Capabilities.class);
 				return constructor.newInstance(url, factory, capabilities);
 			} catch (Exception ex) {
@@ -603,17 +615,18 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			String proxyUserDomain = ConfigurationManager.getBundle().getString("ntlmProxyDomain");
 			
 			
-			String proxyUser = ConfigurationManager.getBundle().getString("ntlmProxyUser");
-			String proxyPassword = ConfigurationManager.getBundle().getString("ntlmProxyPassword");
+			String proxyUser = ConfigurationManager.getBundle().getString("ntlmProxyUser","");
+			String proxyPassword = ConfigurationManager.getBundle().getString("ntlmProxyPassword","");
 			URL urls;
 			try {
-				urls = new URL(ConfigurationManager.getBundle().getString("remote.server"));
+				urls = new URL(ConfigurationManager.getBundle().getString("remote.server",""));
 			} catch (MalformedURLException e) {
 				throw new RuntimeException(e.getMessage(), e);
 			}
 
 			ClientConfig config;
-			if (!proxyUser.isEmpty() || !proxyUser.equalsIgnoreCase("")) {
+//			if (!proxyUser.isEmpty() || !proxyUser.equalsIgnoreCase("")) {
+			if (!"".equals(proxyUser)) {
 				config = ClientConfig.defaultConfig().baseUrl(urls)
 						.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)))
 						.readTimeout(Duration.ofSeconds(60)).authenticateAs(
@@ -625,7 +638,9 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 						.readTimeout(Duration.ofSeconds(60));
 
 			}
-			Factory factory = (Factory) new NettyClientFactory().createClient(config);
+			
+			HttpClient.Factory factory = new NettyClientFactory();
+//					.createClient(config);
 
 			beforeInitialize(desiredCapabilities, listners);
 
@@ -640,6 +655,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			}
 		}
 
+		@SuppressWarnings("unused")
 		@Deprecated
 		private String getWorkstation() {
 			Map<String, String> env = System.getenv();

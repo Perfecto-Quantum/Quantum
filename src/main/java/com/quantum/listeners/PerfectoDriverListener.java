@@ -39,6 +39,10 @@ import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.DriverCommand;
 
+import com.perfecto.reports.ReportAttachments;
+import com.perfecto.reports.ReportPDF;
+import com.perfecto.reports.ReportSummary;
+import com.perfecto.reports.ReportVideos;
 import com.qmetry.qaf.automation.core.ConfigurationManager;
 import com.qmetry.qaf.automation.ui.webdriver.CommandTracker;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
@@ -47,7 +51,6 @@ import com.qmetry.qaf.automation.util.StringUtil;
 import com.quantum.utils.ConfigurationUtils;
 import com.quantum.utils.ConsoleUtils;
 import com.quantum.utils.DeviceUtils;
-import com.quantum.utils.ReportUtils;
 
 public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 	public static final String DRIVER_START_TIMER = "DriverTimer";
@@ -105,46 +108,26 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 		if (commandTracker.getCommand().equalsIgnoreCase(DriverCommand.QUIT)) {
 
 			try {
+				
+				
 
 				if (ConfigurationUtils.getBaseBundle().getString("remote.server", "").contains("perfecto")) {
-					if (ConfigurationManager.getBundle().getString("perfecto.download.reports", "false").toLowerCase()
-							.equals("true")) {
-						try {
-							System.out.println("downloading test reports");
-							ReportUtils.generateTestReport(ConfigurationManager.getBundle().getString("executionId"));
-						} catch (Exception e) {
-							ConsoleUtils.logError(e.toString());
-						}
+					
+					String executionID = ConfigurationManager.getBundle().getString("executionId");
+					
+					Thread[] rptDownloadTasks = new Thread[] {
+							new Thread(new ReportPDF(executionID), "Report PDF Downloader"),
+							new Thread(new ReportSummary(executionID), "Report Summary Downloader"),
+							new Thread(new ReportVideos(executionID), "Report Video Downloader"),
+							new Thread(new ReportAttachments(executionID), "Report Attachment Downloader")
+					};
+					
+					for(Thread dwdTask : rptDownloadTasks) {
+						dwdTask.start();
 					}
-					if (ConfigurationManager.getBundle().getString("perfecto.download.summaryReports", "false")
-							.toLowerCase().equals("true")) {
-
-						try {
-							System.out.println("downloading summary reports");
-							ReportUtils
-									.generateSummaryReports(ConfigurationManager.getBundle().getString("executionId"));
-						} catch (Exception e) {
-							ConsoleUtils.logError(e.toString());
-						}
-					}
-					if (ConfigurationManager.getBundle().getString("perfecto.download.video", "false").toLowerCase()
-							.equals("true")) {
-						try {
-							System.out.println("downloading video");
-							ReportUtils.downloadReportVideo(ConfigurationManager.getBundle().getString("executionId"));
-						} catch (Exception e) {
-							ConsoleUtils.logError(e.toString());
-						}
-					}
-					if (ConfigurationManager.getBundle().getString("perfecto.download.attachments", "false")
-							.toLowerCase().equals("true")) {
-						try {
-							System.out.println("downloading attachments");
-							ReportUtils.downloadReportAttachments(
-									ConfigurationManager.getBundle().getString("executionId"));
-						} catch (Exception e) {
-							ConsoleUtils.logError(e.toString());
-						}
+					
+					for(Thread dwdTask : rptDownloadTasks) {
+						dwdTask.join();
 					}
 				}
 

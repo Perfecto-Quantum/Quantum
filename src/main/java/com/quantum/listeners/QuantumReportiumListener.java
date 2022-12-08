@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -52,6 +53,7 @@ import com.qmetry.qaf.automation.step.client.Scenario;
 import com.qmetry.qaf.automation.step.client.TestNGScenario;
 import com.qmetry.qaf.automation.step.client.text.BDDDefinitionHelper.ParamType;
 import com.qmetry.qaf.automation.ui.WebDriverTestCase;
+import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 import com.quantum.utils.ConsoleUtils;
 import com.quantum.utils.DeviceUtils;
 import com.quantum.utils.DriverUtils;
@@ -190,6 +192,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 	@Override
 	public void onTestStart(ITestResult testResult) {
+
 		if (getBundle().getString("remote.server", "").contains("perfecto")) {
 			getBundle().setProperty("ScenarioExecution", testResult.getMethod().getMethodName());
 			// get custom fields "%name-value" from groups
@@ -224,7 +227,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 					} catch (Exception ex) {
 						new NullPointerException(
 								"Custom field key/value pair not delimited properly.  Example of proper default usage: %Developer-Jeremy.  Check application properties custom.field.delimiter and custom.field.identifier for custom values that may have been set.")
-										.printStackTrace();
+								.printStackTrace();
 					}
 				}
 			}
@@ -309,7 +312,9 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 	public void onTestSuccess(ITestResult testResult) {
 		getBundle().setProperty("ScenarioExecution", "FromListener");
 		getBundle().setProperty("device_not_available", false);
+
 		ReportiumClient client = getReportClient();
+
 		if (ConfigurationManager.getBundle().getPropertyValue("perfecto.harfile.enable").equals("true")) {
 			String platformName = DriverUtils.getDriver().getCapabilities().getCapability("platformName").toString();
 			if (platformName != null && platformName.equalsIgnoreCase("android") || platformName.equalsIgnoreCase("ios")
@@ -337,9 +342,14 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 	@Override
 	public void onTestFailure(ITestResult testResult) {
+
 		getBundle().setProperty("ScenarioExecution", "FromListener");
 		getBundle().setProperty("device_not_available", false);
+
 		ReportiumClient client = getReportClient();
+
+		TestResult reportiumResult;
+
 		if (ConfigurationManager.getBundle().getPropertyValue("perfecto.harfile.enable").equals("true")) {
 			String platformName = DriverUtils.getDriver().getCapabilities().getCapability("platformName").toString();
 			if (platformName != null && platformName.equalsIgnoreCase("android") || platformName.equalsIgnoreCase("ios")
@@ -373,9 +383,16 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 			}
 
 			if (testResult.getThrowable() == null) {
-				client.testStop(TestResultFactory.createFailure(failMsg.isEmpty() ? "An error occurred" : failMsg,
-						new Exception(
-								"There was some validation failure in the scenario which did not provide any throwable object.")));
+				
+				Exception exp = new Exception(
+						"There was some validation failure in the scenario which did not provide any throwable object.");
+				
+				try {
+					client.testStop(TestResultFactory.createFailure(failMsg.isEmpty() ? "An error occurred" : failMsg,exp));
+				}catch(Exception e) {
+					ConsoleUtils.logWarningBlocks(e.getMessage());
+				}
+				
 			} else {
 				ExceptionUtils.getStackTrace(testResult.getThrowable());
 				String actualExceptionMessage = testResult.getThrowable().toString();
@@ -417,18 +434,47 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 						testContext.withTestExecutionTags(tagsFinal);
 					}
 
-					TestResult reportiumResult = TestResultFactory.createFailure(
-							failMsg.isEmpty() ? "An error occurred" : failMsg, testResult.getThrowable(), customError);
-					client.testStop(reportiumResult, testContext.build());
+					reportiumResult = TestResultFactory.createFailure(failMsg.isEmpty() ? "An error occurred" : failMsg,
+							testResult.getThrowable(), customError);
+
+					try {
+						client.testStop(reportiumResult, testContext.build());
+					} catch (Exception e) {
+						ConsoleUtils.logWarningBlocks(e.getMessage());
+					}
+
 				} else {
-					client.testStop(TestResultFactory.createFailure(failMsg.isEmpty() ? "An error occurred" : failMsg,
-							testResult.getThrowable()));
+
+					reportiumResult = TestResultFactory.createFailure(failMsg.isEmpty() ? "An error occurred" : failMsg,
+							testResult.getThrowable());
+
+					try {
+						client.testStop(reportiumResult);
+					} catch (Exception e) {
+						ConsoleUtils.logWarningBlocks(e.getMessage());
+					}
 				}
 			}
+			
+			handleWebDriverFailure(testResult);
 
 			logTestEnd(testResult);
 
 			tearIt(testResult);
+
+		}
+	}
+	
+	private void handleWebDriverFailure(ITestResult testResult) {
+		try {
+			QAFExtendedWebDriver driver = DeviceUtils.getQAFDriver();
+			if (driver != null) {
+				driver.getUnderLayingDriver().getPageSource();
+			}
+		} catch (Exception e) {
+			Object testInstance = testResult.getInstance();
+			((WebDriverTestCase) testInstance).getTestBase().tearDown();
+			
 		}
 	}
 
@@ -571,7 +617,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 						getBundle().getInt("BUILD_NUMBER",
 								System.getProperty("reportium-job-number") == null ? 0
 										: Integer.parseInt(System.getProperty("reportium-job-number"))))
-												.withBranch(System.getProperty("reportium-job-branch")));
+						.withBranch(System.getProperty("reportium-job-branch")));
 		for (String driverName : driverList.keySet()) {
 
 			perfectoExecutionContextBuilder.withWebDriver(driverList.get(driverName), driverName);

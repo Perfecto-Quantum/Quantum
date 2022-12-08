@@ -254,8 +254,8 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 
 			Map<String, String> credentials = new HashMap<>();
 
-			if (capabilities.get("securityToken") != null) {
-				credentials.put("securityToken", capabilities.get("securityToken").toString());
+			if (capabilities.get("perfecto:securityToken") != null) {
+				credentials.put("securityToken", capabilities.get("perfecto:securityToken").toString());
 			}
 
 			if (capabilities.get("model") != null) {
