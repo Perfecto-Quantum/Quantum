@@ -1,53 +1,46 @@
 package com.quantum.utils;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.Point;
-import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.support.ui.FluentWait;
 
-import com.google.common.base.Function;
+//import com.perfectomobile.selenium.WebElement;
 import com.qmetry.qaf.automation.ui.WebDriverTestBase;
 
 import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.MobileElement;
+import io.appium.java_client.PerformsTouchActions;
 import io.appium.java_client.TouchAction;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
-import io.appium.java_client.touch.LongPressOptions;
-import io.appium.java_client.touch.offset.ElementOption;
 import io.appium.java_client.touch.offset.PointOption;
 
 public final class AppiumUtils {
 
-	@SuppressWarnings("rawtypes")
 	public static AppiumDriver getAppiumDriver() {
 		return checkType(AppiumDriver.class);
 	}
 
-	@SuppressWarnings("rawtypes")
 	public static IOSDriver getIOSDriver() {
 		return checkType(IOSDriver.class);
 	}
 
-	@SuppressWarnings("rawtypes")
 	public static AndroidDriver getAndroidDriver() {
 		return checkType(AndroidDriver.class);
 	}
 
-	@SuppressWarnings("rawtypes")
 	public static TouchAction getTouchAction() {
-		return new TouchAction(getAppiumDriver());
+		WebDriver driver = new WebDriverTestBase().getDriver().getUnderLayingDriver();
+		return new TouchAction<>((PerformsTouchActions)driver);
+		
+		// TouchAction constructor with AppiumDriver argument is deprecated
+//		return new TouchAction(getAppiumDriver());
 	}
 
 	/**
@@ -132,8 +125,11 @@ public final class AppiumUtils {
 	// dynamically selecting each scroll wheel
 	public static void iosScrollKeys(String[] list) {
 		System.out.println("Starting the process");
+		By xpath;
 		for (int i = 0; i < list.length; i++) {
-			MobileElement we = (MobileElement) getIOSDriver().findElementByXPath("//UIAPickerWheel[" + (i + 1) + "]");
+			
+			xpath = By.xpath("//UIAPickerWheel[" + (i + 1) + "]");
+			WebElement we = (WebElement) getIOSDriver().findElement(xpath);
 			we.sendKeys(list[i]);
 		}
 	}
@@ -152,12 +148,12 @@ public final class AppiumUtils {
 	// based on this i'm telling the scroll code to go up or down searching for
 	// the value
 	// additionally i'm checking the same for the day and year
-	@SuppressWarnings("rawtypes")
+
 	public static void iosScrollChecker(String[] list) {
 		for (int i = 0; i < list.length; i++) {
 
 			IOSDriver driver = getIOSDriver();
-			MobileElement me = (MobileElement) driver.findElement(By.xpath("//UIAPickerWheel[" + (i + 1) + "]"));
+			WebElement me = (WebElement) driver.findElement(By.xpath("//UIAPickerWheel[" + (i + 1) + "]"));
 			int mget = getMonthInt(me.getText().split(",")[0]);
 
 			if (i == 0) {
@@ -178,18 +174,21 @@ public final class AppiumUtils {
 
 	// Used to get the dynamic location of an object
 	// Code here shouldn't be modified
-	@SuppressWarnings("rawtypes")
-	private static void scrollAndSearch(IOSDriver driver, String value, MobileElement me, Boolean direction) {
+//	@SuppressWarnings("rawtypes")
+	private static void scrollAndSearch(IOSDriver driver, String value, WebElement me, Boolean direction) {
 		String x = getLocationX(me);
 		String y = getLocationY(me);
-		while (!driver.findElementByXPath(getXpathFromElement(me)).getText().contains(value)) {
+		
+		By xpath = By.xpath(getXpathFromElement(me));
+		
+		while (!driver.findElement(xpath).getText().contains(value)) {
 			swipe(driver, x, y, direction);
 		}
 	}
 
 	// Performs the swipe and search operation
 	// Code here shouldn't be modified
-	@SuppressWarnings("rawtypes")
+//	@SuppressWarnings("rawtypes")
 	private static void swipe(IOSDriver driver, String start, String end, Boolean up) {
 		String direction;
 		if (up) {
@@ -323,90 +322,90 @@ public final class AppiumUtils {
 	}
 
 	// converts the full string of the month to androids short form name
-	private static String convertAndroidMonthName(String month) {
-		String monthName = "";
-		switch (month) {
-		case "January":
-			monthName = "Jan";
-			break;
-		case "February":
-			monthName = "Feb";
-			break;
-		case "March":
-			monthName = "Mar";
-			break;
-		case "April":
-			monthName = "Apr";
-			break;
-		case "May":
-			monthName = "May";
-			break;
-		case "June":
-			monthName = "Jun";
-			break;
-		case "July":
-			monthName = "Jul";
-			break;
-		case "August":
-			monthName = "Aug";
-			break;
-		case "September":
-			monthName = "Sep";
-			break;
-		case "October":
-			monthName = "Oct";
-			break;
-		case "November":
-			monthName = "Nov";
-			break;
-		case "December":
-			monthName = "Dec";
-			break;
-		default:
-			monthName = month;
-			break;
-		}
-		return monthName;
-	}
+//	private static String convertAndroidMonthName(String month) {
+//		String monthName = "";
+//		switch (month) {
+//		case "January":
+//			monthName = "Jan";
+//			break;
+//		case "February":
+//			monthName = "Feb";
+//			break;
+//		case "March":
+//			monthName = "Mar";
+//			break;
+//		case "April":
+//			monthName = "Apr";
+//			break;
+//		case "May":
+//			monthName = "May";
+//			break;
+//		case "June":
+//			monthName = "Jun";
+//			break;
+//		case "July":
+//			monthName = "Jul";
+//			break;
+//		case "August":
+//			monthName = "Aug";
+//			break;
+//		case "September":
+//			monthName = "Sep";
+//			break;
+//		case "October":
+//			monthName = "Oct";
+//			break;
+//		case "November":
+//			monthName = "Nov";
+//			break;
+//		case "December":
+//			monthName = "Dec";
+//			break;
+//		default:
+//			monthName = month;
+//			break;
+//		}
+//		return monthName;
+//	}
 
 	// Parses webelement to retrieve the xpath used for identification
-	private static String getXpathFromElement(MobileElement me) {
+	private static String getXpathFromElement(WebElement me) {
 		return (me.toString().split("-> xpath: ")[1]).substring(0, (me.toString().split("-> xpath: ")[1]).length() - 1);
 	}
 
 	// Gets the objects X location in pixels
-	private static String getLocationX(MobileElement me) {
+	private static String getLocationX(WebElement me) {
 		int x = me.getLocation().x;
 		int width = (Integer.parseInt(me.getAttribute("width")) / 2) + x;
 		return width + "";
 	}
 
 	// Gets the objects X location in pixels
-	private static String getLocationY(MobileElement me) {
+	private static String getLocationY(WebElement me) {
 		int y = me.getLocation().y;
 		int height = (Integer.parseInt(me.getAttribute("height")) / 2) + y;
 		return height + "";
 	}
 
 	// performs a wait command on a web element
-	@SuppressWarnings({ "rawtypes", "deprecation" })
-	private static MobileElement fluentWait(AppiumDriver driver, By xpath) {
-		MobileElement waitElement = null;
-
-		FluentWait<RemoteWebDriver> fwait = new FluentWait<RemoteWebDriver>(driver).withTimeout(Duration.ofSeconds(15))
-				.pollingEvery(Duration.ofMillis(500)).ignoring(NoSuchElementException.class)
-				.ignoring(TimeoutException.class);
-
-		try {
-			waitElement = (MobileElement) fwait.until(new Function<RemoteWebDriver, WebElement>() {
-				public WebElement apply(RemoteWebDriver driver) {
-					return driver.findElement(xpath);
-				}
-			});
-		} catch (Exception e) {
-		}
-		return waitElement;
-	}
+//	@SuppressWarnings({ "rawtypes", "deprecation" })
+//	private static WebElement fluentWait(AppiumDriver driver, By xpath) {
+//		WebElement waitElement = null;
+//
+//		FluentWait<RemoteWebDriver> fwait = new FluentWait<RemoteWebDriver>(driver).withTimeout(Duration.ofSeconds(15))
+//				.pollingEvery(Duration.ofMillis(500)).ignoring(NoSuchElementException.class)
+//				.ignoring(TimeoutException.class);
+//
+//		try {
+//			waitElement = (WebElement) fwait.until(new Function<RemoteWebDriver, WebElement>() {
+//				public WebElement apply(RemoteWebDriver driver) {
+//					return driver.findElement(xpath);
+//				}
+//			});
+//		} catch (Exception e) {
+//		}
+//		return waitElement;
+//	}
 
 	@SuppressWarnings(value = "unchecked")
 	private static <T> T checkType(Class<T> expectedClass) {

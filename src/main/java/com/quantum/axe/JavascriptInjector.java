@@ -1,12 +1,10 @@
 package com.quantum.axe;
 
-import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.net.URL;
 import java.util.Collections;
+
+import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 /**
  * A helper class that assists in injecting third party JavaScript libaries into
@@ -82,15 +80,9 @@ public class JavascriptInjector {
     final Capabilities capabilities = driver.getCapabilities();
     try {
       result = driver.executeAsyncScript(testCase, Collections.EMPTY_MAP);
-      final String message = String.format(
-          "executeAsyncScript works on: %s %s - %s %s",
-          capabilities.getCapability("platformName"),
-          capabilities.getCapability("osVersion"),
-          capabilities.getCapability("browserName"),
-          capabilities.getCapability("browserVersion"));
 //      log.info(message);
     } catch (final Exception e) {
-      final String message = String.format(
+      String message = String.format(
           "Asynchronous script execution test failed for: %s %s - %s %s - JavaScript: \"%s\"",
           capabilities.getCapability("platformName"),
           capabilities.getCapability("osVersion"),

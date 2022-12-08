@@ -311,6 +311,7 @@ public class Utils {
 	}
 
 	// Vertical swipe down with scale factor
+	@Deprecated
 	public static boolean verticalSwipeInOrderHistory(QAFWebElement ele) {
 		int scalevalu = DeviceUtils.getScale();
 		System.out.println("Device Status" + scalevalu);
@@ -443,6 +444,7 @@ public class Utils {
 
 	// Swipe and find an entry with vertical swipe. Also, adjust vertical
 	// location if its close to the top/bottom of the page
+	@Deprecated
 	public static void verticalSwipeAndFindElementWithLocationAdjustmntOrdersPage(QAFWebElement parent,
 			QAFWebElement elementToFind) {
 		boolean entryFound = false;
@@ -474,6 +476,7 @@ public class Utils {
 
 	// Swipe and find an entry with vertical swipe. Also, adjust vertical
 	// location if its close to the top/bottom of the page
+	@Deprecated
 	public static void verticalSwipeAndFindElementWithLocationAdjustmntCart(QAFWebElement parent,
 			QAFWebElement elementToFind) {
 		boolean entryFound = false;
@@ -504,6 +507,7 @@ public class Utils {
 
 	// Swipe and find an entry with vertical swipe. Also, adjust vertical
 	// location if its close to the top/bottom of the page
+	@Deprecated
 	public static void verticalSwipeDownAndFindElementWithLocationAdjustmnt(QAFWebElement parent,
 			QAFWebElement elementToFind) {
 		boolean entryFound = false;
@@ -599,6 +603,7 @@ public class Utils {
 		}
 	}
 
+	@Deprecated
 	public static boolean verticalSwipeWithScaleFactorInCart(QAFWebElement parent) {
 		int scalevalu = DeviceUtils.getScale();
 		System.out.println("Device Status" + scalevalu);
@@ -624,6 +629,7 @@ public class Utils {
 		return true;
 	}
 
+	@Deprecated
 	// Swipe vertically and find element in cart
 	public static void verticalSwipeAndFindElementInCart(QAFWebElement parent, QAFWebElement elementToFind) {
 		boolean entryFound = false;
@@ -802,6 +808,8 @@ public class Utils {
 	 *
 	 * @param text - The text of the button
 	 */
+	
+	@Deprecated
 	public static boolean validateRadioButtonSelected(RemoteWebDriver driver, String text) {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("content", "\"" + text + "\"");
@@ -819,6 +827,8 @@ public class Utils {
 		return Boolean.parseBoolean(result.toString());
 	}
 
+	
+	@Deprecated
 	// To validate the value arrow is pointing to
 	public static boolean validateArrowBtnPointedTo(RemoteWebDriver driver, String text) {
 		Map<String, String> params = new HashMap<String, String>();
@@ -837,6 +847,7 @@ public class Utils {
 		return Boolean.parseBoolean(result.toString());
 	}
 
+	@Deprecated
 	// To validate reclamation entry icon
 	public static boolean validateREIcon(RemoteWebDriver driver, String text) {
 		Map<String, String> params = new HashMap<String, String>();
@@ -856,6 +867,7 @@ public class Utils {
 		return Boolean.parseBoolean(result.toString());
 	}
 
+	@Deprecated
 	// To validate reclamation inquiry icon
 	public static boolean validateRIIcon(RemoteWebDriver driver, String text) {
 		Map<String, String> params = new HashMap<String, String>();
@@ -874,6 +886,7 @@ public class Utils {
 		return Boolean.parseBoolean(result.toString());
 	}
 
+	@Deprecated
 	// To validate maintenance icon
 	public static boolean validateMaintenanceIcon(RemoteWebDriver driver, String text) {
 		Map<String, String> params = new HashMap<String, String>();
@@ -892,6 +905,7 @@ public class Utils {
 		return Boolean.parseBoolean(result.toString());
 	}
 
+	@Deprecated
 	// To validate tag icon
 	public static boolean validateTagIcon(RemoteWebDriver driver, String text) {
 		Map<String, String> params = new HashMap<String, String>();
@@ -911,7 +925,9 @@ public class Utils {
 		Object result = driver.executeScript("mobile:checkpoint:image", imageParams);
 		return Boolean.parseBoolean(result.toString());
 	}
-
+	
+	
+	@Deprecated
 	// To validate purchase flag icon
 	public static boolean validatePurchaseFlagIcon(RemoteWebDriver driver, String text) {
 		Map<String, String> params = new HashMap<String, String>();
@@ -930,6 +946,7 @@ public class Utils {
 		return Boolean.parseBoolean(result.toString());
 	}
 
+	@Deprecated
 	// To validate claim icon
 	public static boolean validateClaimIcon(RemoteWebDriver driver, String text) {
 		Map<String, String> params = new HashMap<String, String>();
@@ -948,6 +965,7 @@ public class Utils {
 		return Boolean.parseBoolean(result.toString());
 	}
 
+	@Deprecated
 	// To validate order icon
 	public static boolean validateOrderIcon(RemoteWebDriver driver, String text) {
 		Map<String, String> params = new HashMap<String, String>();
@@ -966,6 +984,7 @@ public class Utils {
 		return Boolean.parseBoolean(result.toString());
 	}
 
+	@Deprecated
 	public static boolean validatePriceAuditIcon(RemoteWebDriver driver, String text) {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("content", "\"" + text + "\"");
@@ -1010,7 +1029,6 @@ public class Utils {
 			formatter = new SimpleDateFormat("MM/dd/yy");
 			newDateFormat = (String) formatter.format(date);
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return newDateFormat;
@@ -1055,7 +1073,7 @@ public class Utils {
 		DeviceUtils.getQAFDriver().executeScript("mobile:touch:swipe", params);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+//	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static void switchAirPlaneModeOnOff(boolean status) {
 		// if (ConfigurationManager.getBundle().getString("OSType", "not
 		// mentioned").equalsIgnoreCase("iOS")) {
@@ -1087,7 +1105,6 @@ public class Utils {
 			try {
 				Thread.sleep(2000);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			// switchOnOff.click();

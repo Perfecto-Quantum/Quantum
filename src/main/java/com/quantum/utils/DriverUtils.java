@@ -1,9 +1,9 @@
 package com.quantum.utils;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Platform;
 
 import com.qmetry.qaf.automation.core.ConfigurationManager;
 import com.qmetry.qaf.automation.core.TestBaseProvider;
@@ -36,7 +36,9 @@ public class DriverUtils {
 	}
 
 	public static TouchAction getTouchAction() {
-		return new TouchAction(getAppiumDriver());
+
+		return AppiumUtils.getTouchAction();
+//		return new TouchAction(getAppiumDriver());
 	}
 
 	public static IOSDriver getIOSDriver() {
@@ -59,6 +61,7 @@ public class DriverUtils {
 			return false;
 		}
 	}
+
 	@Deprecated
 	public boolean isRunningIOS() {
 		if (getOS().equalsIgnoreCase("ios")) {
@@ -69,21 +72,13 @@ public class DriverUtils {
 	}
 
 	public static boolean isAndroid() {
-		if (getOS().equalsIgnoreCase("android")) {
-			return true;
-		} else {
-			return false;
-		}
+		return getOS().equalsIgnoreCase(Platform.ANDROID.name());
 	}
 
 	public static boolean isIOS() {
-		if (getOS().equalsIgnoreCase("ios")) {
-			return true;
-		} else {
-			return false;
-		}
-	}
 
+		return getOS().equalsIgnoreCase(Platform.IOS.name());
+	}
 
 	/**
 	 * Switches to either a new WebDriver session with a mobile device / web browser
@@ -99,29 +94,42 @@ public class DriverUtils {
 	 * &lt;parameter name="perfecto2.env.resources"
 	 * value="src/main/resources/android2" />
 	 * 
-	 * @param driverName
-	 *            The name of the driver you are switching to "perfecto" or
-	 *            "perfecto2" or in case of browser drivers the parameter value should be "perfectoRemote" or "perfecto2Remote"
+	 * @param driverName The name of the driver you are switching to "perfecto" or
+	 *                   "perfecto2" or in case of browser drivers the parameter
+	 *                   value should be "perfectoRemote" or "perfecto2Remote"
 	 */
 	public static void switchToDriver(String driverName) {
-		if(driverName.contains("Driver")) {
-			driverName = driverName.substring(0,driverName.lastIndexOf("Driver"));
+		if (driverName.contains("Driver")) {
+			driverName = driverName.substring(0, driverName.lastIndexOf("Driver"));
 		}
 		TestBaseProvider.instance().get().setDriver(driverName + "Driver");
 		DeviceUtils.getQAFDriver();
 		String envResources = ConfigurationManager.getBundle()
 				.getString(driverName.replaceAll("(?i)remote", "") + ".env.resources");
 		ConfigurationManager.getBundle().setProperty("env.resources", envResources);
-		
+
 		ConfigurationUtils.setActualDeviceCapabilities(getDriver().getCapabilities().asMap());
-		
+
 	}
 
 	private static String getOS() {
-		Map<String, String> params = new HashMap<>();
-		params.put("property", "os");
-		String properties = (String) DriverUtils.getDriver().executeScript("mobile:handset:info", params);
-		return properties;
+
+		if (DriverUtils.getDriver() != null) {
+
+			String os = new WebDriverTestBase().getDriver().getCapabilities().getPlatformName().name();
+			return os;
+
+		} else {
+			return "";
+		}
+
+		// Returning Blank value for Android Virtual Devices.
+
+//		Map<String, String> params = new HashMap<>();
+//		params.put("property", "os");
+//		String properties = (String) DriverUtils.getDriver().executeScript("mobile:handset:info", params);
+//		return properties;
+
 	}
 
 	/**

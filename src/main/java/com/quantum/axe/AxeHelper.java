@@ -229,7 +229,8 @@ public class AxeHelper {
 	 * Run axe storing the results in document.perfectoAxeResult on the browser;
 	 */
 	public void runAxe() {
-		final Object result = driver.executeAsyncScript(runAxeScript, Collections.EMPTY_MAP);
+		
+		driver.executeAsyncScript(runAxeScript, Collections.EMPTY_MAP);
 
 //    log.info("Axe returned: {}", result);
 	}
@@ -242,12 +243,12 @@ public class AxeHelper {
 	 * @return
 	 */
 	public boolean startHighlighter(final String type) {
-		Object result = driver.executeScript(highlightScript, Collections.EMPTY_MAP);
+		driver.executeScript(highlightScript, Collections.EMPTY_MAP);
 //    log.info("Axe highlight script: {}", result);
 
 		final String toExecute = String.format(startHighlighterScript, type);
 
-		result = driver.executeScript(toExecute, Collections.EMPTY_MAP);
+		driver.executeScript(toExecute, Collections.EMPTY_MAP);
 //    log.info("Axe start highlighter returned: {}", result);
 
 		return true;

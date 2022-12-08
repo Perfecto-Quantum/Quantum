@@ -15,7 +15,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -136,7 +135,7 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 		}
 	}
 
-	@SuppressWarnings({ "unchecked", "deprecation", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static boolean waitForDeviceAvailable(Device deviceInformation, Map<String, String> credentials)
 			throws TimeoutException {
 
@@ -255,8 +254,8 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 
 			Map<String, String> credentials = new HashMap<>();
 
-			if (capabilities.get("securityToken") != null) {
-				credentials.put("securityToken", capabilities.get("securityToken").toString());
+			if (capabilities.get("perfecto:securityToken") != null) {
+				credentials.put("securityToken", capabilities.get("perfecto:securityToken").toString());
 			}
 
 			if (capabilities.get("model") != null) {
