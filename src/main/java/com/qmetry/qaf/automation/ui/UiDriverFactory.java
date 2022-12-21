@@ -397,13 +397,22 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			String driverCapKey = String.format(ApplicationProperties.DRIVER_CAPABILITY_PREFIX_FORMAT.key, browserName);
 			config = ConfigurationManager.getBundle().subset(driverCapKey);
 			
+			
+			
 			// ======== Patch for Appium 2.0 and Selenium 4 vendor specific prefix ========
 			
 			QuantumPatch quantumPatch = new QuantumPatch();
 			
-			Platform platform = desiredCapabilities.getPlatformName();
+			String platform = (String)capabilities.get("platformName");
 			
-			if(Platform.ANDROID.equals(platform) || Platform.IOS.equals(platform)) {
+			platform = (null == platform? null:platform.toUpperCase()); 
+			
+			if(null == platform) {
+				platform = (String)config.getProperty("driverClass");
+				platform = (null == platform? "WEB-PLATFORM":platform); 
+			}
+			
+			if(platform.contains("ANDROID") || platform.contains("IOS")) {
 				quantumPatch.capabilitiesPatchAppium2(config, capabilities);
 			}else {
 				quantumPatch.capabilitiesPatchSelenium4(config, capabilities);
