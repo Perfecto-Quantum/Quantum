@@ -412,7 +412,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 				platform = (null == platform? "WEB-PLATFORM":platform); 
 			}
 			
-			if(platform.contains("ANDROID") || platform.contains("IOS")) {
+			if( platform.startsWith("io.appium.java_client") ) {
 				quantumPatch.capabilitiesPatchAppium2(config, capabilities);
 			}else {
 				quantumPatch.capabilitiesPatchSelenium4(config, capabilities);
