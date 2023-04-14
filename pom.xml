@@ -15,7 +15,7 @@
 		<selenium.version>4.2.2</selenium.version>
 		<testng.version>6.10</testng.version>
 		<cukes.version>1.2.5</cukes.version>
-		<org.json.version>20220320</org.json.version>
+		<org.json.version>20230227</org.json.version>
 		<perfectomobile.version>18.6.0.0</perfectomobile.version>
 		<intellij.perfectomobile.version>18.4.0.0 </intellij.perfectomobile.version>
 		<qaf.version>3.1.0</qaf.version>
