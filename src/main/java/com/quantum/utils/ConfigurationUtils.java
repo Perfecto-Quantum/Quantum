@@ -11,7 +11,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import com.perfectomobile.intellij.connector.ConnectorConfiguration;
 import com.perfectomobile.intellij.connector.impl.client.ClientSideLocalFileSystemConnector;
 import com.perfectomobile.intellij.connector.impl.client.ProcessOutputLogAdapter;
-import com.perfectomobile.selenium.util.EclipseConnector;
+//import com.perfectomobile.selenium.util.EclipseConnector;
 import com.qmetry.qaf.automation.core.ConfigurationManager;
 import com.qmetry.qaf.automation.core.TestBaseProvider;
 import com.qmetry.qaf.automation.util.PropertyUtil;
@@ -63,10 +63,10 @@ public class ConfigurationUtils {
 				}
 			} else if ("eclipse".equalsIgnoreCase(pluginType)) {
 				try {
-					EclipseConnector connector = new EclipseConnector();
-					if (connector.getHost() != null) {
-						return connector.getExecutionId();
-					}
+//					EclipseConnector connector = new EclipseConnector();
+//					if (connector.getHost() != null) {
+//						return connector.getExecutionId();
+//					}
 				} catch (Exception e) {
 					System.err.println("Eclipse Connector Plugin socket not found");
 				}
@@ -81,7 +81,7 @@ public class ConfigurationUtils {
 	/**
 	 * Checks if is device.
 	 *
-	 * param driver capabilities
+	 * @param caps driver capabilities
 	 * 
 	 * @return true, if is device
 	 */
