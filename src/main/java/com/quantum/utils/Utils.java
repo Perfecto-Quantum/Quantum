@@ -13,7 +13,6 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.RemoteWebDriver;
 
 import com.qmetry.qaf.automation.core.ConfigurationManager;
 import com.qmetry.qaf.automation.core.QAFTestBase;
@@ -795,213 +794,6 @@ public class Utils {
 		return true;
 	}
 
-//
-//    public static void objectOptimizationOnDevice(String deviceModel, boolean status) {
-//        if (deviceModel.equalsIgnoreCase(Utils.getDeviceInfo())) {
-//            MoreActions.objectOptimizationXcuiTest(status);
-//        }
-//    }
-
-	/**
-	 * This method will validate that the radio button is selected for the text that
-	 * is present on the right of the button.
-	 *
-	 * @param text - The text of the button
-	 */
-	
-	@Deprecated
-	public static boolean validateRadioButtonSelected(RemoteWebDriver driver, String text) {
-		Map<String, String> params = new HashMap<String, String>();
-		params.put("content", "\"" + text + "\"");
-//		params.put("source", "native");
-		params.put("content", text);
-		driver.executeScript("mobile:text:find", params);
-
-		Map<String, String> imageParams = new HashMap<String, String>();
-		imageParams.put("content", "PUBLIC:iUNFI_Images/Radio_Selected_button.png");
-		imageParams.put("match", "bounded");
-		imageParams.put("relation.direction", "right");
-		imageParams.put("relation.inline", "horizontal");
-
-		Object result = driver.executeScript("mobile:checkpoint:image", imageParams);
-		return Boolean.parseBoolean(result.toString());
-	}
-
-	
-	@Deprecated
-	// To validate the value arrow is pointing to
-	public static boolean validateArrowBtnPointedTo(RemoteWebDriver driver, String text) {
-		Map<String, String> params = new HashMap<String, String>();
-		params.put("content", "\"" + text + "\"");
-//		params.put("source", "native");
-		params.put("content", text);
-		driver.executeScript("mobile:text:find", params);
-
-		Map<String, String> imageParams = new HashMap<String, String>();
-		imageParams.put("content", "PUBLIC:iUNFI_Images/Up-arrow-updated.png");
-		imageParams.put("match", "bounded");
-		imageParams.put("relation.direction", "above");
-		imageParams.put("relation.inline", "vertical");
-
-		Object result = driver.executeScript("mobile:checkpoint:image", imageParams);
-		return Boolean.parseBoolean(result.toString());
-	}
-
-	@Deprecated
-	// To validate reclamation entry icon
-	public static boolean validateREIcon(RemoteWebDriver driver, String text) {
-		Map<String, String> params = new HashMap<String, String>();
-		params.put("content", "\"" + text + "\"");
-//		params.put("source", "native");
-		params.put("content", text);
-		driver.executeScript("mobile:text:find", params);
-
-		Map<String, String> imageParams = new HashMap<String, String>();
-		imageParams.put("content", "PUBLIC:iUNFI_Images/RE_Icon.png");
-		imageParams.put("threshold", "80");
-		imageParams.put("match", "bounded");
-		imageParams.put("relation.direction", "right");
-		imageParams.put("relation.inline", "horizontal");
-
-		Object result = driver.executeScript("mobile:checkpoint:image", imageParams);
-		return Boolean.parseBoolean(result.toString());
-	}
-
-	@Deprecated
-	// To validate reclamation inquiry icon
-	public static boolean validateRIIcon(RemoteWebDriver driver, String text) {
-		Map<String, String> params = new HashMap<String, String>();
-		params.put("content", "\"" + text + "\"");
-//		params.put("source", "native");
-		params.put("content", text);
-		driver.executeScript("mobile:text:find", params);
-
-		Map<String, String> imageParams = new HashMap<String, String>();
-		imageParams.put("content", "PUBLIC:iUNFI_Images/RI_Icon.png");
-		imageParams.put("match", "bounded");
-		imageParams.put("relation.direction", "right");
-		imageParams.put("relation.inline", "horizontal");
-
-		Object result = driver.executeScript("mobile:checkpoint:image", imageParams);
-		return Boolean.parseBoolean(result.toString());
-	}
-
-	@Deprecated
-	// To validate maintenance icon
-	public static boolean validateMaintenanceIcon(RemoteWebDriver driver, String text) {
-		Map<String, String> params = new HashMap<String, String>();
-		params.put("content", "\"" + text + "\"");
-//		params.put("source", "native");
-		params.put("content", text);
-		driver.executeScript("mobile:text:find", params);
-
-		Map<String, String> imageParams = new HashMap<String, String>();
-		imageParams.put("content", "PUBLIC:iUNFI_Images/Maintenance_Icon.png");
-		imageParams.put("match", "bounded");
-		imageParams.put("relation.direction", "right");
-		imageParams.put("relation.inline", "horizontal");
-
-		Object result = driver.executeScript("mobile:checkpoint:image", imageParams);
-		return Boolean.parseBoolean(result.toString());
-	}
-
-	@Deprecated
-	// To validate tag icon
-	public static boolean validateTagIcon(RemoteWebDriver driver, String text) {
-		Map<String, String> params = new HashMap<String, String>();
-		params.put("content", "\"" + text + "\"");
-//		params.put("source", "native");
-		params.put("content", text);
-		driver.executeScript("mobile:text:find", params);
-
-		Map<String, String> imageParams = new HashMap<String, String>();
-		imageParams.put("content", "PUBLIC:iUNFI_Images/Tag_Icon_New.png");
-		imageParams.put("threshold", "80");
-		imageParams.put("timeout", "90");
-		imageParams.put("match", "bounded");
-		imageParams.put("relation.direction", "right");
-		imageParams.put("relation.inline", "horizontal");
-
-		Object result = driver.executeScript("mobile:checkpoint:image", imageParams);
-		return Boolean.parseBoolean(result.toString());
-	}
-	
-	
-	@Deprecated
-	// To validate purchase flag icon
-	public static boolean validatePurchaseFlagIcon(RemoteWebDriver driver, String text) {
-		Map<String, String> params = new HashMap<String, String>();
-		params.put("content", "\"" + text + "\"");
-//		params.put("source", "native");
-		params.put("content", text);
-		driver.executeScript("mobile:text:find", params);
-
-		Map<String, String> imageParams = new HashMap<String, String>();
-		imageParams.put("content", "PUBLIC:iUNFI_Images/Flag_Icon.png");
-		imageParams.put("match", "bounded");
-		imageParams.put("relation.direction", "right");
-		imageParams.put("relation.inline", "horizontal");
-
-		Object result = driver.executeScript("mobile:checkpoint:image", imageParams);
-		return Boolean.parseBoolean(result.toString());
-	}
-
-	@Deprecated
-	// To validate claim icon
-	public static boolean validateClaimIcon(RemoteWebDriver driver, String text) {
-		Map<String, String> params = new HashMap<String, String>();
-		params.put("content", "\"" + text + "\"");
-//		params.put("source", "native");
-		params.put("content", text);
-		driver.executeScript("mobile:text:find", params);
-
-		Map<String, String> imageParams = new HashMap<String, String>();
-		imageParams.put("content", "PUBLIC:iUNFI_Images/Claim_Icon.png");
-		imageParams.put("match", "bounded");
-		imageParams.put("relation.direction", "right");
-		imageParams.put("relation.inline", "horizontal");
-
-		Object result = driver.executeScript("mobile:checkpoint:image", imageParams);
-		return Boolean.parseBoolean(result.toString());
-	}
-
-	@Deprecated
-	// To validate order icon
-	public static boolean validateOrderIcon(RemoteWebDriver driver, String text) {
-		Map<String, String> params = new HashMap<String, String>();
-		params.put("content", "\"" + text + "\"");
-//		params.put("source", "native");
-		params.put("content", text);
-		driver.executeScript("mobile:text:find", params);
-
-		Map<String, String> imageParams = new HashMap<String, String>();
-		imageParams.put("content", "PUBLIC:iUNFI_Images/Order_Icon.png");
-		imageParams.put("match", "bounded");
-		imageParams.put("relation.direction", "right");
-		imageParams.put("relation.inline", "horizontal");
-
-		Object result = driver.executeScript("mobile:checkpoint:image", imageParams);
-		return Boolean.parseBoolean(result.toString());
-	}
-
-	@Deprecated
-	public static boolean validatePriceAuditIcon(RemoteWebDriver driver, String text) {
-		Map<String, String> params = new HashMap<String, String>();
-		params.put("content", "\"" + text + "\"");
-//		params.put("source", "native");
-		params.put("content", text);
-		driver.executeScript("mobile:text:find", params);
-
-		Map<String, String> imageParams = new HashMap<String, String>();
-		imageParams.put("content", "PUBLIC:iUNFI_Images/PriceAuditTaskImage.png");
-		imageParams.put("match", "bounded");
-		imageParams.put("relation.direction", "right");
-		imageParams.put("relation.inline", "horizontal");
-
-		Object result = driver.executeScript("mobile:checkpoint:image", imageParams);
-		return Boolean.parseBoolean(result.toString());
-	}
-
 	public static String truncate(String value, int length) {
 		// Ensure String length is longer than requested size.
 		if (value.length() > length) {
@@ -1131,8 +923,11 @@ public class Utils {
 	}
 
 	/**
-	 * Inputting text into the text box using Javascript code
+	 * Type text into the text box using Javascript code
 	 *
+	 *	@param webElementTextBox WebElement representing the textbox.
+	 *
+	 *	@param text String value to be typed in text box. 
 	 */
 	public static void javaScriptSendkeys(QAFWebElement webElementTextBox, String text) {
 		JavascriptExecutor jsExec = DeviceUtils.getQAFDriver();

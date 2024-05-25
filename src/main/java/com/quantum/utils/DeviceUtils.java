@@ -21,30 +21,67 @@ import org.openqa.selenium.remote.DriverCommand;
 import org.openqa.selenium.remote.RemoteExecuteMethod;
 import org.openqa.selenium.remote.RemoteWebElement;
 
-import com.perfectomobile.httpclient.device.DeviceParameter;
-import com.perfectomobile.httpclient.device.DeviceResult;
+//import com.perfectomobile.httpclient.device.DeviceParameter;
+//import com.perfectomobile.httpclient.device.DeviceResult;
 import com.qmetry.qaf.automation.ui.WebDriverTestBase;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebElement;
 import com.qmetry.qaf.automation.util.Validator;
 import com.quantum.axe.AxeHelper;
 
+/**
+* DeviceUtils class contains set of utility methods, which help in interacting with 
+* the test device on Perfecto Continues testing platform.
+*/
+
 public class DeviceUtils {
 
-	private static final String REPOSITORY_KEY = "perfecto.repository.folder";
+//	private static final String REPOSITORY_KEY = "perfecto.repository.folder";
 
+	/**
+	 * Utility method to get {@link com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver}
+	 * 
+	 * @return Instance of {@link com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver}
+	 */
+	
 	public static QAFExtendedWebDriver getQAFDriver() {
 		return new WebDriverTestBase().getDriver();
 	}
 
+	/**
+	 * Utility method Verify Text using Perfecto's Visual testing.
+	 * 
+	 * @param text - Text to verify.
+	 * 
+	 * @return Boolean representing whether the text is available or not.
+	 */
 	public static boolean verifyVisualText(String text) {
-		return Validator.verifyThat("Text: \"" + text + "\" should be present", isText(text, null),
-				Matchers.equalTo("true"));
+		String message = String.format("Text: '%s' should be present", text);
+		String result = isText(text, null);
+		return Validator.verifyThat(message,result ,Matchers.equalTo("true"));
 	}
 
+	/**
+	 * Utility method Assert Text using Perfecto's Visual testing.
+	 * 
+	 * @param text - Text to verify.
+	 * 
+	 */
 	public static void assertVisualText(String text) {
-		Validator.assertThat("Text: \"" + text + "\" must be present", isText(text, 60), Matchers.equalTo("true"));
+		String message = String.format("Text: '%s' must be present", text);
+		String result = isText(text, 60);
+		Validator.assertThat(message,result, Matchers.equalTo("true"));
 	}
+	
+	/**
+	 *
+	 *	Install app in the device using Perfecto command
+	 *
+	 * @param filePath          - The full repository path, including directory and
+	 *                         file name, where to locate the application.
+	 * @param shouldInstrument  - Boolean value representing whether to instrument or not.
+	 * 
+	 */
 
 	public static void installApp(String filePath, boolean shouldInstrument) {
 		Map<String, String> params = new HashMap<String, String>();
@@ -55,18 +92,14 @@ public class DeviceUtils {
 		getQAFDriver().executeScript("mobile:application:install", params);
 	}
 
-	public static void installAppOnDevice(DeviceResult device) {
-		getBundle().setProperty("getQAFDriver().name", "appiumRemotegetQAFDriver()");
-
-		getBundle().setProperty("getQAFDriver().capabilities.deviceName",
-				device.getResponseValue(DeviceParameter.DEVICE_ID));
-
-		installApp(REPOSITORY_KEY, getBundle().getString("app.instrumentation", "noinstrument"));
-
-		getQAFDriver().quit();
-
-	}
-
+	/**
+	 *
+	 *	Install app in the device using Perfecto command
+	 *
+	 * @param repoKey     - Key used in Configuration manager getbundle to retrieve App Perfecto repo path.
+	 * @param instrument  - String value representing whether to instrument or not.
+	 * 
+	 */
 	public static void installApp(String repoKey, String instrument) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("file", getBundle().getString(repoKey, repoKey));
@@ -106,7 +139,7 @@ public class DeviceUtils {
 	 *
 	 * For Android devices: - The appplication manifest.xml file must include
 	 * internet access permission:
-	 * <uses-permission android:name="android.permission.INTERNET"/> - The
+	 * &lt;uses-permission android:name="android.permission.INTERNET"/&gt; - The
 	 * application will automatically be signed with an Android debug key to enable
 	 * native object automation.
 	 * 
@@ -154,6 +187,15 @@ public class DeviceUtils {
 		String resultStr = (String) getQAFDriver().executeScript("mobile:application:install", params);
 		System.out.println(resultStr);
 	}
+	
+	/**
+	 *
+	 *	Internal Utility method to create Map Parameter for app start/stop.
+	 *
+	 * @param app     - App name/identifier value
+	 * @param by  	  - String value representing app identification type : name/identifier.
+	 * 
+	 */
 
 	private static Map<String, String> getAppParams(String app, String by) {
 		Map<String, String> params = new HashMap<String, String>();
@@ -162,23 +204,47 @@ public class DeviceUtils {
 	}
 
 	// by = "name" or "identifier"
+	
+	/**
+	 *
+	 *	Method to app start using Perfecto method.
+	 *
+	 * @param app     - App name/identifier value
+	 * @param by  	  - String value representing app identification type : name/identifier.
+	 * 
+	 */
 	public static void startApp(String app, String by) {
 		getQAFDriver().executeScript("mobile:application:open", getAppParams(app, by));
 	}
 
 	// by = "name" or "identifier"
+	/**
+	 *
+	 *	Method to app stop using Perfecto method.
+	 *
+	 * @param app     - App name/identifier value
+	 * @param by  	  - String value representing app identification type : name/identifier.
+	 * 
+	 */
 	public static void closeApp(String app, String by) {
 		closeApp(app, by, false);
 	}
 
 	// by = "name" or "identifier"
+		/**
+		 *
+		 *	Method to app stop using Perfecto method with ignoring Exception.
+		 *
+		 * @param app     - App name/identifier value
+		 * @param by  	  - String value representing app identification type : name/identifier.
+		 * @param ignoreExceptions - Boolean value representing whether to ignore exception or not.
+		 */
 	public static void closeApp(String app, String by, boolean ignoreExceptions) {
 
 		try {
 			getQAFDriver().executeScript("mobile:application:close", getAppParams(app, by));
 		} catch (Exception e) {
 			if (!ignoreExceptions) {
-
 				throw e;
 			}
 
@@ -186,6 +252,15 @@ public class DeviceUtils {
 	}
 
 	// by = "name" or "identifier" with driver
+	/**
+	 *
+	 *	Method to app stop using Perfecto method with ignoring Exception.
+	 *
+	 * @param app     - App name/identifier value
+	 * @param by  	  - String value representing app identification type : name/identifier.
+	 * @param ignoreExceptions - Boolean value representing whether to ignore exception or not.
+	 * @param driver - {@link QAFExtendedWebDriver}
+	 */
 	public static void closeApp(String app, String by, boolean ignoreExceptions, QAFExtendedWebDriver driver) {
 
 		try {
@@ -200,36 +275,95 @@ public class DeviceUtils {
 	}
 
 	// by = "name" or "identifier"
+	/**
+	 *
+	 *	Method to Clean app using Perfecto method.
+	 *
+	 * @param app     - App name/identifier value
+	 * @param by  	  - String value representing app identification type : name/identifier.
+	 */
 	public static void cleanApp(String app, String by) {
 		getQAFDriver().executeScript("mobile:application:clean", getAppParams(app, by));
 	}
 
 	// by = "name" or "identifier"
+	/**
+	 *
+	 *	Method to Unistall app using Perfecto method.
+	 *
+	 * @param app     - App name/identifier value
+	 * @param by  	  - String value representing app identification type : name/identifier.
+	 */
 	public static void uninstallApp(String app, String by) {
 		getQAFDriver().executeScript("mobile:application:uninstall", getAppParams(app, by));
 	}
 
+	/**
+	 *
+	 *	Method to Unistall All apps using Perfecto method.
+	 *
+	 */
 	public static void uninstallAllApps() {
 		Map<String, String> params = new HashMap<String, String>();
 		getQAFDriver().executeScript("mobile:application:reset", params);
 	}
 
+	/**
+	 *
+	 *	Method to get app information using Perfecto method.
+	 *
+	 *	@param property App property to retrieve.
+	 *
+	 *	@return String representing the Application property required.
+	 */
 	public static String getAppInfo(String property) {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("property", property);
 		return (String) getQAFDriver().executeScript("mobile:application:info", params);
 	}
+	
+	/**
+	 *
+	 *	Utility method to verify app information using Perfecto method.
+	 *
+	 *	@param propertyName App property to verify.
+	 *
+	 *	@param propertyValue Expected App property.
+	 *
+	 *	@return boolean represents the status of app information validation.
+	 */
 
 	public static boolean verifyAppInfo(String propertyName, String propertyValue) {
-		return Validator.verifyThat(propertyName + " should be " + propertyValue, getAppInfo(propertyName),
-				Matchers.equalTo(propertyValue));
+		
+		String message = String.format("%s should be %s", propertyName,propertyValue);
+		String appInfo = getAppInfo(propertyName);
+		return Validator.verifyThat(message, appInfo,Matchers
+				.equalTo(propertyValue));
 	}
 
+	/**
+	 *
+	 *	Utility method to Assert app information using Perfecto method.
+	 *
+	 *	@param propertyName App property to Assert.
+	 *
+	 *	@param propertyValue Expected App property.
+	 *
+	 */
 	public static void assertAppInfo(String propertyName, String propertyValue) {
 		String appOrientation = getAppInfo(propertyName);
-		Validator.assertThat(propertyName + " must be " + propertyValue, appOrientation,
-				Matchers.equalTo(propertyValue));
+		String message = String.format("%s must be %s", propertyName,propertyValue);
+		Validator.assertThat(message, appOrientation,Matchers
+				.equalTo(propertyValue));
 	}
+	
+	/**
+	 *
+	 *	Utility method to Switch app context using Perfecto method.
+	 *
+	 *	@param context App context example NATIVE_APP.
+	 *
+	 */
 
 	public static void switchToContext(String context) {
 		RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(getQAFDriver());
@@ -238,16 +372,51 @@ public class DeviceUtils {
 		executeMethod.execute(DriverCommand.SWITCH_TO_CONTEXT, params);
 	}
 
+	/**
+	 *
+	 *	Utility method to wait for text using Perfecto visual method.
+	 *
+	 *	@param text text to wait for.
+	 * 
+	 *	@param seconds int max time to wait 
+	 *
+	 */
 	public static void waitForPresentTextVisual(String text, int seconds) {
-		Validator.verifyThat("Text: \"" + text + "\" should be present after " + seconds + "seconds",
-				isText(text, seconds), Matchers.equalTo("true"));
+		
+		String message = String.format("Text: '%s' should be present within max timeout - %s seconds", text, seconds);
+		String result = isText(text, seconds);
+		Validator.verifyThat(message,result, Matchers.equalTo("true"));
 	}
 
+	/**
+	 *
+	 *	Utility method to wait for Image using Perfecto visual method.
+	 *
+	 *	@param image Image to wait for.
+	 * 
+	 *	@param seconds int max time to wait 
+	 *
+	 */
 	public static void waitForPresentImageVisual(String image, int seconds) {
-		Validator.verifyThat("Image: \"" + image + "\" should be visible after " + seconds + "seconds",
-				isImg(image, seconds), Matchers.equalTo("true"));
+		
+		String message = String.format("Image: '%s' should be present within max timeout - %s seconds", image, seconds);
+		String result = isImg(image, seconds);
+		
+		Validator.verifyThat(message,result, Matchers.equalTo("true"));
 	}
 
+	/**
+	 *
+	 *	Utility method to execute Perfecto Image Checkpoint method.
+	 *
+	 *	@param img Image to wait for.
+	 * 
+	 *	@param timeout int max time to wait 
+	 *
+	 *	@return String value representing whether the Image is present or not.
+	 *
+	 */
+	
 	public static String isImg(String img, Integer timeout) {
 		String context = getCurrentContext();
 		switchToContext("VISUAL");
@@ -264,12 +433,33 @@ public class DeviceUtils {
 		return result.toString();
 	}
 
+	/**
+	 *
+	 *	Utility method to assert visually Image using Perfecto visual method.
+	 *
+	 *	@param img image to wait for.
+	 *
+	 */
 	public static void assertVisualImg(String img) {
-		Validator.assertThat("Image " + img + " must be visible", isImg(img, 180), Matchers.equalTo("true"));
+		String message = String.format("Image %s must be visible", img);
+		String result = isImg(img, 180);
+		Validator.assertThat(message,result, Matchers.equalTo("true"));
 	}
+	
+	/**
+	 *
+	 *	Utility method to verify visually Image using Perfecto visual method.
+	 *
+	 *	@param img image to wait for.
+	 *
+	 *	@return Verification result of Image check using Perfecto visual method.
+	 *
+	 */
 
 	public static boolean verifyVisualImg(String img) {
-		return Validator.verifyThat("Image " + img + " should be visible", isImg(img, 180), Matchers.equalTo("true"));
+		String message = String.format("Image %s should be visible", img);
+		String result = isImg(img, 180);
+		return Validator.verifyThat(message,result, Matchers.equalTo("true"));
 	}
 
 	/**
@@ -323,6 +513,7 @@ public class DeviceUtils {
 	 */
 	public static String getCurrentContextHandles() {
 		RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(getQAFDriver());
+		@SuppressWarnings("unchecked")
 		ArrayList<String> al = (ArrayList<String>) executeMethod.execute(DriverCommand.GET_CONTEXT_HANDLES, null);
 		StringBuffer sb = new StringBuffer();
 
@@ -360,7 +551,7 @@ public class DeviceUtils {
 	/**
 	 * Performs the swipe gesture according to the start and end coordinates.
 	 * <p>
-	 * Example swipe left:<br/>
+	 * Example swipe left:<br>
 	 * start: 60%,50% end: 10%,50%
 	 *
 	 * @param start write in format of x,y. can be in pixels or
@@ -460,6 +651,16 @@ public class DeviceUtils {
 		params.put(by, restValue);
 		getQAFDriver().executeScript("mobile:handset:rotate", params);
 	}
+	
+	/**
+	 *
+	 *	Utility method to Set location using Perfecto method.
+	 *
+	 *	@param location String to set location
+	 *
+	 *	@param by String Set location strategy - "address" or "coordinates"
+	 *
+	 */
 
 	// by = "address" or "coordinates"
 	public static void setLocation(String location, String by) {
@@ -470,27 +671,58 @@ public class DeviceUtils {
 		getQAFDriver().executeScript("mobile:location:set", params);
 	}
 
+	/**
+	 *
+	 *	Utility method to Assert location using Perfecto method.
+	 *
+	 *	@param location String to set location
+	 *
+	 *
+	 */
 	public static void assertLocation(String location) {
 		String deviceLocation = getDeviceLocation();
-		Validator.assertThat("The device location", deviceLocation, Matchers.equalTo(location));
-
+		Validator.assertThat("The device location", deviceLocation, Matchers
+				.equalTo(location));
 	}
 
+	/**
+	 *
+	 *	Utility method to Verify location using Perfecto method.
+	 *
+	 *	@param location String to set location
+	 *
+	 *	@return Boolean value whether the location is as expected.
+	 */
 	public static boolean verifyLocation(String location) {
 		String deviceLocation = getDeviceLocation();
-		return Validator.verifyThat("The device location", deviceLocation, Matchers.equalTo(location));
+		return Validator.verifyThat("The device location", deviceLocation, Matchers
+				.equalTo(location));
 	}
-
+	
+	/**
+	 *
+	 *	Utility method to get Device location using Perfecto method.
+	 *
+	 *	@return String value the location of Perfecto Device.
+	 */
 	public static String getDeviceLocation() {
 		Map<String, String> params = new HashMap<String, String>();
 		return (String) getQAFDriver().executeScript("mobile:location:get", params);
 	}
 
+	/**
+	 *
+	 *	Utility method to reset Device location using Perfecto method.
+	 */
 	public static void resetLocation() {
 		Map<String, String> params = new HashMap<String, String>();
 		getQAFDriver().executeScript("mobile:location:reset", params);
 	}
 
+	/**
+	 *
+	 *	Utility method to navigate to Device Home screen using Perfecto method.
+	 */
 	public static void goToHomeScreen() {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("target", "All");
@@ -498,13 +730,25 @@ public class DeviceUtils {
 		getQAFDriver().executeScript("mobile:handset:ready", params);
 	}
 
-	public static void lockDevice(int sec) {
+	/**
+	 *
+	 *	Utility method to Lock Device for given duration using Perfecto method.
+	 *
+	 *	@param lockTimeInSeconds - Device Lock time in seconds
+	 */
+	public static void lockDevice(int lockTimeInSeconds) {
 		Map<String, Integer> params = new HashMap<String, Integer>();
-		params.put("timeout", sec);
+		params.put("timeout", lockTimeInSeconds);
 
 		getQAFDriver().executeScript("mobile:screen:lock", params);
 	}
 
+	/**
+	 *
+	 *	Utility method to Set timezone of Device using Perfecto method.
+	 *
+	 *	@param timezone - Timezone to set
+	 */
 	public static void setTimezone(String timezone) {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("timezone", timezone);
@@ -512,27 +756,59 @@ public class DeviceUtils {
 		getQAFDriver().executeScript("mobile:timezone:set", params);
 	}
 
+	/**
+	 *
+	 *	Utility method to Get timezone of Device using Perfecto method.
+	 *
+	 *	@return Sting Timezone of device
+	 */
 	public static String getTimezone() {
 		Map<String, String> params = new HashMap<String, String>();
 
 		return (String) getQAFDriver().executeScript("mobile:timezone:get", params);
 	}
 
+	/**
+	 *
+	 *	Utility method to Assert timezone of Device using Perfecto method.
+	 *
+	 *	@param timezone Timezone of device
+	 */
 	public static void assertTimezone(String timezone) {
 		String deviceTimezone = getTimezone();
 		Validator.assertThat("The device timezone", deviceTimezone, Matchers.equalTo(timezone));
 	}
 
+	/**
+	 *
+	 *	Utility method to Verify timezone of Device using Perfecto method.
+	 *
+	 *	@param timezone Timezone of device
+	 *
+	 *	@return Boolean representing result of timezone match.
+	 */
 	public static boolean verifyTimezone(String timezone) {
 		return Validator.verifyThat("The device timezone should be " + timezone, getTimezone(),
 				Matchers.equalTo(timezone));
 	}
 
+	/**
+	 *
+	 *	Utility method to reset timezone of Device using Perfecto method.
+	 */
 	public static void resetTimezone() {
 		Map<String, String> params = new HashMap<String, String>();
 		getQAFDriver().executeScript("mobile:timezone:reset", params);
 	}
 
+	/**
+	 *
+	 *	Utility method to take screenshot using Perfecto method.
+	 *
+	 *	@param repositoryPath Screenshot Path of Perfecto repository
+	 *
+	 *	@param shouldSave boolean value representing whether screenshot to save or not.
+	 */
 	public static void takeScreenshot(String repositoryPath, boolean shouldSave) {
 		Map<String, String> params = new HashMap<String, String>();
 		if (shouldSave) {
@@ -541,7 +817,16 @@ public class DeviceUtils {
 		getQAFDriver().executeScript("mobile:screen:image", params);
 	}
 
-	// by = "name" or "identifier"
+	/**
+	 *
+	 *	Utility method to Start image injection in Device using Perfecto method.
+	 *
+	 *	@param repositoryFile Image File Path of Perfecto repository
+	 *
+	 *	@param app App identifier value.
+	 *
+	 *	@param by App identifying stategy. by = "name" or "identifier"
+	 */
 	public static void startImageInjection(String repositoryFile, String app, String by) {
 		Map<String, Object> params = new HashMap<>();
 		params.put("repositoryFile", repositoryFile);
@@ -550,11 +835,29 @@ public class DeviceUtils {
 
 	}
 
+	/**
+	 *
+	 *	Utility method to Stop image injection in Device using Perfecto method.
+	 *
+	 */
 	public static void stopImageInjection() {
 		Map<String, Object> params = new HashMap<>();
 		new WebDriverTestBase().getDriver().executeScript("mobile:image.injection:stop", params);
 	}
 
+	/**
+	 *
+	 *	Utility method to simulate finger print authentication on Device using Perfecto method.
+	 *
+	 *	@param identifier - App identifier value.
+	 *
+	 *	@param by - App identifying stategy. by = "name" or "identifier"
+	 *
+	 *	@param resultAuth - Result to Simulate.
+	 *
+	 *	@param errorType - Error type to simulate in case of failed authentication
+	 *
+	 */
 	public static void setFingerprint(String by, String identifier, String resultAuth, String errorType) {
 
 		Map<String, Object> params = new HashMap<>();
@@ -567,6 +870,19 @@ public class DeviceUtils {
 		getQAFDriver().executeScript("mobile:fingerprint:set", params);
 	}
 
+	/**
+	 *
+	 *	Utility method to simulate Sensor authentication on Device using Perfecto method.
+	 *
+	 *	@param identifier - App identifier value.
+	 *
+	 *	@param by - App identifying stategy. by = "name" or "identifier"
+	 *
+	 *	@param resultAuth - Result to Simulate.
+	 *
+	 *	@param errorType - Error type to simulate in case of failed authentication
+	 *
+	 */
 	public static void setSensorAuthentication(String by, String identifier, String resultAuth, String errorType) {
 
 		Map<String, Object> params = new HashMap<>();
@@ -578,6 +894,12 @@ public class DeviceUtils {
 		getQAFDriver().executeScript("mobile:sensorAuthentication:set", params);
 	}
 
+	/**
+	 *
+	 *	Utility method to Start capturing HAR file on Device using Perfecto method.
+	 *
+	 */
+	
 	public static void generateHAR() {
 		Map<String, Object> params = new HashMap<>();
 		params.put("generateHarFile", "true");
@@ -585,11 +907,23 @@ public class DeviceUtils {
 
 	}
 
+	/**
+	 *
+	 *	Utility method to Stop capturing HAR file on Device using Perfecto method.
+	 *
+	 */
 	public static void stopGenerateHAR() {
 		Map<String, Object> params = new HashMap<>();
 		getQAFDriver().executeScript("mobile:vnetwork:stop", params);
 	}
 
+	
+	/**
+	 *
+	 *	Utility method to Inject audio file on Device using Perfecto method.
+	 *
+	 *	@param file Audio file path in Perfecto repository.
+	 */
 	public static void audioInject(String file) {
 		Map<String, Object> params = new HashMap<>();
 		params.put("key", file);
@@ -597,6 +931,14 @@ public class DeviceUtils {
 
 	}
 
+	/**
+	 *
+	 *	Utility method to Get Device Property using Perfecto method.
+	 *
+	 *	@param property Device property to retrieve.
+	 *
+	 *	@return String representing required device property.
+	 */
 	public static String getDeviceProperty(String property) {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("property", property);
@@ -840,6 +1182,7 @@ public class DeviceUtils {
 	 *                  multiple phone numbers. Format - +[country code][area
 	 *                  code][phone number]
 	 *
+	 *	@throws java.lang.Exception Exception thrown by method if no Destination is selected.
 	 */
 	public static void cloudCall(String toHandset, String toUser, String toLogical, String toNumber) throws Exception {
 		if (toHandset.isEmpty() && toUser.isEmpty() && toLogical.isEmpty() && toNumber.isEmpty())
@@ -866,9 +1209,9 @@ public class DeviceUtils {
 	 *
 	 * Confirm that the destination device is configured to receive email messages.
 	 *
-	 * @param subject   - The message subject for this command. <default is "none">.
-	 * @param body      - The message text for this command. <default is "test
-	 *                  email">.
+	 * @param subject   - The message subject for this command. &lt;default is "none"&gt;.
+	 * @param body      - The message text for this command. &lt;default is "test
+	 *                  email"&gt;.
 	 * @param toHandset - The destination device. It is possible to select multiple
 	 *                  devices.
 	 * @param toAddress - The email address for this command.
@@ -876,6 +1219,8 @@ public class DeviceUtils {
 	 *                  multiple users.
 	 * @param toLogical - user | none The user currently running the script.
 	 *
+	 *
+	 *	@throws java.lang.Exception Exception thrown by method if no Destination is selected.
 	 */
 	public static void cloudEmail(String subject, String body, String toHandset, String toAddress, String toUser,
 			String toLogical) throws Exception {
@@ -903,8 +1248,8 @@ public class DeviceUtils {
 	 * multiple destinations that may include devices, users, and phones. There is
 	 * no default. To use, at least one destination must be selected.
 	 *
-	 * @param body      - The message text for this command. <default is "test
-	 *                  email">.
+	 * @param body      - The message text for this command. &lt;default is "test
+	 *                  email"&gt;.
 	 * @param toHandset - The destination device. It is possible to select multiple
 	 *                  devices.
 	 * @param toUser    - The user for this command. It is possible to select
@@ -914,6 +1259,7 @@ public class DeviceUtils {
 	 *                  multiple phone numbers. Format - +[country code][area
 	 *                  code][phone number]
 	 *
+	 *	@throws java.lang.Exception Exception thrown by method if no Destination is selected.
 	 */
 	public static void cloudSMS(String body, String toHandset, String toUser, String toLogical, String toNumber)
 			throws Exception {
@@ -934,6 +1280,9 @@ public class DeviceUtils {
 		getQAFDriver().executeScript("mobile:gateway:sms", pars);
 	}
 
+	/**
+	 * Utility method to start Axe tool on Perfecto Browsers for Accessibility testing.
+	 */
 	private static void startAxe() {
 		AxeHelper axe = new AxeHelper(DeviceUtils.getQAFDriver());
 		axe.runAxe();
@@ -959,6 +1308,7 @@ public class DeviceUtils {
 
 			errorCount++;
 			String ruleId = (String) violation.get("issue");
+			@SuppressWarnings("unchecked")
 			Map<String, String> node = (Map<String, String>) violation.get("node");
 
 			impact = node.get("impact");
@@ -996,17 +1346,32 @@ public class DeviceUtils {
 		}
 	}
 
+	/**
+	 * Utility method to start Device vital collection using Perfecto method
+	 */
 	public static void startVitals() {
 		Map<String, String> params = new HashMap<>();
 		getQAFDriver().executeScript("mobile:vitals:start", params);
 	}
 
+	/**
+	 * Utility method to start Device vital collection using Perfecto method
+	 * 
+	 * @param vitals - List of vitals to collect.
+	 */
 	public static void startVitals(List<String> vitals) {
 		Map<String, Object> params = new HashMap<>();
 		params.put("vitals", vitals);
 		getQAFDriver().executeScript("mobile:vitals:start", params);
 	}
 
+	/**
+	 * Utility method to start Device vital collection using Perfecto method
+	 * 
+	 * @param vitals - List of vitals to collect.
+	 * 
+	 * @param interval - Duration of collection of vitals.
+	 */
 	public static void startVitals(List<String> vitals, Integer interval) {
 		Map<String, Object> params = new HashMap<>();
 		params.put("vitals", vitals);
@@ -1014,6 +1379,9 @@ public class DeviceUtils {
 		getQAFDriver().executeScript("mobile:vitals:start", params);
 	}
 
+	/**
+	 * Utility method to stop Device vital collection using Perfecto method
+	 */
 	public static void stopVitals() {
 		Map<String, Object> params = new HashMap<>();
 		getQAFDriver().executeScript("mobile:vitals:stop", params);

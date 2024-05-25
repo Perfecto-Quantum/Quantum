@@ -11,7 +11,7 @@ import com.quantum.utils.DeviceUtils;
 import com.quantum.utils.DriverUtils;
 import com.quantum.utils.ReportUtils;
 
-import cucumber.api.java.en.Then;
+import io.cucumber.java.en.Then;
 
 /**
  * The class PerfectoDeviceSteps provides methods for working with a device,
@@ -88,18 +88,18 @@ public class PerfectoDeviceSteps {
 	 * <p>
 	 * Example: 
 	 * <p>
-	 * &lt;parameter name="perfecto.capabilities.platformName" value="Android" />
-	 * <p>&lt;parameter name="perfecto.env.resources" value="src/main/resources/android2" />
+	 * &lt;parameter name="perfecto.capabilities.platformName" value="Android"/&gt;
+	 * <p>&lt;parameter name="perfecto.env.resources" value="src/main/resources/android2"/&gt;
 	 *  * <p>
-	 * &lt;parameter name="device2.capabilities.platformName" value="Android" />
-	 * <p>&lt;parameter name="device2.env.resources" value="src/main/resources/android2" />
+	 * &lt;parameter name="device2.capabilities.platformName" value="Android" /&gt;
+	 * <p>&lt;parameter name="device2.env.resources" value="src/main/resources/android2" /&gt;
 	 * <p>
 	 * <b>Note:</b> 
 	 * If AppiumDriver is set to true you must also have the appropriate Appium driver class assigned to the driver name
 	 * <p>
-	 * &lt;parameter name="perfecto.capabilities.driverClass" value="io.appium.java_client.android.AndroidDriver" />
+	 * &lt;parameter name="perfecto.capabilities.driverClass" value="io.appium.java_client.android.AndroidDriver" /&gt;
 	 * <p>or
-	 * <p>&lt;parameter name="device2.capabilities.driverClass" value="io.appium.java_client.ios.IOSDriver" />
+	 * <p>&lt;parameter name="device2.capabilities.driverClass" value="io.appium.java_client.ios.IOSDriver" /&gt;
 	 * <p>
 	 * I switch to driver "perfecto"
 	 * 
@@ -362,8 +362,9 @@ public class PerfectoDeviceSteps {
 	}
 
 	/**
-	 * Performs the lo touch gesture according to the point coordinates.
+	 * Performs the long touch gesture according to the point coordinates.
 	 *
+	 * @param seconds Duration of long touch in seconds.
 	 * @param locator
 	 *            write in format of x,y. can be in pixels or
 	 *            percentage(recommended) for example 50%,50%.
@@ -405,7 +406,9 @@ public class PerfectoDeviceSteps {
 	}
 
 	/**
-	 * Add Comment to Report
+	 * Add Comment to Report.
+	 * 
+	 * 	@param comment Comment to be added in Perfecto's Smart report
 	 *
 	 */
 	@Then("^Add report comment \\\"(.*?)\\\"$")
@@ -475,6 +478,8 @@ public class PerfectoDeviceSteps {
      * @param locator - The pickerwheel element must be this specific 
      * 					type ("XCUIElementTypePickerWheel"), not “XCUIElementTypePicker” 
      * 					or any other parent/child of the pickerwheel.
+     * 
+     * 	@param value Value to be asserted with Pickerwheel.
      */
     @Then("^I validate \"(.*?)\" has the value \"(.*?)\"$")
     public static void getValue(String locator, String value){

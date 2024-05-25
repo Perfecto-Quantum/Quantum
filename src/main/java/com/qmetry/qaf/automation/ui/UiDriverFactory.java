@@ -34,7 +34,6 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.ie.InternetExplorerOptions;
-import org.openqa.selenium.opera.OperaOptions;
 import org.openqa.selenium.remote.CommandInfo;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.HttpCommandExecutor;
@@ -100,8 +99,8 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 	 * driver object. It will not include any modification done by
 	 * {@link QAFWebDriverCommandListener#beforeInitialize(Capabilities)}
 	 *
-	 * @param driverName
-	 * @return
+	 * @param driverName - String driver name
+	 * @return DesiredCapabilities object
 	 */
 	public static DesiredCapabilities getDesiredCapabilities(String driverName) {
 		return Browsers.getBrowser(driverName).getDesiredCapabilities();
@@ -291,7 +290,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 		firefox(new FirefoxOptions(), FirefoxDriver.class),
 		iexplorer(new InternetExplorerOptions(), InternetExplorerDriver.class),
 		chrome(new ChromeOptions(), ChromeDriver.class),
-		opera(new OperaOptions(), "com.opera.core.systems.OperaDriver"),
+//		opera(new OperaOptions(), "com.opera.core.systems.OperaDriver"),
 		android(new DesiredCapabilities("android", "", Platform.ANDROID), "org.openqa.selenium.android.AndroidDriver"),
 		iphone(new DesiredCapabilities("iPhone", "", Platform.MAC), "org.openqa.selenium.iphone.IPhoneDriver"),
 		ipad(new DesiredCapabilities("iPad", "", Platform.MAC), "org.openqa.selenium.iphone.IPhoneDriver"),
@@ -539,16 +538,16 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			} catch (MalformedURLException e) {
 				throw new RuntimeException(e.getMessage(), e);
 			}
-			ClientConfig config;
+//			ClientConfig config;
 			
 			if (!proxyUser.isEmpty() || !proxyUser.equalsIgnoreCase("")) {
-				config = ClientConfig.defaultConfig().baseUrl(urls)
+				ClientConfig.defaultConfig().baseUrl(urls)
 						.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)))
 						.readTimeout(Duration.ofSeconds(60)).authenticateAs(
 								(org.openqa.selenium.Credentials) UsernameAndPassword.of(proxyUser, proxyPassword));
 
 			} else {
-				config = ClientConfig.defaultConfig().baseUrl(urls)
+				ClientConfig.defaultConfig().baseUrl(urls)
 						.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)))
 						.readTimeout(Duration.ofSeconds(60));
 
@@ -633,16 +632,18 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 				throw new RuntimeException(e.getMessage(), e);
 			}
 
-			ClientConfig config;
+//			ClientConfig config;
 //			if (!proxyUser.isEmpty() || !proxyUser.equalsIgnoreCase("")) {
 			if (!"".equals(proxyUser)) {
-				config = ClientConfig.defaultConfig().baseUrl(urls)
+//				config = 
+				ClientConfig.defaultConfig().baseUrl(urls)
 						.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)))
 						.readTimeout(Duration.ofSeconds(60)).authenticateAs(
-								(org.openqa.selenium.Credentials) UsernameAndPassword.of(proxyUser, proxyPassword));
+								UsernameAndPassword.of(proxyUser, proxyPassword).get());
 
 			} else {
-				config = ClientConfig.defaultConfig().baseUrl(urls)
+//				config = 
+				ClientConfig.defaultConfig().baseUrl(urls)
 						.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)))
 						.readTimeout(Duration.ofSeconds(60));
 
