@@ -5,12 +5,11 @@ import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -24,6 +23,7 @@ import org.testng.IInvokedMethod;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
+import org.testng.xml.XmlTest;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -50,7 +50,6 @@ import com.qmetry.qaf.automation.step.QAFTestStepListener;
 import com.qmetry.qaf.automation.step.StepExecutionTracker;
 import com.qmetry.qaf.automation.step.TestStep;
 import com.qmetry.qaf.automation.step.client.Scenario;
-import com.qmetry.qaf.automation.step.client.TestNGScenario;
 import com.qmetry.qaf.automation.step.client.text.BDDDefinitionHelper.ParamType;
 import com.qmetry.qaf.automation.ui.WebDriverTestCase;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
@@ -59,8 +58,8 @@ import com.quantum.utils.DeviceUtils;
 import com.quantum.utils.DriverUtils;
 import com.quantum.utils.ReportUtils;
 
-import cucumber.runtime.RuntimeOptions;
-import cucumber.runtime.RuntimeOptionsFactory;
+import io.cucumber.core.options.RuntimeOptions;
+import io.cucumber.core.options.RuntimeOptionsBuilder;
 
 class Messages {
 	List<String> StackTraceErrors;
@@ -172,6 +171,8 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 	@SuppressWarnings("unchecked")
 	public void onStart(ITestContext context) {
 		if (getBundle().getString("remote.server", "").contains("perfecto")) {
+			
+//			System.setProperty("webdriver.http.factory", "jdk-http-client");
 
 			List<String> stepListeners = getBundle().getList(ApplicationProperties.TESTSTEP_LISTENERS.key);
 			if (!stepListeners.contains(this.getClass().getName())) {
@@ -192,8 +193,13 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 	@Override
 	public void onTestStart(ITestResult testResult) {
-
+		
+		String testName = testResult.getTestName();
+		
+		testName = testName + getDataDrivenText(testResult);
+		
 		if (getBundle().getString("remote.server", "").contains("perfecto")) {
+			
 			getBundle().setProperty("ScenarioExecution", testResult.getMethod().getMethodName());
 			// get custom fields "%name-value" from groups
 			// compile actual groups
@@ -232,7 +238,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 				}
 			}
 
-			Builder testContext = new TestContext.Builder();
+			Builder<?> testContext = new TestContext.Builder<>();
 			if (groupsFinal.size() > 0) {
 				testContext
 						.withTestExecutionTags(groupsFinal.toString().replace('[', ' ').replace(']', ' ').split(","));
@@ -242,8 +248,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 				testContext.withCustomFields(cfc);
 			}
 
-			createReportiumClient(testResult).testStart(
-					testResult.getMethod().getMethodName() + getDataDrivenText(testResult), testContext.build());
+			createReportiumClient(testResult).testStart(testName, testContext.build());
 
 			if (testResult.getParameters().length > 0 && getBundle().getBoolean("addFullDataToReport", false)) {
 				logStepStart("Test Data used");
@@ -310,6 +315,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 	@Override
 	public void onTestSuccess(ITestResult testResult) {
+
 		getBundle().setProperty("ScenarioExecution", "FromListener");
 		getBundle().setProperty("device_not_available", false);
 
@@ -317,15 +323,17 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 		if (ConfigurationManager.getBundle().getPropertyValue("perfecto.harfile.enable").equals("true")) {
 			String platformName = DriverUtils.getDriver().getCapabilities().getCapability("platformName").toString();
+
 			if (platformName != null && platformName.equalsIgnoreCase("android") || platformName.equalsIgnoreCase("ios")
 					|| platformName.equalsIgnoreCase("any") || platformName.equalsIgnoreCase("linux"))
 				DeviceUtils.stopGenerateHAR();
+
 			if (platformName != null && platformName.equalsIgnoreCase("mac")) {
-				Object deviceName = DriverUtils.getDriver().getCapabilities().getCapability("deviceName");
-				if (deviceName != null) {
-					if (deviceName.toString().toLowerCase().contains("iphone")
-							|| deviceName.toString().toLowerCase().contains("ipad")) {
-						ReportUtils.logStepStart("Start generate Har file");
+				Object deviceNameObj = DriverUtils.getDriver().getCapabilities().getCapability("deviceName");
+				if (deviceNameObj != null) {
+
+					String deviceName = deviceNameObj.toString().toLowerCase();
+					if (deviceName.contains("iphone") || deviceName.contains("ipad")) {
 						DeviceUtils.stopGenerateHAR();
 					}
 				}
@@ -345,7 +353,17 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 		getBundle().setProperty("ScenarioExecution", "FromListener");
 		getBundle().setProperty("device_not_available", false);
-
+		
+		// Retry failed tests
+		try {
+			XmlTest currentTest = testResult.getMethod().getXmlTest();
+			FailedTestSuite.addTest(currentTest);
+		} catch (Exception e) {
+			System.out.println(e.getLocalizedMessage());
+		} finally {
+			ConfigurationManager.getBundle().clearProperty("test-unique-identifier");
+		}
+		
 		ReportiumClient client = getReportClient();
 
 		TestResult reportiumResult;
@@ -383,16 +401,17 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 			}
 
 			if (testResult.getThrowable() == null) {
-				
+
 				Exception exp = new Exception(
 						"There was some validation failure in the scenario which did not provide any throwable object.");
-				
+
 				try {
-					client.testStop(TestResultFactory.createFailure(failMsg.isEmpty() ? "An error occurred" : failMsg,exp));
-				}catch(Exception e) {
+					client.testStop(
+							TestResultFactory.createFailure(failMsg.isEmpty() ? "An error occurred" : failMsg, exp));
+				} catch (Exception e) {
 					ConsoleUtils.logWarningBlocks(e.getMessage());
 				}
-				
+
 			} else {
 				ExceptionUtils.getStackTrace(testResult.getThrowable());
 				String actualExceptionMessage = testResult.getThrowable().toString();
@@ -424,7 +443,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 						tagsFinal.add(tag);
 					}
 
-					Builder testContext = new TestContext.Builder();
+					Builder<?> testContext = new TestContext.Builder<>();
 
 					if (cfc.size() > 0) {
 						testContext.withCustomFields(cfc);
@@ -455,7 +474,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 					}
 				}
 			}
-			
+
 			handleWebDriverFailure(testResult);
 
 			logTestEnd(testResult);
@@ -464,17 +483,18 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 		}
 	}
-	
+
 	private void handleWebDriverFailure(ITestResult testResult) {
 		try {
 			QAFExtendedWebDriver driver = DeviceUtils.getQAFDriver();
 			if (driver != null) {
-				driver.getUnderLayingDriver().getPageSource();
+
+				driver.getUnderLayingDriver().getWindowHandle();
 			}
 		} catch (Exception e) {
 			Object testInstance = testResult.getInstance();
 			((WebDriverTestCase) testInstance).getTestBase().tearDown();
-			
+
 		}
 	}
 
@@ -521,6 +541,15 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 	@Override
 	public void onFinish(ITestContext context) {
+		// Failed test retry
+		FailedTestSuite.saveXml();
+		
+//		((FileHandler)ConfigurationManager.getBundle().getProperty("seleniumfile")).flush();
+//		((FileHandler)ConfigurationManager.getBundle().getProperty("seleniumfile")).close();
+		
+//		((FileHandler)ConfigurationManager.getBundle().getProperty("remotewdfile")).flush();
+//		((FileHandler)ConfigurationManager.getBundle().getProperty("remotewdfile")).close();
+		
 	}
 
 	public static void logTestStep(String message) {
@@ -566,7 +595,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 	}
 
-	@Override
+//	@Override
 	protected String getTestName(ITestResult result) {
 
 		return result.getTestName() == null ? result.getMethod().getMethodName() : result.getTestName();
@@ -588,8 +617,16 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 		String prjName = getBundle().getString("project.name", suiteName);
 		String prjVer = getBundle().getString("project.ver", "1.0");
 		String xmlTestName = testResult.getTestContext().getName();
-		String allTags = xmlTestName + "," + suiteName
-				+ (System.getProperty("reportium-tags") == null ? "" : "," + System.getProperty("reportium-tags"));
+
+		String reportiumTags = System.getProperty("reportium-tags");
+
+		StringBuilder tagsStringBuilder = new StringBuilder(xmlTestName);
+		tagsStringBuilder = tagsStringBuilder.append(",").append(suiteName);
+
+		tagsStringBuilder = (reportiumTags == null) ? tagsStringBuilder
+				: tagsStringBuilder.append(",").append(reportiumTags);
+
+		String allTags = tagsStringBuilder.toString();
 
 		Object testInstance = testResult.getInstance();
 
@@ -635,17 +672,40 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 	protected String[] getTags(ITestResult testResult) {
 
 		RuntimeOptions cucumberOptions = getCucumberOptions(testResult);
-		List<String> optionsList = cucumberOptions.getFilters().stream().map(object -> Objects.toString(object, null))
-				.collect(Collectors.toList());
-		optionsList.addAll(cucumberOptions.getFeaturePaths());
-		optionsList.addAll(cucumberOptions.getGlue());
+
+		List<URI> featurePathsURI = cucumberOptions.getFeaturePaths();
+
+		List<String> featurePaths = featurePathsURI.stream().map(URI::getPath).collect(Collectors.toList());
+
+		List<URI> gluePathsURI = cucumberOptions.getGlue();
+
+		List<String> gluePaths = gluePathsURI.stream().map(URI::getPath).collect(Collectors.toList());
+
+		List<Pattern> filterPatterns = cucumberOptions.getNameFilters();
+
+//		List<String> patterns =filterPatterns
+//				.stream().map(Object::toString)
+//				.collect(Collectors.toList());
+
+		List<String> optionsList = filterPatterns.stream().map(Object::toString).collect(Collectors.toList());
+
+		optionsList.addAll(featurePaths);
+		optionsList.addAll(gluePaths);
 
 		return ArrayUtils.addAll(super.getTags(testResult), optionsList.toArray(new String[optionsList.size()]));
 	}
 
+	@SuppressWarnings("unchecked")
 	private RuntimeOptions getCucumberOptions(ITestResult testResult) {
 		try {
-			return new RuntimeOptionsFactory(Class.forName(testResult.getTestClass().getName())).create();
+
+			String className = testResult.getTestClass().getName();
+			@SuppressWarnings("rawtypes")
+			Class testResultClass = Class.forName(className);
+
+			return new RuntimeOptionsBuilder().setObjectFactoryClass(testResultClass).build();
+
+//			return new RuntimeOptionsFactory(Class.forName(testResult.getTestClass().getName())).create();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -653,8 +713,23 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 	}
 
 	private void addReportLink(ITestResult result, String url) {
-		((TestNGScenario) result.getMethod()).getMetaData().put("Perfecto-report",
-				"<a href=\"" + url + "\" target=\"_blank\">view</a>");
+		
+		Object testNGMethodObj = result.getMethod().getInstance();
+		
+		if(testNGMethodObj instanceof Scenario) {
+			Scenario scenario = (Scenario) testNGMethodObj;
+			Map <String,Object> metaData = scenario.getMetadata();
+			
+			metaData.put("Perfecto-report",
+					"<a href=\"" + url + "\" target=\"_blank\">view</a>");
+			
+		}
+		
+//		System.out.println(testNGMethod.getClass());
+		
+		
+//		((TestNGScenario) testNGMethod).getMetaData().put("Perfecto-report",
+//				"<a href=\"" + url + "\" target=\"_blank\">view</a>");
 	}
 
 	@SuppressWarnings("rawtypes")

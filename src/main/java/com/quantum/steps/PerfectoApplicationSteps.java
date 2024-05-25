@@ -28,8 +28,8 @@ import com.qmetry.qaf.automation.step.QAFTestStepProvider;
 import com.quantum.utils.DeviceUtils;
 import com.quantum.utils.ReportUtils;
 
-import cucumber.api.java.en.Then;
-import cucumber.api.java.en.When;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 
 /**
  * The class PerfectoApplicationSteps provides methods for working with
@@ -62,7 +62,7 @@ import cucumber.api.java.en.When;
  *      "https://community.perfectomobile.com/series/20208/posts/1072062">Switching
  *      contexts</a>
  */
-@QAFTestStepProvider(prefix = "cucmber")
+@QAFTestStepProvider//(prefix = "cucmber")
 public class PerfectoApplicationSteps {
 	/**
 	 * Opens a native application with the application name.
@@ -362,7 +362,7 @@ public class PerfectoApplicationSteps {
 	 * Identify the edit field object using the <i>Object Repository</i> or an XPath
 	 * expression.
 	 *
-	 * @param locator the object identifier
+	 * @param locator - the object identifier
 	 * @see <a href=
 	 *      "https://github.com/PerfectoCode/Quantum/wiki/Object%20Repository">Object
 	 *      Repository</a>
@@ -469,6 +469,7 @@ public class PerfectoApplicationSteps {
 	/**
 	 * Switch to context.
 	 *
+	 *	@param context App Context to switch to.
 	 * @see <a href=
 	 *      "https://community.perfectomobile.com/series/20208/posts/1072062">Switching
 	 *      contexts</a>

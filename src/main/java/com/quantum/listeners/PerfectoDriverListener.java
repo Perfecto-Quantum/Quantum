@@ -32,12 +32,19 @@ package com.quantum.listeners;
 import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Function;
+import java.util.regex.Pattern;
 
 import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.Platform;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.DriverCommand;
+import org.openqa.selenium.support.ui.FluentWait;
 
 import com.perfecto.reports.ReportAttachments;
 import com.perfecto.reports.ReportPDF;
@@ -55,49 +62,63 @@ import com.quantum.utils.DeviceUtils;
 public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 	public static final String DRIVER_START_TIMER = "DriverTimer";
 
+	private boolean isQuitCommand(CommandTracker commandTracker) {
+		
+		String currentCommand = commandTracker.getCommand();
+		return DriverCommand.QUIT.equalsIgnoreCase(currentCommand);
+	}
+	
+	private boolean isVirtualDevice(Optional<Object> deviceName) {
+		Pattern pattern = Pattern.compile(".*(em|sim)ulator.*",Pattern.CASE_INSENSITIVE);
+		
+		return pattern.matcher(deviceName.toString()).find();
+	}
+	
+	private void closeApp(QAFExtendedWebDriver driver) {
+		try {
+			String appName = (String) driver.getCapabilities().getCapability("applicationName");
+			
+			String eclipseExecId = (String) driver.getCapabilities().getCapability("eclipseExecutionId");
+			
+			if (StringUtil.isNotBlank(appName) && StringUtil.isBlank(eclipseExecId)) {
+				DeviceUtils.closeApp(appName, "name", true, driver);
+			}
+		} catch (Exception ex) {
+			
+		}
+	}
+	
+	
 	@Override
 	public void beforeCommand(QAFExtendedWebDriver driver, CommandTracker commandTracker) {
 
-		if (commandTracker.getCommand().equalsIgnoreCase(DriverCommand.QUIT)) {
+		if (isQuitCommand(commandTracker)) {
+			
 			boolean virtualDeviceCap = false;
 			boolean virtualDeviceName = false;
-			Map<String, Object> map = driver.getCapabilities().asMap();
-			for (String cap : map.keySet()) {
-				if (cap.equalsIgnoreCase("useVirtualDevice")) {
-					virtualDeviceCap = (boolean) map.get(cap);
-				}
-				if (cap.contains("deviceName")) {
-					if (String.valueOf(map.get(cap)).toUpperCase().contains("EMULATOR")
-							|| String.valueOf(map.get(cap)).toUpperCase().contains("SIMULATOR"))
-						virtualDeviceName = true;
-				}
-			}
-//			System.out.println("Virtual device capability - >" + virtualDeviceCap);
+			
+			Map<String, Object> capabilities = driver.getCapabilities().asMap();
+			
+			// Is Use Virtual Device Capability set
+			virtualDeviceCap =  capabilities.keySet().stream()
+					.filter( cap -> cap.endsWith("useVirtualDevice"))
+					.map(cap -> capabilities.get(cap)).findFirst().isPresent();
+
+			// Get Device Name
+			Optional<Object> deviceNameOptional = capabilities.keySet().stream()
+					.filter( cap -> cap.endsWith("deviceName"))
+					.map(cap -> capabilities.get(cap)).findFirst();
+			
+			// Has Virtual Device in name
+			virtualDeviceName = isVirtualDevice(deviceNameOptional);
+
 			if (!virtualDeviceCap && !virtualDeviceName) {
-				ConfigurationUtils.setActualDeviceCapabilities(driver.getCapabilities().asMap());
-				try {
-					String appName = (String) driver.getCapabilities().getCapability("applicationName");
-					if (StringUtil.isNotBlank(appName) && StringUtil
-							.isBlank((String) driver.getCapabilities().getCapability("eclipseExecutionId"))) {
-
-						DeviceUtils.closeApp(appName, "name", true, driver);
-					}
-				} catch (Exception ex) {
-				}
-
-				if (ConfigurationManager.getBundle().getString("remote.server").toLowerCase()
-						.contains(".perfectomobile.com")) {
-					try {
-						Map<String, Object> params = new HashMap<>();
-						driver.executeScript("mobile:execution:close", params);
-					} catch (Exception ex) {
-					}
-
-					try {
-						driver.close();
-					} catch (Exception ex) {
-					}
-				}
+				
+				// Set the Derised Capability obtained from Driver.
+				ConfigurationUtils.setActualDeviceCapabilities(capabilities);
+				
+				// Close App
+				closeApp(driver);
 			}
 		}
 
@@ -105,49 +126,100 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 
 	@Override
 	public void afterCommand(QAFExtendedWebDriver driver, CommandTracker commandTracker) {
-		if (commandTracker.getCommand().equalsIgnoreCase(DriverCommand.QUIT)) {
+		if (isQuitCommand(commandTracker)) {
 
 			try {
-				
-				
 
-				if (ConfigurationUtils.getBaseBundle().getString("remote.server", "").contains("perfecto")) {
-					
+				if (isRunningOnPerfecto()) {
+
 					String executionID = ConfigurationManager.getBundle().getString("executionId");
 					
-					Thread[] rptDownloadTasks = new Thread[] {
-							new Thread(new ReportPDF(executionID), "Report PDF Downloader"),
-							new Thread(new ReportSummary(executionID), "Report Summary Downloader"),
-							new Thread(new ReportVideos(executionID), "Report Video Downloader"),
-							new Thread(new ReportAttachments(executionID), "Report Attachment Downloader")
-					};
+					ExecutorService reportDownloadServ = Executors.newFixedThreadPool(5);
 					
-					for(Thread dwdTask : rptDownloadTasks) {
-						dwdTask.start();
-					}
+					reportDownloadServ.execute(new ReportPDF(executionID));
+					reportDownloadServ.execute(new ReportSummary(executionID));
+					reportDownloadServ.execute(new ReportVideos(executionID));
+					reportDownloadServ.execute(new ReportAttachments(executionID));
 					
-					for(Thread dwdTask : rptDownloadTasks) {
-						dwdTask.join();
-					}
+					reportDownloadServ.shutdown();
+					
+					FluentWait<ExecutorService> waitForExecutor = new FluentWait<ExecutorService>(reportDownloadServ);
+					
+					waitForExecutor.withTimeout(Duration.ofMinutes(10));
+					waitForExecutor.pollingEvery(Duration.ofSeconds(1));
+					waitForExecutor.until(new Function<ExecutorService,Boolean>(){
+
+						@Override
+						public Boolean apply(ExecutorService executor) {
+							return executor.isTerminated();
+						}
+						
+					});
 				}
 
 			} catch (Exception ex) {
-
+				System.out.println(ex.getMessage());
 			}
 		}
-
 	}
 
-	@Override
-	public void beforeInitialize(Capabilities desiredCapabilities) {
-		if (ConfigurationUtils.getBaseBundle().getString("remote.server", "").contains("perfecto")) {
-			String eclipseExecutionId = ConfigurationUtils.getExecutionIdCapability();
+	private boolean isRunningOnPerfecto() {
+		String remoteServer = ConfigurationUtils.getBaseBundle().getString("remote.server", "");
 
-			if (StringUtil.isNotBlank(eclipseExecutionId)) {
-				((DesiredCapabilities) desiredCapabilities).setCapability("eclipseExecutionId", eclipseExecutionId);
+		Pattern pattern = Pattern.compile(".*perfecto.*", Pattern.CASE_INSENSITIVE);
+
+		return pattern.matcher(remoteServer).find();
+	}
+
+	private void enableAppiumBehaviour(Capabilities desiredCapabilities) {
+
+		Platform platform = desiredCapabilities.getPlatformName();
+
+		if (platform != null) {
+			String pureAppiumBehavior = getBundle().getString("pureAppiumBehavior", "ignore");
+
+			String platformName = platform.name();
+
+			boolean enableAppiumBehavior = false;
+			boolean useAppiumForHybrid = false;
+			boolean useAppiumForWeb = false;
+
+			if ("android".equalsIgnoreCase(platformName)) {
+				enableAppiumBehavior = true;
 			}
-		}
 
+			switch (pureAppiumBehavior.toLowerCase()) {
+			case "native":
+				// no action needed
+				break;
+			case "hybrid":
+				useAppiumForHybrid = true;
+				break;
+			case "web":
+				useAppiumForWeb = true;
+				break;
+			default:
+				enableAppiumBehavior = false;
+				break;
+			}
+
+			((DesiredCapabilities)desiredCapabilities).setCapability("perfecto:enableAppiumBehavior", enableAppiumBehavior);
+			((DesiredCapabilities)desiredCapabilities).setCapability("perfecto:useAppiumForHybrid", useAppiumForHybrid);
+			((DesiredCapabilities)desiredCapabilities).setCapability("perfecto:useAppiumForWeb", useAppiumForWeb);
+
+		}
+	}
+
+	private void setEclipseExecutionId(Capabilities desiredCapabilities) {
+
+		String eclipseExecutionId = ConfigurationUtils.getExecutionIdCapability();
+
+		if (StringUtil.isNotBlank(eclipseExecutionId)) {
+			((DesiredCapabilities)desiredCapabilities).setCapability("eclipseExecutionId", eclipseExecutionId);
+		}
+	}
+
+	private void setReportiumJobDetails(Capabilities desiredCapabilities) {
 		String jobName = getBundle().getString("JOB_NAME", System.getProperty("reportium-job-name"));
 		int jobNumber = getBundle().getInt("BUILD_NUMBER", System.getProperty("reportium-job-number") == null ? 0
 				: Integer.parseInt(System.getProperty("reportium-job-number")));
@@ -155,48 +227,65 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 		String tags = System.getProperty("reportium-tags");
 
 		if (jobName != null) {
-			((DesiredCapabilities) desiredCapabilities).setCapability("report.jobName", jobName);
-			((DesiredCapabilities) desiredCapabilities).setCapability("report.jobNumber", jobNumber);
+			((DesiredCapabilities) desiredCapabilities).setCapability("perfecto:report.jobName", jobName);
+			((DesiredCapabilities) desiredCapabilities).setCapability("perfecto:report.jobNumber", jobNumber);
 		}
 		if (jobBranch != null) {
-			((DesiredCapabilities) desiredCapabilities).setCapability("report.jobBranch", jobBranch);
+			((DesiredCapabilities) desiredCapabilities).setCapability("perfecto:report.jobBranch", jobBranch);
 		}
 		if (tags != null) {
-			((DesiredCapabilities) desiredCapabilities).setCapability("report.tags", tags);
+			((DesiredCapabilities) desiredCapabilities).setCapability("perfecto:report.tags", tags);
 		}
+	}
 
-		String pureAppiumBehavior = getBundle().getString("pureAppiumBehavior", "ignore");
-		if (desiredCapabilities.getPlatformName() != null) {
-			if (pureAppiumBehavior.equalsIgnoreCase("native")) {
-				if (desiredCapabilities.getPlatformName().toString().equalsIgnoreCase("android")) {
-					((DesiredCapabilities) desiredCapabilities).setCapability("enableAppiumBehavior", true);
-				}
-			} else if (pureAppiumBehavior.equalsIgnoreCase("hybrid")) {
-				if (desiredCapabilities.getPlatformName().toString().equalsIgnoreCase("android")) {
-					((DesiredCapabilities) desiredCapabilities).setCapability("enableAppiumBehavior", true);
-				}
-				((DesiredCapabilities) desiredCapabilities).setCapability("useAppiumForHybrid", true);
-			} else if (pureAppiumBehavior.equalsIgnoreCase("web")) {
-				if (desiredCapabilities.getPlatformName().toString().equalsIgnoreCase("android")) {
-					((DesiredCapabilities) desiredCapabilities).setCapability("enableAppiumBehavior", true);
-				}
-				((DesiredCapabilities) desiredCapabilities).setCapability("useAppiumForWeb", true);
-			} else if (pureAppiumBehavior.equalsIgnoreCase("disable")) {
-				((DesiredCapabilities) desiredCapabilities).setCapability("enableAppiumBehavior", false);
-				((DesiredCapabilities) desiredCapabilities).setCapability("useAppiumForHybrid", false);
-				((DesiredCapabilities) desiredCapabilities).setCapability("useAppiumForWeb", false);
-			}
-		}
-		if (ConfigurationUtils.getBaseBundle().getString("remote.server", "").contains("perfecto")) {
-			if (ConfigurationManager.getBundle().getString("perfecto.harfile.enable", "false").equals("true")) {
-				Object platformName = ((DesiredCapabilities) desiredCapabilities).getCapability("platformName");
-				if (platformName != null) {
-					if (platformName.toString().equalsIgnoreCase("windows"))
-						((DesiredCapabilities) desiredCapabilities).setCapability("captureHAR", true);
+	public void enablePerfectoHARFile(Capabilities desiredCapabilities) {
+
+		try {
+			boolean enableHARCapture = ConfigurationManager.getBundle().getBoolean("perfecto.harfile.enable");
+
+			if (enableHARCapture) {
+
+				Platform platform = desiredCapabilities.getPlatformName();
+				if (platform != null) {
+					String platformName = platform.name();
+					if ("windows".equalsIgnoreCase(platformName))
+						((DesiredCapabilities)desiredCapabilities).setCapability("perfecto:captureHAR", true);
 				}
 			}
+		} catch (Exception e) {
+			ConsoleUtils.logWarningBlocks("perfecto.harfile.enable key should be true/false.");
 		}
+	}
 
+	@Override
+	public void beforeInitialize(Capabilities desiredCapabilities) {
+
+		// Perfecto specific capabilities dont continue if execution environment is not
+		// Perfecto
+		if (!isRunningOnPerfecto())
+			return;
+
+		// Set Eclipse Execution ID
+		setEclipseExecutionId(desiredCapabilities);
+
+		// Set Reportium related capabilities
+		setReportiumJobDetails(desiredCapabilities);
+		
+		// Enable Appium Behaviour - Perfecto specific capabilities
+		enableAppiumBehaviour(desiredCapabilities);
+
+	}
+
+	private void setExecutionId(Capabilities desiredCapabilities) {
+		if (isRunningOnPerfecto()) {
+			ConfigurationManager.getBundle().addProperty("executionId",
+					desiredCapabilities.getCapability("executionId"));
+		}
+	}
+
+	private void setImplicitWait(WebDriver driver) {
+		long implicitWait = ConfigurationManager.getBundle().getLong("seleniun.wait.implicit", 0);
+		driver.manage().timeouts().implicitlyWait(Duration.ofMillis(implicitWait));
 	}
 
 	@Override
@@ -207,17 +296,18 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 		// MutableCapabilities dcaps =
 		// CloudUtils.getDeviceProperties((MutableCapabilities)
 		// driver.getCapabilities());
+
 		ConfigurationUtils.setActualDeviceCapabilities(driver.getCapabilities().asMap());
-		// ConsoleUtils.logWarningBlocks("DEVICE PROPERTIES: " + dcaps.toString());
+
 		ConsoleUtils.logWarningBlocks("DEVICE PROPERTIES: " + driver.getCapabilities().toString());
+		
+		// Set Implicit wait of Selenium Driver from 'seleniun.wait.implicit' property.
+		setImplicitWait(driver);
 
-		long implicitWait = ConfigurationManager.getBundle().getLong("seleniun.wait.implicit", 0);
-		driver.manage().timeouts().implicitlyWait(Duration.ofMillis(implicitWait));
+		// Set Execution ID
+		setExecutionId(driver.getCapabilities());
 
-		if (ConfigurationManager.getBundle().getString("remote.server").toLowerCase().contains(".perfectomobile.com")) {
-			ConfigurationManager.getBundle().addProperty("executionId",
-					driver.getCapabilities().getCapability("executionId"));
-		}
+		// Start the Driver Session Timer
 		ConfigurationManager.getBundle().setProperty(DRIVER_START_TIMER, System.currentTimeMillis());
 
 	}

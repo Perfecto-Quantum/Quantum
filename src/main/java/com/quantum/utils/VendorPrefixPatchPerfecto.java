@@ -23,7 +23,7 @@ public class VendorPrefixPatchPerfecto implements VendorPrefixPatch{
 		
 		List<String> ignoreList = Arrays.asList(new String[]{"user","browserName","driverClass","automationVersion"});
 		
-		Pattern pattern = Pattern.compile("^perfecto:", Pattern.CASE_INSENSITIVE);
+		Pattern pattern = Pattern.compile("^perfecto.*:", Pattern.CASE_INSENSITIVE);
 		
 		Matcher matcher;
 		
@@ -39,7 +39,10 @@ public class VendorPrefixPatchPerfecto implements VendorPrefixPatch{
 				}
 				
 			}else {
-				perfectoCaps.addProperty(capName, config.getProperty(capName));
+				if(!"driverClass".equalsIgnoreCase(capName)) {
+					perfectoCaps.addProperty(capName, config.getProperty(capName));
+				}
+				
 			}
 		}
 		
