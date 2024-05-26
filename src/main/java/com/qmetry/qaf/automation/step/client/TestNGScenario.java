@@ -35,7 +35,7 @@ public class TestNGScenario extends TestNGMethod {
 	/**
 	 * 
 	 */
-	@SuppressWarnings("unused")
+//	@SuppressWarnings("unused")
 	private static final long serialVersionUID = 6225163528424712337L;
 	//private Scenario scenario;
 	private TestStepCompositer testStepCompositer;

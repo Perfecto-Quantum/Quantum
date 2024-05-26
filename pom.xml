@@ -15,6 +15,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<reportium-sdk.version>2.3</reportium-sdk.version>
 		<testng.version>7.7.1</testng.version>
+		
 		<cukes.version>7.11.1</cukes.version>
 		<hamcrest.version>2.2</hamcrest.version>
 		<org.json.version>20220320</org.json.version>

@@ -1,5 +1,3 @@
-
-
 /*******************************************************************************
  * Copyright (c) 2019 Infostretch Corporation
  * 
@@ -53,6 +51,7 @@ import com.google.gson.JsonSyntaxException;
 import com.qmetry.qaf.automation.core.ConfigurationManager;
 import com.qmetry.qaf.automation.data.DataBean;
 import com.qmetry.qaf.automation.keys.ApplicationProperties;
+import com.qmetry.qaf.automation.step.client.DataDrivenScenario;
 import com.qmetry.qaf.automation.step.client.TestNGScenario;
 import com.qmetry.qaf.automation.testng.DataProviderException;
 import com.qmetry.qaf.automation.testng.dataprovider.QAFDataProvider.params;
@@ -91,25 +90,34 @@ public class QAFInetrceptableDataProvider {
 	@DataProvider(name = QAFDataProvider.NAME)
 	public static Iterator<Object[]> interceptedDataProvider(ITestNGMethod method, ITestContext c) {
 		
+		Object methodInstance = method.getInstance();
 		
-		List<Object[]> interceptedData = new ArrayList<Object[]>();
+		DataDrivenScenario dataDrivenScenario = null;
 		
-		System.out.println(method.getClass());
+		if(methodInstance instanceof DataDrivenScenario) {
+			dataDrivenScenario = (DataDrivenScenario) methodInstance;
+		}
 		
-		TestNGScenario scenario = (TestNGScenario) method;
+		Map<String, Object> metadata = dataDrivenScenario.getMetadata();
 		
-//		DataDrivenScenario scenario = (DataDrivenScenario) method;
-		@SuppressWarnings("unchecked")
-		Map<String, Object> parameters = (Map<String, Object>) getParameters(scenario);
-		// update resolved meta-data should reflect in report
-		Map<String, Object> metadata = scenario.getMetaData();
-		metadata.putAll(parameters);
+		
+//		TestNGScenario scenario = new TestNGScenario(null, null, null, dataDrivenScenario);
+				
+				//(TestNGScenario) method;
+		
+//		@SuppressWarnings("unchecked")
+//		Map<String, Object> parameters = (Map<String, Object>) getParameters(scenario);
+//		// update resolved meta-data should reflect in report
+//		Map<String, Object> metadata = scenario.getMetaData();
+//		metadata.putAll(parameters);
+		
+//		Map<String, Object> metadata = dataDrivenScenario.getMetadata();
 		
 		// Intercepter registered using property 'qaf.listeners'
-		Set<QAFDataProviderIntercepter> intercepters = getIntercepters();
-		for (QAFDataProviderIntercepter intercepter : intercepters) {
-			intercepter.beforeFech(scenario, c);
-		}
+//		Set<QAFDataProviderIntercepter> intercepters = getIntercepters();
+//		for (QAFDataProviderIntercepter intercepter : intercepters) {
+//			intercepter.beforeFech(scenario, c);
+//		}
 				
 		List<Object[]> dataList = null;
 		String dataProvider = (String) metadata.get(params.DATAPROVIDER.name());
@@ -124,13 +132,16 @@ public class QAFInetrceptableDataProvider {
 			Object[][] testData = getData(metadata);
 			dataList = ListUtils.toList(testData);
 		}
+		
+		return dataList.iterator();
 
-		List<Object[]> data = process(scenario, dataList);
+//		List<Object[]> data = process(scenario, dataList);
+//		
+//		return data;
 
 		// listeners
-		interceptedData = intercept(scenario, c, data,intercepters);
-		
-		return interceptedData.iterator();
+//		List<Object[]> interceptedData = intercept(scenario, c, data,intercepters);
+//		return interceptedData.iterator();
 	}
 
 	private static List<Object[]> intercept(TestNGScenario scenario, ITestContext context, List<Object[]> testdata, Set<QAFDataProviderIntercepter> intercepters) {
@@ -166,8 +177,11 @@ public class QAFInetrceptableDataProvider {
 	}
 
 	private static Map<?, ?> getParameters(TestNGScenario scenario) {
+		
+		
 		Map<String, Object> methodParameters = scenario.getMetaData();
 		String description = scenario.getDescription();
+		
 		if (isNotBlank(description) && JSONUtil.isValidJsonString(description)) {
 			Map<String, Object> paramsFromDesc = new JSONObject(description).toMap();
 			description =(String) paramsFromDesc.remove("description");
@@ -199,6 +213,45 @@ public class QAFInetrceptableDataProvider {
 			return StringUtil.toMap(testParameters, true);
 		}
 	}
+	
+//	private static Map<?, ?> getParameters(DataDrivenScenario scenario) {
+//		
+//		
+//		Map<String, Object> methodParameters = scenario.getMetadata();
+//		String description = scenario.getDescription();
+//		
+//		if (isNotBlank(description) && JSONUtil.isValidJsonString(description)) {
+//			
+//			Map<String, Object> paramsFromDesc = new JSONObject(description).toMap();
+//			description =(String) paramsFromDesc.remove("description");
+//			methodParameters.putAll(paramsFromDesc);
+//			scenario.setDescription(description);
+//		}
+//
+//		// highest priority test data overridden through property with test name prefix
+//		String testParameters = getConfigParameters(scenario.getMethodName() + ".testdata");
+//		if(isBlank(testParameters)){
+//			//second priority overridden through property "global.testdata"
+//			testParameters = getConfigParameters("global.testdata");
+//			if(isBlank(testParameters)){
+//				//default provided with test case
+//				testParameters = new JSONObject(methodParameters).toString();
+//			}
+//		}
+//		
+//		String cls = scenario.getConstructorOrMethod().getMethod().getDeclaringClass().getSimpleName();
+//		String mtd = scenario.getMethodName();
+//		testParameters = testParameters.replace("${class}", cls);
+//		testParameters = testParameters.replace("${method}", mtd);
+//		testParameters = StrSubstitutor.replace(testParameters, methodParameters);
+//		testParameters = getBundle().getSubstitutor().replace(testParameters);
+//		try {
+//			return new JSONObject(testParameters).toMap();
+//		} catch (JsonSyntaxException e) {
+//			// old way of setting global data or testdata using key=value
+//			return StringUtil.toMap(testParameters, true);
+//		}
+//	}
 
 	@SuppressWarnings("unchecked")
 	private static List<Object[]> process(TestNGScenario scenario, List<Object[]> data) {
