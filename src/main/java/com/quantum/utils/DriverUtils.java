@@ -2,6 +2,7 @@ package com.quantum.utils;
 
 import java.util.Map;
 
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
@@ -212,12 +213,33 @@ public class DriverUtils {
 
 	private static String getOS() {
 
-		if (DriverUtils.getDriver() != null) {
-
-			String os = new WebDriverTestBase().getDriver().getCapabilities().getPlatformName().name();
-			return os;
+		
+		WebDriver driver = DriverUtils.getDriver();
+		
+		if (null!=driver) {
+			
+			if(driver instanceof QAFExtendedWebDriver) {
+				QAFExtendedWebDriver qafDriver = (QAFExtendedWebDriver) driver;
+				Capabilities cap = qafDriver.getCapabilities();
+				String platformName = cap.getPlatformName().name();
+				return platformName;
+			}else {
+				return "";
+			}
 
 		} else {
+			driver = DriverUtils.getAppiumDriver();
+			
+			if(null != driver ) {
+				if(driver instanceof AndroidDriver) {
+					return Platform.ANDROID.name();
+				}else {
+					if(driver instanceof IOSDriver) {
+						return Platform.IOS.name();
+					}
+				}
+			}
+			
 			return "";
 		}
 	}

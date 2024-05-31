@@ -170,10 +170,8 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 	@Override
 	@SuppressWarnings("unchecked")
 	public void onStart(ITestContext context) {
-		if (getBundle().getString("remote.server", "").contains("perfecto")) {
+		if (isExecutingOnPerfecto()) {
 			
-//			System.setProperty("webdriver.http.factory", "jdk-http-client");
-
 			List<String> stepListeners = getBundle().getList(ApplicationProperties.TESTSTEP_LISTENERS.key);
 			if (!stepListeners.contains(this.getClass().getName())) {
 				stepListeners.add(this.getClass().getName());
@@ -190,6 +188,10 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 			}
 		}
 	}
+	
+	private boolean isExecutingOnPerfecto() {
+		return getBundle().getString("remote.server", "").contains("perfecto");
+	}
 
 	@Override
 	public void onTestStart(ITestResult testResult) {
@@ -198,27 +200,38 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 		
 		testName = testName + getDataDrivenText(testResult);
 		
-		if (getBundle().getString("remote.server", "").contains("perfecto")) {
+		if (isExecutingOnPerfecto()) {
 			
 			getBundle().setProperty("ScenarioExecution", testResult.getMethod().getMethodName());
 			// get custom fields "%name-value" from groups
 			// compile actual groups
-			String[] groups = testResult.getMethod().getGroups();
+			
+			String[] groups = TestNode.getScenarioGroups(testResult);
+			
 			ArrayList<String> groupsFinal = new ArrayList<String>();
 
 			ArrayList<CustomField> cfc = new ArrayList<CustomField>();
-			for (String string : groups) {
-				if (string.startsWith(getBundle().getString("custom.field.identifier", "%"))) {
+			
+			String uniqueIdentifierPrefix = getBundle().getString(FailedTestSuite.UNIQUE_TEST_PREFIX_KEY,"");
+						
+			for (String group : groups) {
+				
+				// Find Unique Identifier from the Scenario
+				if(group.startsWith(uniqueIdentifierPrefix)) {
+					getBundle().addProperty(FailedTestSuite.UNIQUE_TEST_IDENTIFIER, group);
+				}
+				
+				if (group.startsWith(getBundle().getString("custom.field.identifier", "%"))) {
 					try {
 						cfc.add(new CustomField(
-								string.split(getBundle().getString("custom.field.delimiter", "-"))[0].substring(1),
-								string.split(getBundle().getString("custom.field.delimiter", "-"))[1]));
+								group.split(getBundle().getString("custom.field.delimiter", "-"))[0].substring(1),
+								group.split(getBundle().getString("custom.field.delimiter", "-"))[1]));
 					} catch (Exception ex) {
 						throw new NullPointerException(
 								"Custom field key/value pair not delimited properly.  Example of proper default usage: %Developer-Jeremy.  Check application properties custom.field.delimiter and custom.field.identifier for custom values that may have been set.");
 					}
 				} else {
-					groupsFinal.add(string);
+					groupsFinal.add(group);
 				}
 			}
 
@@ -239,6 +252,8 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 			}
 
 			Builder<?> testContext = new TestContext.Builder<>();
+			
+			
 			if (groupsFinal.size() > 0) {
 				testContext
 						.withTestExecutionTags(groupsFinal.toString().replace('[', ' ').replace(']', ' ').split(","));
@@ -255,7 +270,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 				ReportUtils.reportComment(testResult.getParameters()[0].toString());
 				logStepEnd();
 			}
-			if (getBundle().getString("remote.server", "").contains("perfecto")) {
+			if (isExecutingOnPerfecto()) {
 				if (ConfigurationManager.getBundle().getString("perfecto.harfile.enable", "false").equals("true")) {
 					String platformName = DriverUtils.getDriver().getCapabilities().getCapability("platformName")
 							.toString();
@@ -361,7 +376,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 		} catch (Exception e) {
 			System.out.println(e.getLocalizedMessage());
 		} finally {
-			ConfigurationManager.getBundle().clearProperty("test-unique-identifier");
+			ConfigurationManager.getBundle().clearProperty(FailedTestSuite.UNIQUE_TEST_IDENTIFIER);
 		}
 		
 		ReportiumClient client = getReportClient();
@@ -406,6 +421,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 						"There was some validation failure in the scenario which did not provide any throwable object.");
 
 				try {
+					
 					client.testStop(
 							TestResultFactory.createFailure(failMsg.isEmpty() ? "An error occurred" : failMsg, exp));
 				} catch (Exception e) {
@@ -520,6 +536,17 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 		getBundle().setProperty("ScenarioExecution", "FromListener");
 		getBundle().setProperty("device_not_available", false);
 		ReportiumClient client = getReportClient();
+		
+		// Retry failed tests
+				try {
+					XmlTest currentTest = result.getMethod().getXmlTest();
+					FailedTestSuite.addTest(currentTest);
+				} catch (Exception e) {
+					System.out.println(e.getLocalizedMessage());
+				} finally {
+					ConfigurationManager.getBundle().clearProperty(FailedTestSuite.UNIQUE_TEST_IDENTIFIER);
+				}
+		
 		if (null != client) {
 			// By default all the skipped tests will be failed, if you want
 			if (ConfigurationManager.getBundle().getString("skippedTests", "fail").equalsIgnoreCase("pass")) {

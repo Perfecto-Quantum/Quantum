@@ -3,6 +3,7 @@ package com.quantum.utils;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationMap;
@@ -68,11 +69,16 @@ public class QuantumPatch {
 			vendorName = "perfecto";
 		}
 		
-		
 		if(StringUtils.isEmpty(vendorName)) {
 			capabilities.putAll(vendorSpecificCaps);
 		}else {
 			capabilities.put(String.format("%s:options",vendorName),vendorSpecificCaps);
+		}
+		
+		Set<String> vendorSpecificKeys = vendorSpecificCaps.keySet();
+		
+		for(String vendorSpecificKey: vendorSpecificKeys) {
+			capabilities.remove(vendorSpecificKey);
 		}
 
 	}

@@ -53,6 +53,9 @@ import com.qmetry.qaf.automation.ui.util.QAFWebElementExpectedConditions;
 import com.qmetry.qaf.automation.ui.webdriver.CommandTracker.Stage;
 import com.qmetry.qaf.automation.util.LocatorUtil;
 import com.qmetry.qaf.automation.util.StringMatcher;
+import com.quantum.utils.Appium2Capabilities;
+
+import io.appium.java_client.AppiumDriver;
 
 /**
  * com.qmetry.qaf.automation.ui.webdriver.QAFWebDriver.java
@@ -109,9 +112,18 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 
 	@Override
 	public Capabilities getCapabilities() {
+
 		if (capabilities == null)
 			capabilities = super.getCapabilities();
-		return capabilities;
+		
+		Capabilities currentCapabilities = capabilities;
+		
+		if(underLayingDriver instanceof AppiumDriver) {
+			currentCapabilities = new Appium2Capabilities(currentCapabilities);
+		}
+		
+		return currentCapabilities;
+		
 	}
 
 	public WebDriver getUnderLayingDriver() {

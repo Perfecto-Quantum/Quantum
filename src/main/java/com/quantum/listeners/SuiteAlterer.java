@@ -85,46 +85,72 @@ public class SuiteAlterer implements IAlterSuiteListener {
 
 					// params
 					Map<String, String> temp = parameterList.get(r);
-					Iterator<Entry<String, String>> it = temp.entrySet().iterator();
-					while (it.hasNext()) {
-						Map.Entry<String, String> pair = it.next();
-						if (!pair.getKey().toString().equals("includedGroups")
-								&& !pair.getKey().toString().equals("excludedGroups")
-								&& !pair.getKey().toString().equals("thread-count")) {
-							testParams.put(pair.getKey().toString(), pair.getValue().toString());
-						}
-
-						if (pair.getKey().toString().equals("thread-count")) {
-							if(pair.getValue().toString()!="")
-							{
-							threadCount = Integer.parseInt(pair.getValue().toString());
-							}
-							else
-							{
-								threadCount=0;
-							}
-						}
-					}
-
+					Iterator<Entry<String, String>> parameterListIterator = temp.entrySet().iterator();
+					
 					// include list
 					List<String> testIncludeList = getTestIncludeGroupList(originalTest.get(z));
 					List<String> includeList = new ArrayList<>();
-					Iterator<String> it3 = testIncludeList.iterator();
-					while (it3.hasNext()) {
-
-						includeList.add(it3.next().toString());
+					Iterator<String> includeGroupIterator = testIncludeList.iterator();
+					
+					while (includeGroupIterator.hasNext()) {
+						includeList.add(includeGroupIterator.next());
 					}
 
+					String key;
+					while (parameterListIterator.hasNext()) {
+						Map.Entry<String, String> pair = parameterListIterator.next();
+
+						key = pair.getKey();
+						switch (key) {
+							case "includedGroups":
+								String[] includeArray = pair.getValue().toString().split(",");
+								for (int j = 0; j < includeArray.length; j++) {
+									includeList.add(includeArray[j]);
+								}
+								break;
+							case "excludedGroups":
+								break;
+							case "thread-count":
+								threadCount = "".equals(pair.getValue())? 0: Integer.parseInt(pair.getValue());
+								break;
+							default:
+								testParams.put(key, pair.getValue());
+						}
+
+//						if (!key.equals("includedGroups") && !key.equals("excludedGroups")
+//								&& !key.equals("thread-count")) {
+//							
+//						}
+//
+//						if (key.equals("thread-count")) {
+//							if (pair.getValue().toString() != "") {
+//								threadCount = Integer.parseInt(pair.getValue().toString());
+//							} else {
+//								threadCount = 0;
+//							}
+//						}
+					}
+
+//					// include list
+//					List<String> testIncludeList = getTestIncludeGroupList(originalTest.get(z));
+//					List<String> includeList = new ArrayList<>();
+//					Iterator<String> it3 = testIncludeList.iterator();
+//					while (it3.hasNext()) {
+//						includeList.add(it3.next().toString());
+//					}
+
 					temp = parameterList.get(r);
-					it = temp.entrySet().iterator();
-					while (it.hasNext()) {
-						Map.Entry<String, String> pair = it.next();
-						if (pair.getKey().toString().equals("includedGroups")) {
+					parameterListIterator = temp.entrySet().iterator();
+					while (parameterListIterator.hasNext()) {
+						Map.Entry<String, String> pair = parameterListIterator.next();
+						key = pair.getKey();
+//						if (pair.getKey().toString().equals("includedGroups")) {
+						
+						if("includedGroups".equals(key)) {
 							String[] includeArray = pair.getValue().toString().split(",");
 							for (int j = 0; j < includeArray.length; j++) {
 								includeList.add(includeArray[j]);
 							}
-
 						}
 					}
 
@@ -137,9 +163,9 @@ public class SuiteAlterer implements IAlterSuiteListener {
 						excludeList.add(it4.next().toString());
 					}
 
-					it = temp.entrySet().iterator();
-					while (it.hasNext()) {
-						Map.Entry<String, String> pair = it.next();
+					parameterListIterator = temp.entrySet().iterator();
+					while (parameterListIterator.hasNext()) {
+						Map.Entry<String, String> pair = parameterListIterator.next();
 						if (pair.getKey().toString().equals("excludedGroups")) {
 							String[] excludeArray = pair.getValue().toString().split(",");
 							for (int j = 0; j < excludeArray.length; j++) {
@@ -162,9 +188,7 @@ public class SuiteAlterer implements IAlterSuiteListener {
 
 					if (threadCount != 0) {
 						newTest.setThreadCount(threadCount);
-					}
-					else
-					{
+					} else {
 						newTest.setThreadCount(originalTest.get(r).getThreadCount());
 					}
 
@@ -306,7 +330,7 @@ public class SuiteAlterer implements IAlterSuiteListener {
 
 			Map<String, String> testPars = originalTest.get(z).getAllParameters();
 
-			Iterator<Entry<String,String>> it2 = testPars.entrySet().iterator();
+			Iterator<Entry<String, String>> it2 = testPars.entrySet().iterator();
 			while (it2.hasNext()) {
 				Map.Entry<String, String> pair = it2.next();
 				if (pair.getKey().toString().equals("csvParams")) {

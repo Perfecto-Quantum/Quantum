@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationMap;
@@ -22,7 +23,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.LogFactoryImpl;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Credentials;
-import org.openqa.selenium.Platform;
 import org.openqa.selenium.UsernameAndPassword;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
@@ -62,6 +62,22 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 
 public class UiDriverFactory implements DriverFactory<UiDriver> {
 	private static final Log logger = LogFactoryImpl.getLog(UiDriverFactory.class);
+
+	private static final Map<String, String> ANDROID_CAP_MAP = new HashMap<String, String>();
+	private static final Map<String, String> IOS_CAP_MAP = new HashMap<String, String>();
+
+	static {
+		ANDROID_CAP_MAP.put("platformName", "Android");
+		ANDROID_CAP_MAP.put("browser", "");
+		ANDROID_CAP_MAP.put("version", "");
+
+		IOS_CAP_MAP.put("platformName", "iOS");
+		IOS_CAP_MAP.put("browser", "");
+		IOS_CAP_MAP.put("version", "");
+	}
+	private static final DesiredCapabilities ANDROID_BASE_CAPABILITIES = new DesiredCapabilities(ANDROID_CAP_MAP);
+
+	private static final DesiredCapabilities IOS_BASE_CAPABILITIES = new DesiredCapabilities(IOS_CAP_MAP);
 
 	/*
 	 * (non-Javadoc)
@@ -244,7 +260,8 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 		loadDriverResouces(browser);
 	}
 
-	private static WebDriver getWebDriverObject(Class<? extends WebDriver> of, Capabilities capabilities, String urlStr) {
+	private static WebDriver getWebDriverObject(Class<? extends WebDriver> of, Capabilities capabilities,
+			String urlStr) {
 		try {
 			// give it first try
 			Constructor<? extends WebDriver> constructor = of.getConstructor(URL.class, Capabilities.class);
@@ -254,12 +271,15 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			logger.error(ex.getMessage());
 			try {
 
+				System.out.println(ex.getMessage());
+
 				logger.info("Retrying the Driver initialization - 1");
 				Constructor<? extends WebDriver> constructor = of.getConstructor(Capabilities.class);
 				return constructor.newInstance(capabilities);
 			} catch (Exception e) {
 
 				logger.error(e.getMessage());
+				System.out.println(e.getMessage());
 
 				if (e.getCause() != null && e.getCause() instanceof WebDriverException) {
 					throw (WebDriverException) e.getCause();
@@ -273,6 +293,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 				} catch (Exception e1) {
 
 					logger.error(e1.getMessage());
+					System.out.println(e1.getMessage());
 					logger.info("Retrying the Driver initialization - 3");
 					try {
 						// give it another try
@@ -281,26 +302,28 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 					} catch (Exception e2) {
 						throw new WebDriverException(e2);
 					}
-                }
+				}
 			}
 		}
 	}
 
 	private enum Browsers {
 
-		chrome(new ChromeOptions(), ChromeDriver.class),
-		edge(new EdgeOptions(), EdgeDriver.class),
+		chrome(new ChromeOptions(), ChromeDriver.class), edge(new EdgeOptions(), EdgeDriver.class),
 		firefox(new FirefoxOptions(), FirefoxDriver.class),
 		iexplorer(new InternetExplorerOptions(), InternetExplorerDriver.class),
-
-//		opera(new OperaOptions(), "com.opera.core.systems.OperaDriver"),
-		android(new DesiredCapabilities("android", "", Platform.ANDROID), "org.openqa.selenium.android.AndroidDriver"),
-		iphone(new DesiredCapabilities("iPhone", "", Platform.MAC), "org.openqa.selenium.iphone.IPhoneDriver"),
-		ipad(new DesiredCapabilities("iPad", "", Platform.MAC), "org.openqa.selenium.iphone.IPhoneDriver"),
 		safari(new SafariOptions(), "org.openqa.selenium.safari.SafariDriver"),
-//																appium(
-//																new DesiredCapabilities(),
-//																"io.appium.java_client.AppiumDriver"), 
+//		opera(new OperaOptions(), "com.opera.core.systems.OperaDriver"),
+
+		android(ANDROID_BASE_CAPABILITIES, "io.appium.java_client.android.AndroidDriver"),
+		iOS(IOS_BASE_CAPABILITIES, "io.appium.java_client.ios.IOSDriver"),
+
+//				new DesiredCapabilities("android", "", Platform.ANDROID), 
+//				"io.appium.java_client.android.AndroidDriver"),//"org.openqa.selenium.android.AndroidDriver"),
+//		iphone(new DesiredCapabilities("iPhone", "", Platform.MAC),
+//				"io.appium.java_client.ios.IOSDriver"),//"org.openqa.selenium.iphone.IPhoneDriver"),
+//		ipad(new DesiredCapabilities("iPad", "", Platform.MAC),"io.appium.java_client.ios.IOSDriver"), //"org.openqa.selenium.iphone.IPhoneDriver"),
+
 		perfecto(new DesiredCapabilities()),
 
 		/**
@@ -394,6 +417,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			// individual capability property with driver name prefix
 			String driverCapKey = String.format(ApplicationProperties.DRIVER_CAPABILITY_PREFIX_FORMAT.key, browserName);
 			config = ConfigurationManager.getBundle().subset(driverCapKey);
+			capabilities.putAll(new ConfigurationMap(config));
 
 			// ======== Patch for Appium 2.0 and Selenium 4 vendor specific prefix ========
 
@@ -410,6 +434,8 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 			if (platform.contains("ANDROID") || platform.contains("IOS")) {
 				quantumPatch.capabilitiesPatchAppium2(config, capabilities);
+
+				checkForAutomationNameCapability(capabilities);
 			} else {
 				quantumPatch.capabilitiesPatchSelenium4(config, capabilities);
 			}
@@ -426,6 +452,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 				try {
 					setDriverCls((Class<? extends WebDriver>) Class.forName(String.valueOf(driverclass)));
 				} catch (Exception e) {
+					System.out.println("Error while setting Driver class : " + e.getMessage());
 					// throw new AutomationError(e);
 				}
 			}
@@ -436,10 +463,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 					capabilities.put(key, ConfigurationManager.getBundle().getSubstitutor().replace(value));
 				}
 			}
-			
-			capabilities.put("perfecto:noReset", true);
-			capabilities.put("perfecto:fullReset", false);
-			
+
 			return new DesiredCapabilities(capabilities);
 		}
 
@@ -461,7 +485,8 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			browserName = name.replaceAll("(?i)remote|driver", "");
 		}
 
-		private QAFExtendedWebDriver getRemoteWebDriver(WebDriverCommandLogger wdCommandLogger, String seleniumGridURLStr) throws Exception {
+		private QAFExtendedWebDriver getRemoteWebDriver(WebDriverCommandLogger wdCommandLogger,
+				String seleniumGridURLStr) throws Exception {
 
 			String ntlmProxyHost = ConfigurationManager.getBundle().getString("ntlmProxyHost", "");
 
@@ -475,7 +500,8 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 		@SuppressWarnings("unused")
 		@Deprecated
-		private QAFExtendedWebDriver getRemoteWebDriver(String seleniumGridURLStr, WebDriverCommandLogger wdCommandLogger) throws Exception {
+		private QAFExtendedWebDriver getRemoteWebDriver(String seleniumGridURLStr,
+				WebDriverCommandLogger wdCommandLogger) throws Exception {
 
 			String ntlmProxyHost = ConfigurationManager.getBundle().getString("ntlmProxyHost", "");
 
@@ -487,8 +513,27 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 		}
 
+		private void checkForAutomationNameCapability(Map<String, Object> desiredCapabilities) {
+
+			Set<String> capabilityNames = desiredCapabilities.keySet();
+
+			String automationName = "";
+			for (String capName : capabilityNames) {
+
+				if (capName.contains("automationName")) {
+					automationName = desiredCapabilities.getOrDefault(capName, "").toString();
+					break;
+				}
+			}
+
+			if (automationName.isBlank()) {
+				desiredCapabilities.put("appium:automationName", "Appium");
+			}
+		}
+
 		// Following methods are used for Connecting with Selenium based drivers
-		private QAFExtendedWebDriver standardConnect(WebDriverCommandLogger wdCommandLogger, String seleniumGridURLStr) {
+		private QAFExtendedWebDriver standardConnect(WebDriverCommandLogger wdCommandLogger,
+				String seleniumGridURLStr) {
 			logger.info("Direct Driver Connect");
 			Capabilities desiredCapabilities = getDesiredCapabilities();
 
@@ -501,7 +546,8 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 				 * desiredCapabilities, wdCommandLogger); }
 				 */
 
-				int connTimeOutInMSecFromProp = ConfigurationManager.getBundle().getInt("connection.timeout.ms", 60_000);
+				int connTimeOutInMSecFromProp = ConfigurationManager.getBundle().getInt("connection.timeout.ms",
+						60_000);
 				int readTimeOutInMSecFromProp = ConfigurationManager.getBundle().getInt("read.timeout.ms", 60_000);
 
 				Duration connTimeOutInMSecs = Duration.ofMillis(connTimeOutInMSecFromProp);
@@ -509,27 +555,27 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 				WebDriver webDriverObject = null;
 
-				Class<? extends  WebDriver> driverClass = getDriverCls();
+				Class<? extends WebDriver> driverClass = getDriverCls();
 
-				if(null != driverClass){
+				if (null != driverClass) {
 
 					String className = driverClass.getName().toLowerCase();
 
-					if(className.startsWith("io.appium")){
-						
-						
+					if (className.startsWith("io.appium")) {
 						// Create Driver related to Appium.
 						webDriverObject = getWebDriverObject(driverClass, desiredCapabilities, seleniumGridURLStr);
-					}else{
+					} else {
 						// Create Driver related to Selenium.
-						ClientConfig config = ClientConfig.defaultConfig().connectionTimeout(connTimeOutInMSecs)
-								.readTimeout(readTimeOutInMSecs);
+						
+						ClientConfig config = ClientConfig.defaultConfig().connectionTimeout(connTimeOutInMSecs).readTimeout(readTimeOutInMSecs);
+
 						webDriverObject = RemoteWebDriver.builder().config(config).addAlternative(desiredCapabilities)
 								.address(seleniumGridURLStr).build();
 					}
-				}else{
+				} else {
 
-					// Create Driver with RemoteWebDriver as we don't have specific webDriverObject request
+					// Create Driver with RemoteWebDriver as we don't have specific webDriverObject
+					// request
 					ClientConfig config = ClientConfig.defaultConfig().connectionTimeout(connTimeOutInMSecs)
 							.readTimeout(readTimeOutInMSecs);
 					webDriverObject = RemoteWebDriver.builder().config(config).addAlternative(desiredCapabilities)
@@ -564,11 +610,11 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 		}
 
 //		@SuppressWarnings({"unused" })
-		private QAFExtendedWebDriver proxyConnectForNormalDriver(String seleniumGridURLStr, WebDriverCommandLogger wdCommandLogger)
-				throws Exception {
-			
+		private QAFExtendedWebDriver proxyConnectForNormalDriver(String seleniumGridURLStr,
+				WebDriverCommandLogger wdCommandLogger) throws Exception {
+
 			logger.info("Proxy Driver Connect");
-			
+
 			DesiredCapabilities desiredCapabilities = getDesiredCapabilities();
 			Collection<QAFWebDriverCommandListener> driverListeners = getDriverListeners();
 
@@ -595,15 +641,16 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			Duration connTimeOutInSecs = Duration.ofMillis(connTimeOutInSecFromProp);
 			Duration readTimeOutInSecs = Duration.ofMillis(readTimeOutInSecFromProp);
 
-			ClientConfig config = ClientConfig.defaultConfig().baseUrl(urls)
-					.connectionTimeout(connTimeOutInSecs).readTimeout(readTimeOutInSecs);
+			ClientConfig config = ClientConfig.defaultConfig().baseUrl(urls).connectionTimeout(connTimeOutInSecs)
+					.readTimeout(readTimeOutInSecs);
 
 			if ("".equals(proxyHost)) {
 				logger.info("Proxy Details are not provided. Continuing without proxy details, may lead to failure!!");
 			} else {
 				config.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)));
-				if(!"".equals(proxyUser)){
-					Credentials proxyCredentials = (org.openqa.selenium.Credentials) UsernameAndPassword.of(proxyUser, proxyPassword);
+				if (!"".equals(proxyUser)) {
+					Credentials proxyCredentials = (org.openqa.selenium.Credentials) UsernameAndPassword.of(proxyUser,
+							proxyPassword);
 					config.authenticateAs(proxyCredentials);
 				}
 			}
@@ -618,24 +665,24 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 			Class<? extends WebDriver> driverClass = getDriverCls();
 
-			try{
-				if(null != driverClass){
+			try {
+				if (null != driverClass) {
 
 					String className = driverClass.getName().toLowerCase();
-					if(className.startsWith("io.appium")){
+					if (className.startsWith("io.appium")) {
 
 						webDriverObject = getDriverProxyObj(driverClass, desiredCapabilities, urls, factory);// driverCls.newInstance();
-					}else{
-						webDriverObject = RemoteWebDriver.builder().config(config).addAlternative(desiredCapabilities).address(urls)
-								.build();
+					} else {
+						webDriverObject = RemoteWebDriver.builder().config(config).addAlternative(desiredCapabilities)
+								.address(urls).build();
 					}
-				}else{
-					webDriverObject = RemoteWebDriver.builder().config(config).addAlternative(desiredCapabilities).address(urls)
-							.build();
+				} else {
+					webDriverObject = RemoteWebDriver.builder().config(config).addAlternative(desiredCapabilities)
+							.address(urls).build();
 				}
 
 				return new QAFExtendedWebDriver(webDriverObject, wdCommandLogger);
-			}catch(Exception e){
+			} catch (Exception e) {
 				throw new AutomationError("Unable to Create Driver Instance " + e.getMessage(), e);
 			}
 

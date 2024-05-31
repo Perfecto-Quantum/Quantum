@@ -65,7 +65,10 @@ public class TestNGScenario extends TestNGMethod {
 					|| getXmlTest().getParallel().equals(ParallelMode.TESTS)) {
 				setPriority(scenario.getPriority());
 			}
-			setGroups(scenario.getM_groups());
+			
+			
+			String[] groups = scenario.getM_groups();
+			setGroups(groups);
 			setGroupsDependedUpon(scenario.getM_groupsDependedUpon(), new ArrayList<String>());
 			setMethodsDependedUpon(scenario.getM_methodsDependedUpon());
 			setDescription(scenario.getDescription());

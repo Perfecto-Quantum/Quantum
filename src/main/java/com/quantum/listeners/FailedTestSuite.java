@@ -35,6 +35,9 @@ import com.qmetry.qaf.automation.step.QAFTestStepListener;
 
 public class FailedTestSuite {
 	
+	public static String UNIQUE_TEST_PREFIX_KEY = "scenario.unique.identifier.prefix";
+	public static String UNIQUE_TEST_IDENTIFIER = "test.unique.identifier";
+	
 	private  ConcurrentHashMap<TestNode,TestNode> failedTests;
 	
 	private volatile static FailedTestSuite failedTestSuite;
@@ -58,7 +61,7 @@ public class FailedTestSuite {
 	private String getUniqueIdentifier() {
 		return ConfigurationManager
 				.getBundle()
-				.getString("test-unique-identifier", "");
+				.getString(UNIQUE_TEST_IDENTIFIER, "");
 	}
 	
 	public static int incrementFailedTest() {
@@ -80,11 +83,12 @@ public class FailedTestSuite {
 		String uniqueIdentifier = getUniqueIdentifier();
 
 		if (!uniqueIdentifier.isBlank()) {
+			
+			if(currentTest.getIncludedGroups().contains(uniqueIdentifier)) return;
 
 			XmlRun xmlRun = new XmlRun();
 			xmlRun.onInclude(uniqueIdentifier);
 			
-
 			XmlGroups uniqueGroup = new XmlGroups();
 			uniqueGroup.setRun(xmlRun);
 			
@@ -92,7 +96,10 @@ public class FailedTestSuite {
 				TestNode.getTestName(currentTest);
 			
 			XmlTest currentFailedTest = (XmlTest) currentTest.clone();
+			
+			currentFailedTest.setThreadCount(currentTest.getThreadCount());
 			currentFailedTest.setName(failedTestName);
+			
 			currentFailedTest.setGroups(uniqueGroup);
 			
 			TestNode testNode = new TestNode(currentFailedTest);
@@ -133,6 +140,7 @@ public class FailedTestSuite {
 				existingTestNode.addUniqueGroup(failedTestSuite.getUniqueIdentifier());
 			}else {
 				failedTestSuite.addFailedTest(currentTest);
+				
 			}
 		}
 		
