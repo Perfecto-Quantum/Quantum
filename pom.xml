@@ -6,7 +6,7 @@
 
 	<groupId>com.quantum</groupId>
 	<artifactId>quantum-support</artifactId>
-	<version>1.31.0.b34</version>
+	<version>1.31.0.b35</version>
 
 	<properties>
 		<jvm.version>11</jvm.version>

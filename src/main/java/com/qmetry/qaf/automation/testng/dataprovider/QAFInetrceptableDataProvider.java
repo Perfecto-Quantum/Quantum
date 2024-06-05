@@ -144,6 +144,7 @@ public class QAFInetrceptableDataProvider {
 //		return interceptedData.iterator();
 	}
 
+	@SuppressWarnings("unused")
 	private static List<Object[]> intercept(TestNGScenario scenario, ITestContext context, List<Object[]> testdata, Set<QAFDataProviderIntercepter> intercepters) {
 		
 
@@ -176,6 +177,7 @@ public class QAFInetrceptableDataProvider {
 		return testdata;
 	}
 
+	@SuppressWarnings("unused")
 	private static Map<?, ?> getParameters(TestNGScenario scenario) {
 		
 		
@@ -253,7 +255,7 @@ public class QAFInetrceptableDataProvider {
 //		}
 //	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "unused" })
 	private static List<Object[]> process(TestNGScenario scenario, List<Object[]> data) {
 		Class<?>[] paramTypes = scenario.getConstructorOrMethod().getParameterTypes();
 		List<Object[]> testdata = new ArrayList<Object[]>(data);
@@ -452,6 +454,7 @@ public class QAFInetrceptableDataProvider {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static Set<QAFDataProviderIntercepter> getIntercepters() {
 		Set<QAFDataProviderIntercepter> intercepters = new LinkedHashSet<QAFDataProviderIntercepter>();
 		String[] listners = ConfigurationManager.getBundle().getStringArray(ApplicationProperties.QAF_LISTENERS.key);

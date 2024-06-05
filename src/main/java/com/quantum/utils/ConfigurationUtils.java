@@ -1,7 +1,12 @@
 package com.quantum.utils;
 
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
 import org.json.JSONObject;
 import org.openqa.selenium.Capabilities;
@@ -134,6 +139,21 @@ public class ConfigurationUtils {
 		String driverName = getBaseBundle().getString("driver.name", "").toLowerCase();
 
 		return driverName.startsWith("perfecto");
+	}
+	
+	public static void getQuantumVersion() throws IOException {
+//		Implementation-Version: 1.31.0.b28
+		
+		
+		System.out.println( ConfigurationUtils.class.getPackage().getImplementationVersion());
+		
+		
+//		URLClassLoader cl = (URLClassLoader) ConfigurationUtils.class.getClassLoader();
+//		URL url = cl.findResource("META-INF/MANIFEST.MF");
+//		Manifest manifest = new Manifest(url.openStream());
+//		Attributes attributes = manifest.getMainAttributes();
+//		System.out.println(attributes.getValue("Implementation-Title"));
+
 	}
 
 }

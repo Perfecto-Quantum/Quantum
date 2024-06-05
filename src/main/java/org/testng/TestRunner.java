@@ -72,6 +72,7 @@ import org.testng.xml.XmlPackage;
 import org.testng.xml.XmlTest;
 
 /** This class takes care of running one Test. */
+@SuppressWarnings("deprecation")
 public class TestRunner
     implements ITestContext,
         ITestResultNotifier,

@@ -75,11 +75,7 @@ public class QuantumPatch {
 			capabilities.put(String.format("%s:options",vendorName),vendorSpecificCaps);
 		}
 		
-		Set<String> vendorSpecificKeys = vendorSpecificCaps.keySet();
-		
-		for(String vendorSpecificKey: vendorSpecificKeys) {
-			capabilities.remove(vendorSpecificKey);
-		}
+		removeVendorSpecificCapabilities(vendorSpecificCaps, capabilities);
 
 	}
 	
@@ -98,10 +94,20 @@ public class QuantumPatch {
 		
 		return capabilities;
 	}
+	
+	private void removeVendorSpecificCapabilities(Map<String,Object> patchedCapabilities, Map<String, Object> capabilities) {
+		Set<String> vendorSpecificKeys = patchedCapabilities.keySet();
+		
+		for(String vendorSpecificKey: vendorSpecificKeys) {
+			capabilities.remove(vendorSpecificKey);
+		}
+	}
 
 	public void capabilitiesPatchAppium2(Configuration config, Map<String, Object> capabilities) {
 
 		Map<String,Object> patchedCapabilities = patchCapabilities(config, capabilities, "quantum.patch.appium.vendorprefixclass");
+		
+		removeVendorSpecificCapabilities(convertToMap(config), capabilities);
 		
 		if(patchedCapabilities.size()>0) {
 			capabilities.putAll(patchedCapabilities);

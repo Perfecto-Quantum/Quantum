@@ -58,6 +58,7 @@ import com.quantum.utils.DeviceUtils;
 import com.quantum.utils.DriverUtils;
 import com.quantum.utils.ReportUtils;
 
+import io.cucumber.core.backend.ObjectFactory;
 import io.cucumber.core.options.RuntimeOptions;
 import io.cucumber.core.options.RuntimeOptionsBuilder;
 
@@ -199,6 +200,8 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 		String testName = testResult.getTestName();
 		
 		testName = testName + getDataDrivenText(testResult);
+		
+//		System.out.println( getTags(testResult)[0]);
 		
 		if (isExecutingOnPerfecto()) {
 			
@@ -617,6 +620,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 		ConsoleUtils.logWarningBlocks(
 				"REPORTIUM URL: " + getReportClient().getReportUrl().replace("[", "%5B").replace("]", "%5D"));
+		
 		ConsoleUtils.surroundWithSquare(endText + getTestName(testResult)
 				+ (testResult.getParameters().length > 0 ? " [" + testResult.getParameters()[0] + "]" : ""));
 
@@ -727,8 +731,8 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 		try {
 
 			String className = testResult.getTestClass().getName();
-			@SuppressWarnings("rawtypes")
-			Class testResultClass = Class.forName(className);
+
+			Class<? extends ObjectFactory> testResultClass = (Class<? extends ObjectFactory>) Class.forName(className);
 
 			return new RuntimeOptionsBuilder().setObjectFactoryClass(testResultClass).build();
 

@@ -55,6 +55,7 @@ import io.appium.java_client.service.local.AppiumServiceBuilder;
 /**
  * Default Appium driver implementation.
  */
+@SuppressWarnings("deprecation")
 public class AppiumDriver extends RemoteWebDriver implements
         ExecutesMethod,
         ComparesImages,
@@ -204,9 +205,18 @@ public class AppiumDriver extends RemoteWebDriver implements
      *
      * @return map containing version details
      */
-    public Map<String, Object> getStatus() {
-        //noinspection unchecked
-        return (Map<String, Object>) execute(DriverCommand.STATUS).getValue();
+    
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getStatus() {
+		
+		Object statusObject = execute(DriverCommand.STATUS).getValue();
+    
+		if(statusObject instanceof Map<?,?>) {
+			return (Map<String,Object>)statusObject;
+		}else {
+			return null;
+		}
+		
     }
 
     /**

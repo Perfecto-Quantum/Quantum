@@ -13,6 +13,7 @@ import com.qmetry.qaf.automation.core.TestBaseProvider;
 import com.qmetry.qaf.automation.ui.WebDriverTestBase;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 
+import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.TouchAction;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
@@ -111,7 +112,6 @@ public class DriverUtils {
 	 * 
 	 */
 	public static AndroidDriver getAndroidDriver() {
-
 
 		return (AndroidDriver) getAppiumDriver();
 	}
@@ -213,32 +213,36 @@ public class DriverUtils {
 
 	private static String getOS() {
 
-		
-		WebDriver driver = DriverUtils.getDriver();
+		WebDriver driver = DriverUtils.getDriver().getUnderLayingDriver();
 		
 		if (null!=driver) {
 			
-			if(driver instanceof QAFExtendedWebDriver) {
+			if((driver instanceof AppiumDriver)) {
+				
+				driver = DriverUtils.getAppiumDriver();
+				
+				if(null != driver ) {
+					if(driver instanceof AndroidDriver) {
+						return Platform.ANDROID.name();
+					}else {
+						if(driver instanceof IOSDriver) {
+							return Platform.IOS.name();
+						}
+					}
+				}
+				
+				return "";
+				
+				
+			}else {
 				QAFExtendedWebDriver qafDriver = (QAFExtendedWebDriver) driver;
 				Capabilities cap = qafDriver.getCapabilities();
 				String platformName = cap.getPlatformName().name();
 				return platformName;
-			}else {
-				return "";
 			}
 
 		} else {
-			driver = DriverUtils.getAppiumDriver();
 			
-			if(null != driver ) {
-				if(driver instanceof AndroidDriver) {
-					return Platform.ANDROID.name();
-				}else {
-					if(driver instanceof IOSDriver) {
-						return Platform.IOS.name();
-					}
-				}
-			}
 			
 			return "";
 		}

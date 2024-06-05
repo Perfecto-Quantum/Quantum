@@ -55,6 +55,7 @@ import com.qmetry.qaf.automation.ui.selenium.webdriver.SeleniumDriverFactory;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 import com.qmetry.qaf.automation.ui.webdriver.QAFWebDriverCommandListener;
 import com.qmetry.qaf.automation.util.StringUtil;
+import com.quantum.utils.ConfigurationUtils;
 import com.quantum.utils.QuantumPatch;
 
 import io.appium.java_client.remote.AppiumCommandExecutor;
@@ -271,16 +272,14 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			logger.error(ex.getMessage());
 			try {
 
-				System.out.println(ex.getMessage());
-
 				logger.info("Retrying the Driver initialization - 1");
+				
 				Constructor<? extends WebDriver> constructor = of.getConstructor(Capabilities.class);
 				return constructor.newInstance(capabilities);
 			} catch (Exception e) {
 
 				logger.error(e.getMessage());
-				System.out.println(e.getMessage());
-
+				
 				if (e.getCause() != null && e.getCause() instanceof WebDriverException) {
 					throw (WebDriverException) e.getCause();
 				}
@@ -289,11 +288,10 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 				try {
 					return of.getConstructor().newInstance();
-//							.newInstance();
 				} catch (Exception e1) {
 
 					logger.error(e1.getMessage());
-					System.out.println(e1.getMessage());
+					
 					logger.info("Retrying the Driver initialization - 3");
 					try {
 						// give it another try
@@ -385,6 +383,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 		@SuppressWarnings("unchecked")
 		private DesiredCapabilities getDesiredCapabilities() {
+			
 			Map<String, Object> capabilities = new HashMap<String, Object>(desiredCapabilities.asMap());
 			Gson gson = new GsonBuilder().create();
 
@@ -463,6 +462,8 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 					capabilities.put(key, ConfigurationManager.getBundle().getSubstitutor().replace(value));
 				}
 			}
+			
+			capabilities.put("perfecto:QuantumVersion", ConfigurationUtils.class.getPackage().getImplementationVersion());
 
 			return new DesiredCapabilities(capabilities);
 		}
@@ -670,18 +671,24 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 					String className = driverClass.getName().toLowerCase();
 					if (className.startsWith("io.appium")) {
-
+						
 						webDriverObject = getDriverProxyObj(driverClass, desiredCapabilities, urls, factory);// driverCls.newInstance();
+						
+						return new QAFExtendedWebDriver(webDriverObject, wdCommandLogger);
 					} else {
 						webDriverObject = RemoteWebDriver.builder().config(config).addAlternative(desiredCapabilities)
 								.address(urls).build();
+						
+						return new QAFExtendedWebDriver(webDriverObject, wdCommandLogger);
 					}
 				} else {
 					webDriverObject = RemoteWebDriver.builder().config(config).addAlternative(desiredCapabilities)
 							.address(urls).build();
+					new QAFExtendedWebDriver(webDriverObject, wdCommandLogger);
 				}
 
-				return new QAFExtendedWebDriver(webDriverObject, wdCommandLogger);
+				return null;
+//				return new QAFExtendedWebDriver(webDriverObject, wdCommandLogger);
 			} catch (Exception e) {
 				throw new AutomationError("Unable to Create Driver Instance " + e.getMessage(), e);
 			}

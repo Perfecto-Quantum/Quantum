@@ -28,9 +28,6 @@ public class Appium2Capabilities implements Capabilities{
 		
 		Object capabilityValue = this.capabilities.getCapability(capabilityName);
 		
-		
-		System.out.println(capabilities);
-		
 		if(null == capabilityValue) {
 			
 			Object desiredCapabilitiesObject = capabilities.getCapability("desired");
@@ -43,11 +40,37 @@ public class Appium2Capabilities implements Capabilities{
 			}
 		}
 		
-		if(capabilityValue.toString().isBlank()) {
-			System.out.println(String.format("%s capability not available!", capabilityName));
+		if(null != capabilityValue) {
+			
+			if(capabilityName.contains("platformName")) {
+				return getPlatformName();
+			}
+			
+			if(capabilityValue.toString().isBlank()) {
+				System.out.println(String.format("%s capability not available!", capabilityName));
+			}
+
+		}else{
+			capabilityValue = "";
 		}
 		
+		
 		return capabilityValue;
+	}
+	
+	@Override
+	public String getBrowserName() {
+		return getCapability("browserName").toString();
+	}
+	
+	@Override
+	public String getBrowserVersion() {
+		return getCapability("browserVersion").toString();
+	}
+	
+	@Override
+	public boolean is(String capabilityName) {
+		return !"".equals(getCapability(capabilityName).toString());
 	}
 	
 	
@@ -77,10 +100,12 @@ public class Appium2Capabilities implements Capabilities{
 		}else {
 			return null;
 		}
+	}
+	
+	@Override
+	public String toString() {
 		
-		
-		
-		
+		return capabilities.toString();
 	}
 
 }

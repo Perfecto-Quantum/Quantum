@@ -111,6 +111,7 @@ public class QAFExtendedWebElement extends RemoteWebElement implements QAFWebEle
 		listners = ConfigurationManager.getBundle().getStringArray(ApplicationProperties.QAF_LISTENERS.key);
 		for (String listener : listners) {
 			try {
+				@SuppressWarnings("deprecation")
 				QAFListener cls = (QAFListener) Class.forName(listener).newInstance();
 				if (QAFWebElementCommandListener.class.isAssignableFrom(cls.getClass()))
 					this.listners.add((QAFWebElementCommandListener) cls);
@@ -261,8 +262,14 @@ public class QAFExtendedWebElement extends RemoteWebElement implements QAFWebEle
 			// already handled in before command?
 			if (commandTracker.getResponce() == null) {
 				commandTracker.setStartTime(System.currentTimeMillis());
+				
+				
+				
+				
 				commandTracker.setResponce(((QAFExtendedWebDriver) parent).executeWitoutLog(commandTracker.getCommand(),
 						commandTracker.getParameters()));
+				
+				
 				commandTracker.setEndTime(System.currentTimeMillis());
 
 			}
@@ -1275,6 +1282,7 @@ public class QAFExtendedWebElement extends RemoteWebElement implements QAFWebEle
 
 	private void registerListeners(String className) {
 		try {
+			@SuppressWarnings("deprecation")
 			QAFWebElementCommandListener cls = (QAFWebElementCommandListener) Class.forName(className).newInstance();
 			listners.add(cls);
 		} catch (Exception e) {
