@@ -135,5 +135,9 @@ public class ConfigurationUtils {
 
 		return driverName.startsWith("perfecto");
 	}
+	
+	public static String getQuantumVersion() {
+		return ConfigurationUtils.class.getPackage().getImplementationVersion();
+	}
 
 }

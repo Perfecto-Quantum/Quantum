@@ -1,18 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.quantum</groupId>
 	<artifactId>quantum-support</artifactId>
-	<version>1.31.0.b2</version>
+	<version>1.31.0</version>
 
 	<properties>
 		<jvm.version>11</jvm.version>
+		<selenium.version>4.8.3</selenium.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<reportium-sdk.version>2.3</reportium-sdk.version>
-		<selenium.version>4.8.2</selenium.version>
 		<testng.version>7.7.1</testng.version>
+		
 		<cukes.version>7.11.1</cukes.version>
 		<hamcrest.version>2.2</hamcrest.version>
 		<org.json.version>20220320</org.json.version>
@@ -20,11 +23,11 @@
 		<intellij.perfectomobile.version>18.4.0.0 </intellij.perfectomobile.version>
 		<qaf.version>3.2.0</qaf.version>
 		<poi.version>5.2.3</poi.version>
-		<qafsupport.version>3.1.0</qafsupport.version>
-		<appium.client.version>8.3.0</appium.client.version>
+		<appium.client.version>8.6.0</appium.client.version>
 		<jsoup.version>1.15.4</jsoup.version>
 		<jackson.version>2.12.3</jackson.version>
 		<guava.jre.version>31.1-jre</guava.jre.version>
+		<webdriver.manager.version>5.6.4</webdriver.manager.version>
 	</properties>
 
 	<scm>
@@ -54,9 +57,10 @@
 				<version>3.5.0</version>
 				<configuration>
 					<source>${jvm.version}</source>
-					<target>${jvm.version}</target>
+					<!--<target>${jvm.version}</target>-->
 					<failOnError>false</failOnError>
-					<excludePackageNames>com.quantum.listeners:com.quantum.axe:com.qmetry.qaf.automation.*:com.perfecto.reports</excludePackageNames>
+					<excludePackageNames>
+						com.quantum.listeners:com.quantum.axe:com.qmetry.qaf.automation.*:com.perfecto.reports</excludePackageNames>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -82,9 +86,9 @@
 						</goals>
 					</execution>
 				</executions>
-				<configuration>
+				<!--<configuration>
 					<encoding>${project.build.sourceEncoding}</encoding>
-				</configuration>
+				</configuration>-->
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -110,15 +114,35 @@
 		</repository>
 		<repository>
 			<id>jai</id>
-			<url>https://repository.jboss.org/nexus/content/repositories/thirdparty-releases</url>
+			<url>
+				https://repository.jboss.org/nexus/content/repositories/thirdparty-releases</url>
 		</repository>
 	</repositories>
 
 	<dependencies>
+		
+		<!--<dependency>
+			<groupId>io.github.bonigarcia</groupId>
+			<artifactId>webdrivermanager</artifactId>
+			<version>${webdriver.manager.version}</version>
+		</dependency>-->
+		
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
 			<version>${testng.version}</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>com.perfecto.reporting-sdk</groupId>
+		    <artifactId>reportium-testng</artifactId>
+		    <version>${reportium-sdk.version}</version>
+		    <exclusions>
+				<exclusion>
+					<groupId>org.testng</groupId>
+					<artifactId>testng</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/io.cucumber/cucumber-java -->
@@ -193,7 +217,7 @@
 			<artifactId>hamcrest-core</artifactId>
 			<version>${hamcrest.version}</version>
 		</dependency>
-		<!--<dependency>
+		<dependency>
 			<groupId>com.qmetry</groupId>
 			<artifactId>qaf</artifactId>
 			<version>${qaf.version}</version>
@@ -250,19 +274,23 @@
 					<artifactId>selenium-support</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>-->
+		</dependency>
 		<dependency>
 			<groupId>com.qmetry</groupId>
 			<artifactId>qaf-support</artifactId>
-			<version>${qafsupport.version}</version>
+			<version>${qaf.version}</version>
 			<exclusions>
 				<exclusion>
-					<groupId>info.cukes</groupId>
-					<artifactId>cucumber-java</artifactId>
+					<groupId>com.qmetry</groupId>
+					<artifactId>qaf</artifactId>
 				</exclusion>
 				<exclusion>
 					<groupId>org.testng</groupId>
 					<artifactId>testng</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>info.cukes</groupId>
+					<artifactId>cucumber-java</artifactId>
 				</exclusion>
 				<exclusion>
 					<groupId>org.seleniumhq.selenium</groupId>
@@ -291,12 +319,38 @@
 			<groupId>io.appium</groupId>
 			<artifactId>java-client</artifactId>
 			<version>${appium.client.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.seleniumhq.selenium</groupId>
+					<artifactId>selenium-java</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.seleniumhq.selenium</groupId>
+					<artifactId>selenium-remote-driver</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.seleniumhq.selenium</groupId>
+					<artifactId>selenium-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.seleniumhq.selenium</groupId>
+					<artifactId>selenium-java</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-java</artifactId>
 			<version>${selenium.version}</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-http-jdk-client</artifactId>
+			<version>${selenium.version}</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-remote-driver</artifactId>
@@ -307,8 +361,8 @@
 			<artifactId>selenium-api</artifactId>
 			<version>${selenium.version}</version>
 		</dependency>
+		
 
-		<!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-server -->
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-support</artifactId>
@@ -326,22 +380,7 @@
 			<artifactId>intellij-connector</artifactId>
 			<version>${intellij.perfectomobile.version}</version>
 		</dependency>
-		<!--<dependency>
-			<groupId>com.perfecto.reporting-sdk</groupId>
-			<artifactId>reportium-java</artifactId>
-			<version>${reportium-sdk.version}</version>
-		</dependency>-->
-		<dependency>
-			<groupId>com.perfecto.reporting-sdk</groupId>
-			<artifactId>reportium-testng</artifactId>
-			<version>${reportium-sdk.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.testng</groupId>
-					<artifactId>testng</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+		
 		<dependency>
 			<groupId>org.dom4j</groupId>
 			<artifactId>dom4j</artifactId>
@@ -360,7 +399,8 @@
 			<version>4.1</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations -->
+		<!--
+		https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>

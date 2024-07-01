@@ -1,53 +1,14 @@
 package com.quantum.utils;
 
-import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
-import static com.quantum.utils.ConfigurationUtils.getBaseBundle;
-
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.httpclient.Credentials;
-import org.apache.commons.lang3.StringUtils;
-import org.openqa.selenium.MutableCapabilities;
-import org.openqa.selenium.remote.DesiredCapabilities;
-
-import com.google.common.base.CaseFormat;
-//import com.perfectomobile.httpclient.HttpClientException;
-//import com.perfectomobile.httpclient.ParameterValue;
-//import com.perfectomobile.httpclient.device.DeviceParameter;
-//import com.perfectomobile.httpclient.device.DeviceResult;
-//import com.perfectomobile.httpclient.device.DevicesHttpClient;
-import com.qmetry.qaf.automation.core.ConfigurationManager;
-
 /**
  * Created by mitchellw on 9/27/2016.
  */
 public class CloudUtils {
 
-	private static final String HTTPS = "https://";
-	private static final String MEDIA_REPOSITORY = "/services/repositories/media/";
-	private static final String UPLOAD_OPERATION = "operation=upload&overwrite=true";
-	private static final String UTF_8 = "UTF-8";
+//	private static final String HTTPS = "https://";
+//	private static final String MEDIA_REPOSITORY = "/services/repositories/media/";
+//	private static final String UPLOAD_OPERATION = "operation=upload&overwrite=true";
+//	private static final String UTF_8 = "UTF-8";
 
 //	public static DevicesHttpClient getHttpClient() {
 //		return new DevicesHttpClient(getHostName(), getCredentials(ConfigurationUtils.getDesiredDeviceCapabilities()));

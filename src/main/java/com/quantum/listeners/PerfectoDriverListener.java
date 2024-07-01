@@ -203,8 +203,6 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 				break;
 			}
 
-			
-			
 			((DesiredCapabilities)desiredCapabilities).setCapability("perfecto:enableAppiumBehavior", enableAppiumBehavior);
 			((DesiredCapabilities)desiredCapabilities).setCapability("perfecto:useAppiumForHybrid", useAppiumForHybrid);
 			((DesiredCapabilities)desiredCapabilities).setCapability("perfecto:useAppiumForWeb", useAppiumForWeb);

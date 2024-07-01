@@ -3,6 +3,7 @@ package com.quantum.utils;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationMap;
@@ -66,14 +67,26 @@ public class QuantumPatch {
 		
 		if(StringUtils.isEmpty(vendorName) && ConfigurationUtils.isPerfectoExecution()) {
 			vendorName = "perfecto";
+				
+			// Multiple Driver Security token
+			
+			if(!vendorSpecificCaps.containsKey("securityToken")) {
+				String securityToken = ConfigurationManager.getBundle().getString("perfecto.capabilities.securityToken", "");
+				
+				if("".equals(securityToken)) {
+					vendorSpecificCaps.put("securityToken", securityToken);
+				}
+			}
+
 		}
-		
-		
+				
 		if(StringUtils.isEmpty(vendorName)) {
 			capabilities.putAll(vendorSpecificCaps);
 		}else {
 			capabilities.put(String.format("%s:options",vendorName),vendorSpecificCaps);
 		}
+		
+		removeVendorSpecificCapabilities(vendorSpecificCaps, capabilities);
 
 	}
 	
@@ -92,10 +105,20 @@ public class QuantumPatch {
 		
 		return capabilities;
 	}
+	
+	private void removeVendorSpecificCapabilities(Map<String,Object> patchedCapabilities, Map<String, Object> capabilities) {
+		Set<String> vendorSpecificKeys = patchedCapabilities.keySet();
+		
+		for(String vendorSpecificKey: vendorSpecificKeys) {
+			capabilities.remove(vendorSpecificKey);
+		}
+	}
 
 	public void capabilitiesPatchAppium2(Configuration config, Map<String, Object> capabilities) {
 
 		Map<String,Object> patchedCapabilities = patchCapabilities(config, capabilities, "quantum.patch.appium.vendorprefixclass");
+		
+		removeVendorSpecificCapabilities(convertToMap(config), capabilities);
 		
 		if(patchedCapabilities.size()>0) {
 			capabilities.putAll(patchedCapabilities);

@@ -27,6 +27,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.CommandExecutor;
 import org.openqa.selenium.remote.CommandPayload;
@@ -53,6 +54,10 @@ import com.qmetry.qaf.automation.ui.util.QAFWebElementExpectedConditions;
 import com.qmetry.qaf.automation.ui.webdriver.CommandTracker.Stage;
 import com.qmetry.qaf.automation.util.LocatorUtil;
 import com.qmetry.qaf.automation.util.StringMatcher;
+import com.quantum.utils.Appium2Capabilities;
+
+import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.android.AndroidDriver;
 
 /**
  * com.qmetry.qaf.automation.ui.webdriver.QAFWebDriver.java
@@ -66,6 +71,8 @@ import com.qmetry.qaf.automation.util.StringMatcher;
  */
 
 public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDriver, QAFWebDriverCommandListener {
+	
+	
 	protected final Log logger = LogFactory.getLog(getClass());
 	private WebDriverCommandLogger commandLogger;
 	private Set<QAFWebDriverCommandListener> listners;
@@ -106,12 +113,29 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 		init(reporter);
 
 	}
+	
+	public QAFExtendedWebDriver getKeyboard() {
+		return this;
+	}
+	
+	public void sendKeys(String text) {
+		new Actions(underLayingDriver).sendKeys(text).perform();
+	}
 
 	@Override
 	public Capabilities getCapabilities() {
+
 		if (capabilities == null)
 			capabilities = super.getCapabilities();
-		return capabilities;
+		
+		Capabilities currentCapabilities = capabilities;
+		
+		if(underLayingDriver instanceof AppiumDriver) {
+			currentCapabilities = new Appium2Capabilities(currentCapabilities);
+		}
+		
+		return currentCapabilities;
+		
 	}
 
 	public WebDriver getUnderLayingDriver() {
@@ -163,6 +187,11 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 
 	@Override
 	public QAFExtendedWebElement findElement(By by) {
+		
+//		WebElement element1 = (QAFExtendedWebElement)super.findElement(by);
+		
+//		new QAFExtendedWebEl
+//		
 		QAFExtendedWebElement element = (QAFExtendedWebElement) super.findElement(by);
 		element.setBy(by);
 		element.cacheable = true;
@@ -214,6 +243,13 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 	}
 
 	protected Response execute(CommandPayload payload) {
+		
+//		String className = underLayingDriver.getClass().getName();
+//		
+//		if(className.startsWith("io.appium")) {
+//			return ((AppiumDriver)underLayingDriver).execute(payload.getName(), payload.getParameters());
+//		}
+		
 	    return execute(payload.getName(), payload.getParameters());
 	}
 	
@@ -297,7 +333,17 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 		
 				//getCapabilities().getCapability(CapabilityType.TAKES_SCREENSHOT);
 		if (/*null == takeScreenshot || (Boolean)*/ takeScreenshot) {
-			String base64Str = execute(DriverCommand.SCREENSHOT).getValue().toString();
+
+			String className = underLayingDriver.getClass().getName();
+			
+			String base64Str = "";
+			
+			if(className.startsWith("io.appium")) {
+				base64Str = ((AndroidDriver)underLayingDriver).getScreenshotAs(OutputType.BASE64);
+			}else {
+				base64Str = execute(DriverCommand.SCREENSHOT).getValue().toString();;
+			}
+			
 			return target.convertFromBase64Png(base64Str);
 		}
 		return null;

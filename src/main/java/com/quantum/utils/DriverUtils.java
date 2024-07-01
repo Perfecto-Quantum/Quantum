@@ -2,8 +2,11 @@ package com.quantum.utils;
 
 import java.util.Map;
 
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Platform;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 import com.qmetry.qaf.automation.core.ConfigurationManager;
 import com.qmetry.qaf.automation.core.TestBaseProvider;
@@ -58,11 +61,25 @@ public class DriverUtils {
 	/**
 	 * <p>Method to Get Appium Driver initialized in current test.
 	 * </p>
-	 * @return Instance of type  {@link io.appium.java_client.AppiumDriver}.
+	 * @return Instance of type  {@link RemoteWebDriver}.
 	 * 
 	 */
-	public static AppiumDriver getAppiumDriver() {
-		return (AppiumDriver) getDriver().getUnderLayingDriver();
+	public static RemoteWebDriver getAppiumDriver() {
+
+		WebDriver driver = getDriver().getUnderLayingDriver();
+
+		if(driver instanceof RemoteWebDriver){
+			return (RemoteWebDriver) driver;
+		}
+
+		if(driver instanceof AndroidDriver){
+			return (AndroidDriver) driver;
+		}
+
+		if(driver instanceof IOSDriver){
+			return (IOSDriver) driver;
+		}
+		return null ;
 	}
 
 	/**
@@ -95,6 +112,7 @@ public class DriverUtils {
 	 * 
 	 */
 	public static AndroidDriver getAndroidDriver() {
+
 		return (AndroidDriver) getAppiumDriver();
 	}
 
@@ -176,6 +194,7 @@ public class DriverUtils {
 		if (driverName.contains("Driver")) {
 			driverName = driverName.substring(0, driverName.lastIndexOf("Driver"));
 		}
+		
 		TestBaseProvider.instance().get().setDriver(driverName + "Driver");
 		DeviceUtils.getQAFDriver();
 		String envResources = ConfigurationManager.getBundle()
@@ -194,12 +213,37 @@ public class DriverUtils {
 
 	private static String getOS() {
 
-		if (DriverUtils.getDriver() != null) {
-
-			String os = new WebDriverTestBase().getDriver().getCapabilities().getPlatformName().name();
-			return os;
+		WebDriver driver = DriverUtils.getDriver().getUnderLayingDriver();
+		
+		if (null!=driver) {
+			
+			if((driver instanceof AppiumDriver)) {
+				
+				driver = DriverUtils.getAppiumDriver();
+				
+				if(null != driver ) {
+					if(driver instanceof AndroidDriver) {
+						return Platform.ANDROID.name();
+					}else {
+						if(driver instanceof IOSDriver) {
+							return Platform.IOS.name();
+						}
+					}
+				}
+				
+				return "";
+				
+				
+			}else {
+				QAFExtendedWebDriver qafDriver = (QAFExtendedWebDriver) driver;
+				Capabilities cap = qafDriver.getCapabilities();
+				String platformName = cap.getPlatformName().name();
+				return platformName;
+			}
 
 		} else {
+			
+			
 			return "";
 		}
 	}

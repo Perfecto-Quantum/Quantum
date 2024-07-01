@@ -22,6 +22,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.ProxyAuthenticationStrategy;
+import org.testng.Assert;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -172,7 +173,9 @@ public class ReportUtils {
 	public static void logAssert(String message, boolean status) {
 		logVerify(message, status);
 		if (!status) {
-			throw new AssertionError(message);
+			
+			Assert.fail(message);
+//			throw new AssertionError(message);
 		}
 	}
 
@@ -187,7 +190,8 @@ public class ReportUtils {
 	public static void logAssert(String message, boolean status, Throwable e) {
 		logVerify(message, status, e);
 		if (!status) {
-			throw new AssertionError(message);
+//			throw new AssertionError(message);
+			Assert.fail(message, e);
 		}
 	}
 	

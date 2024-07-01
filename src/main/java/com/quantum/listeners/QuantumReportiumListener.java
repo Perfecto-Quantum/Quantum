@@ -20,6 +20,8 @@ import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.openqa.selenium.WebDriver;
 import org.testng.IInvokedMethod;
+import org.testng.ISuite;
+import org.testng.ISuiteListener;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
@@ -50,15 +52,16 @@ import com.qmetry.qaf.automation.step.QAFTestStepListener;
 import com.qmetry.qaf.automation.step.StepExecutionTracker;
 import com.qmetry.qaf.automation.step.TestStep;
 import com.qmetry.qaf.automation.step.client.Scenario;
-import com.qmetry.qaf.automation.step.client.TestNGScenario;
 import com.qmetry.qaf.automation.step.client.text.BDDDefinitionHelper.ParamType;
 import com.qmetry.qaf.automation.ui.WebDriverTestCase;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
+import com.quantum.utils.ConfigurationUtils;
 import com.quantum.utils.ConsoleUtils;
 import com.quantum.utils.DeviceUtils;
 import com.quantum.utils.DriverUtils;
 import com.quantum.utils.ReportUtils;
 
+import io.cucumber.core.backend.ObjectFactory;
 import io.cucumber.core.options.RuntimeOptions;
 import io.cucumber.core.options.RuntimeOptionsBuilder;
 
@@ -110,13 +113,31 @@ class Messages {
 	}
 }
 
-public class QuantumReportiumListener extends ReportiumTestNgListener implements QAFTestStepListener, ITestListener {
+public class QuantumReportiumListener extends ReportiumTestNgListener implements QAFTestStepListener, ITestListener,ISuiteListener {
 
 	public static final String PERFECTO_REPORT_CLIENT = "perfecto.report.client";
 
 	public static ReportiumClient getReportClient() {
 		return (ReportiumClient) getBundle().getObject(PERFECTO_REPORT_CLIENT);
 	}
+	
+	@Override
+	public void onStart(ISuite suite) {
+	    
+		String quantumVersion = ConfigurationUtils.getQuantumVersion();
+		
+		if(null != quantumVersion) {
+			ConsoleUtils.surroundWithSquare("Quantum Version : " + quantumVersion);
+		}
+		
+		FailedTestSuite.resetResultFolder();
+	}
+	
+	
+	public void onFinish(ISuite suite) {
+		// Failed test retry
+		FailedTestSuite.saveXml();
+	  }
 
 	public Messages parseFailureJsonFile(String actualMessage) {
 //		String jsonStr = null;
@@ -171,8 +192,13 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 	@Override
 	@SuppressWarnings("unchecked")
 	public void onStart(ITestContext context) {
-		if (getBundle().getString("remote.server", "").contains("perfecto")) {
-
+		
+		if (isExecutingOnPerfecto()) {
+			
+			String suiteTestName = context.getCurrentXmlTest().getName();
+			
+			getBundle().setProperty("Suite test name", suiteTestName);
+			
 			List<String> stepListeners = getBundle().getList(ApplicationProperties.TESTSTEP_LISTENERS.key);
 			if (!stepListeners.contains(this.getClass().getName())) {
 				stepListeners.add(this.getClass().getName());
@@ -189,30 +215,52 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 			}
 		}
 	}
+	
+	private boolean isExecutingOnPerfecto() {
+		return getBundle().getString("remote.server", "").contains("perfecto");
+	}
 
 	@Override
 	public void onTestStart(ITestResult testResult) {
-
-		if (getBundle().getString("remote.server", "").contains("perfecto")) {
+		
+		String testName = testResult.getTestName();
+		
+		testName = testName + getDataDrivenText(testResult);
+		
+//		System.out.println( getTags(testResult)[0]);
+		
+		if (isExecutingOnPerfecto()) {
+			
 			getBundle().setProperty("ScenarioExecution", testResult.getMethod().getMethodName());
 			// get custom fields "%name-value" from groups
 			// compile actual groups
-			String[] groups = testResult.getMethod().getGroups();
+			
+			String[] groups = TestNode.getScenarioGroups(testResult);
+			
 			ArrayList<String> groupsFinal = new ArrayList<String>();
 
 			ArrayList<CustomField> cfc = new ArrayList<CustomField>();
-			for (String string : groups) {
-				if (string.startsWith(getBundle().getString("custom.field.identifier", "%"))) {
+			
+			String uniqueIdentifierPrefix = getBundle().getString(FailedTestSuite.UNIQUE_TEST_PREFIX_KEY,"");
+						
+			for (String group : groups) {
+				
+				// Find Unique Identifier from the Scenario
+				if(group.startsWith(uniqueIdentifierPrefix)) {
+					getBundle().addProperty(FailedTestSuite.UNIQUE_TEST_IDENTIFIER, group);
+				}
+				
+				if (group.startsWith(getBundle().getString("custom.field.identifier", "%"))) {
 					try {
 						cfc.add(new CustomField(
-								string.split(getBundle().getString("custom.field.delimiter", "-"))[0].substring(1),
-								string.split(getBundle().getString("custom.field.delimiter", "-"))[1]));
+								group.split(getBundle().getString("custom.field.delimiter", "-"))[0].substring(1),
+								group.split(getBundle().getString("custom.field.delimiter", "-"))[1]));
 					} catch (Exception ex) {
 						throw new NullPointerException(
 								"Custom field key/value pair not delimited properly.  Example of proper default usage: %Developer-Jeremy.  Check application properties custom.field.delimiter and custom.field.identifier for custom values that may have been set.");
 					}
 				} else {
-					groupsFinal.add(string);
+					groupsFinal.add(group);
 				}
 			}
 
@@ -233,6 +281,8 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 			}
 
 			Builder<?> testContext = new TestContext.Builder<>();
+			
+			
 			if (groupsFinal.size() > 0) {
 				testContext
 						.withTestExecutionTags(groupsFinal.toString().replace('[', ' ').replace(']', ' ').split(","));
@@ -242,15 +292,14 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 				testContext.withCustomFields(cfc);
 			}
 
-			createReportiumClient(testResult).testStart(
-					testResult.getMethod().getMethodName() + getDataDrivenText(testResult), testContext.build());
+			createReportiumClient(testResult).testStart(testName, testContext.build());
 
 			if (testResult.getParameters().length > 0 && getBundle().getBoolean("addFullDataToReport", false)) {
 				logStepStart("Test Data used");
 				ReportUtils.reportComment(testResult.getParameters()[0].toString());
 				logStepEnd();
 			}
-			if (getBundle().getString("remote.server", "").contains("perfecto")) {
+			if (isExecutingOnPerfecto()) {
 				if (ConfigurationManager.getBundle().getString("perfecto.harfile.enable", "false").equals("true")) {
 					String platformName = DriverUtils.getDriver().getCapabilities().getCapability("platformName")
 							.toString();
@@ -348,7 +397,17 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 		getBundle().setProperty("ScenarioExecution", "FromListener");
 		getBundle().setProperty("device_not_available", false);
-
+		
+		// Retry failed tests
+		try {
+			XmlTest currentTest = testResult.getMethod().getXmlTest();
+			FailedTestSuite.addTest(currentTest);
+		} catch (Exception e) {
+			System.out.println(e.getLocalizedMessage());
+		} finally {
+			ConfigurationManager.getBundle().clearProperty(FailedTestSuite.UNIQUE_TEST_IDENTIFIER);
+		}
+		
 		ReportiumClient client = getReportClient();
 
 		TestResult reportiumResult;
@@ -391,6 +450,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 						"There was some validation failure in the scenario which did not provide any throwable object.");
 
 				try {
+					
 					client.testStop(
 							TestResultFactory.createFailure(failMsg.isEmpty() ? "An error occurred" : failMsg, exp));
 				} catch (Exception e) {
@@ -398,7 +458,9 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 				}
 
 			} else {
-				ExceptionUtils.getStackTrace(testResult.getThrowable());
+				String exceptionThown = ExceptionUtils.getStackTrace(testResult.getThrowable());
+				
+				
 				String actualExceptionMessage = testResult.getThrowable().toString();
 				Messages message = parseFailureJsonFile(actualExceptionMessage);
 
@@ -458,6 +520,8 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 						ConsoleUtils.logWarningBlocks(e.getMessage());
 					}
 				}
+				
+				ConsoleUtils.logWarningBlocks(exceptionThown);
 			}
 
 			handleWebDriverFailure(testResult);
@@ -505,6 +569,17 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 		getBundle().setProperty("ScenarioExecution", "FromListener");
 		getBundle().setProperty("device_not_available", false);
 		ReportiumClient client = getReportClient();
+		
+		// Retry failed tests
+				try {
+					XmlTest currentTest = result.getMethod().getXmlTest();
+					FailedTestSuite.addTest(currentTest);
+				} catch (Exception e) {
+					System.out.println(e.getLocalizedMessage());
+				} finally {
+					ConfigurationManager.getBundle().clearProperty(FailedTestSuite.UNIQUE_TEST_IDENTIFIER);
+				}
+		
 		if (null != client) {
 			// By default all the skipped tests will be failed, if you want
 			if (ConfigurationManager.getBundle().getString("skippedTests", "fail").equalsIgnoreCase("pass")) {
@@ -526,6 +601,13 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 	@Override
 	public void onFinish(ITestContext context) {
+		
+//		((FileHandler)ConfigurationManager.getBundle().getProperty("seleniumfile")).flush();
+//		((FileHandler)ConfigurationManager.getBundle().getProperty("seleniumfile")).close();
+		
+//		((FileHandler)ConfigurationManager.getBundle().getProperty("remotewdfile")).flush();
+//		((FileHandler)ConfigurationManager.getBundle().getProperty("remotewdfile")).close();
+		
 	}
 
 	public static void logTestStep(String message) {
@@ -566,6 +648,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 		ConsoleUtils.logWarningBlocks(
 				"REPORTIUM URL: " + getReportClient().getReportUrl().replace("[", "%5B").replace("]", "%5D"));
+		
 		ConsoleUtils.surroundWithSquare(endText + getTestName(testResult)
 				+ (testResult.getParameters().length > 0 ? " [" + testResult.getParameters()[0] + "]" : ""));
 
@@ -676,8 +759,8 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 		try {
 
 			String className = testResult.getTestClass().getName();
-			@SuppressWarnings("rawtypes")
-			Class testResultClass = Class.forName(className);
+
+			Class<? extends ObjectFactory> testResultClass = (Class<? extends ObjectFactory>) Class.forName(className);
 
 			return new RuntimeOptionsBuilder().setObjectFactoryClass(testResultClass).build();
 
@@ -689,8 +772,23 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 	}
 
 	private void addReportLink(ITestResult result, String url) {
-		((TestNGScenario) result.getMethod()).getMetaData().put("Perfecto-report",
-				"<a href=\"" + url + "\" target=\"_blank\">view</a>");
+		
+		Object testNGMethodObj = result.getMethod().getInstance();
+		
+		if(testNGMethodObj instanceof Scenario) {
+			Scenario scenario = (Scenario) testNGMethodObj;
+			Map <String,Object> metaData = scenario.getMetadata();
+			
+			metaData.put("Perfecto-report",
+					"<a href=\"" + url + "\" target=\"_blank\">view</a>");
+			
+		}
+		
+//		System.out.println(testNGMethod.getClass());
+		
+		
+//		((TestNGScenario) testNGMethod).getMetaData().put("Perfecto-report",
+//				"<a href=\"" + url + "\" target=\"_blank\">view</a>");
 	}
 
 	@SuppressWarnings("rawtypes")
