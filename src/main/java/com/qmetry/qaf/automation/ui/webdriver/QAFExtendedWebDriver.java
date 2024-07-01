@@ -27,6 +27,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.CommandExecutor;
 import org.openqa.selenium.remote.CommandPayload;
@@ -111,6 +112,14 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 		capabilities = ((RemoteWebDriver) driver).getCapabilities();
 		init(reporter);
 
+	}
+	
+	public QAFExtendedWebDriver getKeyboard() {
+		return this;
+	}
+	
+	public void sendKeys(String text) {
+		new Actions(underLayingDriver).sendKeys(text).perform();
 	}
 
 	@Override

@@ -20,6 +20,8 @@ import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.openqa.selenium.WebDriver;
 import org.testng.IInvokedMethod;
+import org.testng.ISuite;
+import org.testng.ISuiteListener;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
@@ -53,6 +55,7 @@ import com.qmetry.qaf.automation.step.client.Scenario;
 import com.qmetry.qaf.automation.step.client.text.BDDDefinitionHelper.ParamType;
 import com.qmetry.qaf.automation.ui.WebDriverTestCase;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
+import com.quantum.utils.ConfigurationUtils;
 import com.quantum.utils.ConsoleUtils;
 import com.quantum.utils.DeviceUtils;
 import com.quantum.utils.DriverUtils;
@@ -110,13 +113,31 @@ class Messages {
 	}
 }
 
-public class QuantumReportiumListener extends ReportiumTestNgListener implements QAFTestStepListener, ITestListener {
+public class QuantumReportiumListener extends ReportiumTestNgListener implements QAFTestStepListener, ITestListener,ISuiteListener {
 
 	public static final String PERFECTO_REPORT_CLIENT = "perfecto.report.client";
 
 	public static ReportiumClient getReportClient() {
 		return (ReportiumClient) getBundle().getObject(PERFECTO_REPORT_CLIENT);
 	}
+	
+	@Override
+	public void onStart(ISuite suite) {
+	    
+		String quantumVersion = ConfigurationUtils.getQuantumVersion();
+		
+		if(null != quantumVersion) {
+			ConsoleUtils.surroundWithSquare("Quantum Version : " + quantumVersion);
+		}
+		
+		FailedTestSuite.resetResultFolder();
+	}
+	
+	
+	public void onFinish(ISuite suite) {
+		// Failed test retry
+		FailedTestSuite.saveXml();
+	  }
 
 	public Messages parseFailureJsonFile(String actualMessage) {
 //		String jsonStr = null;
@@ -171,7 +192,12 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 	@Override
 	@SuppressWarnings("unchecked")
 	public void onStart(ITestContext context) {
+		
 		if (isExecutingOnPerfecto()) {
+			
+			String suiteTestName = context.getCurrentXmlTest().getName();
+			
+			getBundle().setProperty("Suite test name", suiteTestName);
 			
 			List<String> stepListeners = getBundle().getList(ApplicationProperties.TESTSTEP_LISTENERS.key);
 			if (!stepListeners.contains(this.getClass().getName())) {
@@ -432,7 +458,9 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 				}
 
 			} else {
-				ExceptionUtils.getStackTrace(testResult.getThrowable());
+				String exceptionThown = ExceptionUtils.getStackTrace(testResult.getThrowable());
+				
+				
 				String actualExceptionMessage = testResult.getThrowable().toString();
 				Messages message = parseFailureJsonFile(actualExceptionMessage);
 
@@ -492,6 +520,8 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 						ConsoleUtils.logWarningBlocks(e.getMessage());
 					}
 				}
+				
+				ConsoleUtils.logWarningBlocks(exceptionThown);
 			}
 
 			handleWebDriverFailure(testResult);
@@ -571,8 +601,6 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 
 	@Override
 	public void onFinish(ITestContext context) {
-		// Failed test retry
-		FailedTestSuite.saveXml();
 		
 //		((FileHandler)ConfigurationManager.getBundle().getProperty("seleniumfile")).flush();
 //		((FileHandler)ConfigurationManager.getBundle().getProperty("seleniumfile")).close();

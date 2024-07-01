@@ -47,7 +47,7 @@ public class Appium2Capabilities implements Capabilities{
 			}
 			
 			if(capabilityValue.toString().isBlank()) {
-				System.out.println(String.format("%s capability not available!", capabilityName));
+//				System.out.println(String.format("%s capability not available!", capabilityName));
 			}
 
 		}else{

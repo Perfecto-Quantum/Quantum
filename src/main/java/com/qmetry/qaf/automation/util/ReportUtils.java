@@ -5,13 +5,10 @@ package com.qmetry.qaf.automation.util;
 
 import java.util.List;
 
-import org.openqa.selenium.OutputType;
-
 import com.qmetry.qaf.automation.core.CheckpointResultBean;
 import com.qmetry.qaf.automation.core.MessageTypes;
 import com.qmetry.qaf.automation.core.QAFTestBase;
 import com.qmetry.qaf.automation.core.TestBaseProvider;
-import com.quantum.utils.DriverUtils;
 
 /**
  * @author chirag.jayswal

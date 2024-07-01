@@ -224,7 +224,7 @@ public class SuiteAlterer implements IAlterSuiteListener {
 		}
 		originalSuite.setTests(finalTest);
 
-		System.out.println(originalSuite.toXml());
+//		System.out.println(originalSuite.toXml());
 
 	}
 

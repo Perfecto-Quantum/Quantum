@@ -67,8 +67,19 @@ public class QuantumPatch {
 		
 		if(StringUtils.isEmpty(vendorName) && ConfigurationUtils.isPerfectoExecution()) {
 			vendorName = "perfecto";
+				
+			// Multiple Driver Security token
+			
+			if(!vendorSpecificCaps.containsKey("securityToken")) {
+				String securityToken = ConfigurationManager.getBundle().getString("perfecto.capabilities.securityToken", "");
+				
+				if("".equals(securityToken)) {
+					vendorSpecificCaps.put("securityToken", securityToken);
+				}
+			}
+
 		}
-		
+				
 		if(StringUtils.isEmpty(vendorName)) {
 			capabilities.putAll(vendorSpecificCaps);
 		}else {

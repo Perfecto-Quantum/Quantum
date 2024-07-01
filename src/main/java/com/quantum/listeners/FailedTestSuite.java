@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
@@ -81,16 +82,31 @@ public class FailedTestSuite {
 	private void addFailedTest(XmlTest currentTest) {
 		
 		String uniqueIdentifier = getUniqueIdentifier();
-
+		
 		if (!uniqueIdentifier.isBlank()) {
 			
-			if(currentTest.getIncludedGroups().contains(uniqueIdentifier)) return;
-
-			XmlRun xmlRun = new XmlRun();
+			XmlRun xmlRun = new XmlRun();;
+			XmlGroups uniqueGroup =new XmlGroups();
 			xmlRun.onInclude(uniqueIdentifier);
-			
-			XmlGroups uniqueGroup = new XmlGroups();
 			uniqueGroup.setRun(xmlRun);
+			
+//			if(currentTest.getIncludedGroups().size()==1) {
+//				if(currentTest.getIncludedGroups().contains(uniqueIdentifier)) {
+//					uniqueGroup = currentTest.getXmlGroups();
+//				}else {
+//					
+//				}
+//			}else {
+//				
+//				if(currentTest.getIncludedGroups().contains(uniqueIdentifier)) {
+//					if(currentTest.getIncludedGroups().contains(uniqueIdentifier)) return;
+//				}else {
+//					xmlRun = new XmlRun();
+//					xmlRun.onInclude(uniqueIdentifier);
+//					uniqueGroup = currentTest.getXmlGroups();
+//					uniqueGroup.setRun(xmlRun);
+//				}
+//			}
 			
 			String failedTestName = currentTest.getName().endsWith("- Failed") ? currentTest.getName():
 				TestNode.getTestName(currentTest);
@@ -107,7 +123,7 @@ public class FailedTestSuite {
 			failedTests.put(testNode,testNode);
 
 		} else {
-			System.out.println("No Unique Tag found");
+//			System.out.println("No Unique Tag found");
 		}
 	}
 
@@ -126,6 +142,19 @@ public class FailedTestSuite {
 		return failedTestSuite;
 	}
 	
+	private void addGroupToExistingTest(TestNode currentTestNode) {
+		TestNode existingTestNode = this.failedTests.get(currentTestNode);
+		String uniqueIdentifier = getUniqueIdentifier();
+		
+		XmlTest xmlTest = existingTestNode.getCurrentTest();
+		
+		List<String> includedGroups = xmlTest.getIncludedGroups();
+		
+		if(!includedGroups.contains(uniqueIdentifier)) {
+			existingTestNode.addUniqueGroup(uniqueIdentifier);
+		}
+	}
+	
 	public static void addTest(XmlTest currentTest) {
 		
 		FailedTestSuite failedTestSuite = getFailedSuite(currentTest);
@@ -136,17 +165,20 @@ public class FailedTestSuite {
 			boolean result = failedTestSuite.failedTests.containsKey(currentTestNode);
 			
 			if(result) {
-				TestNode existingTestNode = failedTestSuite.failedTests.get(currentTestNode);
-				existingTestNode.addUniqueGroup(failedTestSuite.getUniqueIdentifier());
+				failedTestSuite.addGroupToExistingTest(currentTestNode);
 			}else {
 				failedTestSuite.addFailedTest(currentTest);
-				
 			}
 		}
 		
 	}
 	
-	private static void resetResultFolder(File quantumFailedSuiteFolder) {
+	public static void resetResultFolder() {
+		
+		String folderPath = getFailedTestFolder();
+		
+		File quantumFailedSuiteFolder = new File(folderPath);
+		
 		if(quantumFailedSuiteFolder.exists()) {
 			
 			File[] quantumFailedSuiteFiles = quantumFailedSuiteFolder.listFiles();
@@ -161,6 +193,16 @@ public class FailedTestSuite {
 		quantumFailedSuiteFolder.mkdirs();
 	}
 	
+	public static String getFailedTestFolder() {
+		String folderPath = ConfigurationManager.getBundle().getPropertyValueOrNull("failed.testng.file.path");
+		
+		if(Objects.isNull(folderPath)) {
+			folderPath = "test-output/quantum-failed-suite";
+		}
+		
+		return folderPath;
+	}
+	
 	public static void saveXml() {
 		
 		if(Objects.isNull(failedTestSuite)) {	
@@ -172,15 +214,7 @@ public class FailedTestSuite {
 			
 			failedTestSuite.addAllFailedTests();
 			
-			String folderPath = ConfigurationManager.getBundle().getPropertyValueOrNull("failed.testng.file.path");
-			
-			if(Objects.isNull(folderPath)) {
-				folderPath = "test-output/quantum-failed-suite";
-			}
-			
-			File quantumFailedSuiteFolder = new File(folderPath);
-			
-			resetResultFolder(quantumFailedSuiteFolder);
+			String folderPath = getFailedTestFolder();
 			
 			String quantumFailedSuiteXmlFileStr = (folderPath.endsWith("/")? 
 					folderPath : folderPath + "/") + "failed-suite.xml";
