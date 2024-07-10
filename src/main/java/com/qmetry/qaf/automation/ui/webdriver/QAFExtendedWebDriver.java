@@ -58,6 +58,7 @@ import com.quantum.utils.Appium2Capabilities;
 
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.ios.IOSDriver;
 
 /**
  * com.qmetry.qaf.automation.ui.webdriver.QAFWebDriver.java
@@ -339,7 +340,14 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 			String base64Str = "";
 			
 			if(className.startsWith("io.appium")) {
-				base64Str = ((AndroidDriver)underLayingDriver).getScreenshotAs(OutputType.BASE64);
+				
+//				base64Str = AppiumUtils.getAppiumDriver().getScreenshotAs(OutputType.BASE64);
+				if(className.contains("AndroidDriver")) {
+					base64Str = ((AndroidDriver)underLayingDriver).getScreenshotAs(OutputType.BASE64);
+				}else {
+					base64Str = ((IOSDriver)underLayingDriver).getScreenshotAs(OutputType.BASE64);
+				}
+				
 			}else {
 				base64Str = execute(DriverCommand.SCREENSHOT).getValue().toString();;
 			}

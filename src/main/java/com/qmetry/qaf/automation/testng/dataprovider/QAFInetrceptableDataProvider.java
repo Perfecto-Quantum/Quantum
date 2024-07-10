@@ -43,6 +43,7 @@ import org.testng.ITestContext;
 import org.testng.ITestNGMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.internal.Configuration;
+import org.testng.internal.TestNGMethod;
 import org.testng.internal.annotations.IAnnotationFinder;
 import org.testng.internal.invokers.MethodInvocationHelper;
 
@@ -54,6 +55,7 @@ import com.qmetry.qaf.automation.keys.ApplicationProperties;
 import com.qmetry.qaf.automation.step.client.DataDrivenScenario;
 import com.qmetry.qaf.automation.step.client.TestNGScenario;
 import com.qmetry.qaf.automation.testng.DataProviderException;
+import com.qmetry.qaf.automation.testng.TestNGTestCase;
 import com.qmetry.qaf.automation.testng.dataprovider.QAFDataProvider.params;
 import com.qmetry.qaf.automation.util.CSVUtil;
 import com.qmetry.qaf.automation.util.ClassUtil;
@@ -81,48 +83,44 @@ public class QAFInetrceptableDataProvider {
 		return interceptedDataProvider(method, c);
 	}
 
-	/**
-	 * 
-	 * @param method
-	 * @param c
-	 * @return
-	 */
-	@DataProvider(name = QAFDataProvider.NAME)
-	public static Iterator<Object[]> interceptedDataProvider(ITestNGMethod method, ITestContext c) {
-		
+	private static List<Object[]> getTestDataForBDDScenarios(ITestNGMethod method, ITestContext c) {
+
 		Object methodInstance = method.getInstance();
-		
-		DataDrivenScenario dataDrivenScenario = null;
-		
-		if(methodInstance instanceof DataDrivenScenario) {
-			dataDrivenScenario = (DataDrivenScenario) methodInstance;
-		}
-		
-		Map<String, Object> metadata = dataDrivenScenario.getMetadata();
-		
-		
-//		TestNGScenario scenario = new TestNGScenario(null, null, null, dataDrivenScenario);
-				
-				//(TestNGScenario) method;
-		
-//		@SuppressWarnings("unchecked")
-//		Map<String, Object> parameters = (Map<String, Object>) getParameters(scenario);
-//		// update resolved meta-data should reflect in report
-//		Map<String, Object> metadata = scenario.getMetaData();
-//		metadata.putAll(parameters);
-		
-//		Map<String, Object> metadata = dataDrivenScenario.getMetadata();
-		
-		// Intercepter registered using property 'qaf.listeners'
-//		Set<QAFDataProviderIntercepter> intercepters = getIntercepters();
-//		for (QAFDataProviderIntercepter intercepter : intercepters) {
-//			intercepter.beforeFech(scenario, c);
-//		}
-				
+
+		DataDrivenScenario dataDrivenScenario = (DataDrivenScenario) methodInstance;
+
 		List<Object[]> dataList = null;
+
+		Map<String, Object> metadata = dataDrivenScenario.getMetadata();
+
 		String dataProvider = (String) metadata.get(params.DATAPROVIDER.name());
-		boolean hasCustomDataProvider = null!=dataProvider && !dataProvider.startsWith(QAFDataProvider.NAME);
+		boolean hasCustomDataProvider = null != dataProvider && !dataProvider.startsWith(QAFDataProvider.NAME);
+
+		if (hasCustomDataProvider) {
+			// get data provider from description!...
+			String dataProviderClass = (String) metadata.get(params.DATAPROVIDERCLASS.name());
+			Iterator<Object[]> testData = invokeCustomDataProvider(method, c, dataProvider, dataProviderClass);
+			dataList = ListUtils.toList(testData);
+		} else {
+			Object[][] testData = getData(metadata);
+			dataList = ListUtils.toList(testData);
+		}
+
+		return dataList;
+
+	}
+
+	private static List<Object[]> getTestDataForTDDScenarios(ITestNGMethod method, ITestContext c) {
+
+		TestNGScenario scenario = new TestNGScenario((TestNGMethod) method);
+
+		List<Object[]> dataList = null;
 		
+		Map<String, Object> metadata = scenario.getMetaData();
+		
+		String dataProvider = (String) metadata.get(params.DATAPROVIDER.name());
+		boolean hasCustomDataProvider = null != dataProvider && !dataProvider.startsWith(QAFDataProvider.NAME);
+
 		if (hasCustomDataProvider) {
 			// get data provider from description!...
 			String dataProviderClass = (String) metadata.get(params.DATAPROVIDERCLASS.name());
@@ -133,6 +131,50 @@ public class QAFInetrceptableDataProvider {
 			dataList = ListUtils.toList(testData);
 		}
 		
+		
+		return dataList;
+
+	}
+
+	/**
+	 * 
+	 * @param method
+	 * @param c
+	 * @return
+	 */
+	@DataProvider(name = QAFDataProvider.NAME)
+	public static Iterator<Object[]> interceptedDataProvider(ITestNGMethod method, ITestContext c) {
+
+		Object methodInstance = method.getInstance();
+
+		List<Object[]> dataList = null;
+
+		if (methodInstance instanceof DataDrivenScenario) {
+			dataList = getTestDataForBDDScenarios(method, c);
+		}
+
+		if (methodInstance instanceof TestNGTestCase) {
+			dataList = getTestDataForTDDScenarios(method, c);
+		}
+
+//		TestNGScenario scenario = new TestNGScenario(null, null, null, dataDrivenScenario);
+
+		// (TestNGScenario) method;
+
+//		@SuppressWarnings("unchecked")
+//		Map<String, Object> parameters = (Map<String, Object>) getParameters(scenario);
+//		// update resolved meta-data should reflect in report
+//		Map<String, Object> metadata = scenario.getMetaData();
+//		metadata.putAll(parameters);
+
+//		Map<String, Object> metadata = dataDrivenScenario.getMetadata();
+
+		// Intercepter registered using property 'qaf.listeners'
+//		Set<QAFDataProviderIntercepter> intercepters = getIntercepters();
+//		for (QAFDataProviderIntercepter intercepter : intercepters) {
+//			intercepter.beforeFech(scenario, c);
+//		}
+
 		return dataList.iterator();
 
 //		List<Object[]> data = process(scenario, dataList);
@@ -145,8 +187,8 @@ public class QAFInetrceptableDataProvider {
 	}
 
 	@SuppressWarnings("unused")
-	private static List<Object[]> intercept(TestNGScenario scenario, ITestContext context, List<Object[]> testdata, Set<QAFDataProviderIntercepter> intercepters) {
-		
+	private static List<Object[]> intercept(TestNGScenario scenario, ITestContext context, List<Object[]> testdata,
+			Set<QAFDataProviderIntercepter> intercepters) {
 
 		// Intercepter registered using property 'qaf.listeners'
 		for (QAFDataProviderIntercepter intercepter : intercepters) {
@@ -154,16 +196,16 @@ public class QAFInetrceptableDataProvider {
 		}
 		int from = 1;
 		int to = testdata.size();
-		
+
 		Map<String, Object> metadata = scenario.getMetaData();
 		if (metadata.containsKey(params.FROM.name()) || metadata.containsKey(params.TO.name())) {
 			if (metadata.containsKey(params.TO.name()) && (int) metadata.get(params.TO.name()) < to) {
 				to = (int) metadata.get(params.TO.name());
 			}
-			if (metadata.containsKey(params.FROM.name()) && (int) metadata.get(params.FROM.name())>from) {
+			if (metadata.containsKey(params.FROM.name()) && (int) metadata.get(params.FROM.name()) > from) {
 				from = (int) metadata.get(params.FROM.name());
 			}
-			return testdata.subList(from-1, to);
+			return testdata.subList(from - 1, to);
 		}
 
 		if (metadata.containsKey(params.INDICES.name())) {
@@ -179,29 +221,28 @@ public class QAFInetrceptableDataProvider {
 
 	@SuppressWarnings("unused")
 	private static Map<?, ?> getParameters(TestNGScenario scenario) {
-		
-		
+
 		Map<String, Object> methodParameters = scenario.getMetaData();
 		String description = scenario.getDescription();
-		
+
 		if (isNotBlank(description) && JSONUtil.isValidJsonString(description)) {
 			Map<String, Object> paramsFromDesc = new JSONObject(description).toMap();
-			description =(String) paramsFromDesc.remove("description");
+			description = (String) paramsFromDesc.remove("description");
 			methodParameters.putAll(paramsFromDesc);
 			scenario.setDescription(description);
 		}
 
 		// highest priority test data overridden through property with test name prefix
 		String testParameters = getConfigParameters(scenario.getMethodName() + ".testdata");
-		if(isBlank(testParameters)){
-			//second priority overridden through property "global.testdata"
+		if (isBlank(testParameters)) {
+			// second priority overridden through property "global.testdata"
 			testParameters = getConfigParameters("global.testdata");
-			if(isBlank(testParameters)){
-				//default provided with test case
+			if (isBlank(testParameters)) {
+				// default provided with test case
 				testParameters = new JSONObject(methodParameters).toString();
 			}
 		}
-		
+
 		String cls = scenario.getConstructorOrMethod().getMethod().getDeclaringClass().getSimpleName();
 		String mtd = scenario.getMethodName();
 		testParameters = testParameters.replace("${class}", cls);
@@ -215,7 +256,7 @@ public class QAFInetrceptableDataProvider {
 			return StringUtil.toMap(testParameters, true);
 		}
 	}
-	
+
 //	private static Map<?, ?> getParameters(DataDrivenScenario scenario) {
 //		
 //		
@@ -271,22 +312,23 @@ public class QAFInetrceptableDataProvider {
 					TreeMap<String, Object> parametes = new TreeMap<String, Object>(String.CASE_INSENSITIVE_ORDER);
 					parametes.putAll(scenario.getMetaData());
 					parametes.put("method", scenario.getMethodName());
-					parametes.put("class", scenario.getConstructorOrMethod().getMethod().getDeclaringClass().getSimpleName());
-					
+					parametes.put("class",
+							scenario.getConstructorOrMethod().getMethod().getDeclaringClass().getSimpleName());
+
 					filter = StrSubstitutor.replace(filter, parametes);
 					filter = getBundle().getSubstitutor().replace(filter);
 					logger.info("Applying Filter " + filter);
-					int i =0;
+					int i = 0;
 					Iterator<Object[]> iter = testdata.iterator();
 					while (iter.hasNext()) {
 						// consider column values as context variables
 						Map<String, Object> record = (Map<String, Object>) iter.next()[0];
 						boolean include = StringUtil.eval(filter, record);
-						i=i+1;
+						i = i + 1;
 						if (!include) {
 							logger.debug("removing " + record);
 							iter.remove();
-						}else{
+						} else {
 							record.put("__baseindex", i);
 						}
 					}
@@ -377,13 +419,13 @@ public class QAFInetrceptableDataProvider {
 				List<Object[]> mapData = DataProviderUtil.getDataSetAsMap(key, file);
 				return mapData.toArray(new Object[][] {});
 			}
-			/*if (file.endsWith("xls")) {
-				if (isNotBlank(key)) {
-					return ExcelUtil.getTableDataAsMap(file, ((String) metadata.get(params.KEY.name())),
-							(String) metadata.get(params.SHEETNAME.name()));
-				}
-				return ExcelUtil.getExcelDataAsMap(file, (String) metadata.get(params.SHEETNAME.name()));
-			}*/
+			/*
+			 * if (file.endsWith("xls")) { if (isNotBlank(key)) { return
+			 * ExcelUtil.getTableDataAsMap(file, ((String) metadata.get(params.KEY.name())),
+			 * (String) metadata.get(params.SHEETNAME.name())); } return
+			 * ExcelUtil.getExcelDataAsMap(file, (String)
+			 * metadata.get(params.SHEETNAME.name())); }
+			 */
 			if (file.endsWith("xlsx") || file.endsWith("xls")) {
 				if (isNotBlank(key)) {
 					return PoiExcelUtil.getTableDataAsMap(file, ((String) metadata.get(params.KEY.name())),
@@ -407,7 +449,8 @@ public class QAFInetrceptableDataProvider {
 		String methodClass = tm.getConstructorOrMethod().getDeclaringClass().getName();
 
 		if (isBlank(dpc)) {
-			dpc = getBundle().getString("global.dataproviderclass", getBundle().getString("dataproviderclass",methodClass));
+			dpc = getBundle().getString("global.dataproviderclass",
+					getBundle().getString("dataproviderclass", methodClass));
 		}
 		if (isNotBlank(dpc)) {
 			Method m;
@@ -416,7 +459,8 @@ public class QAFInetrceptableDataProvider {
 			} catch (Exception e) {
 				m = getDataProviderMethod(dp, methodClass);
 			}
-			Object instanceToUse = m.getDeclaringClass().equals(tm.getConstructorOrMethod().getDeclaringClass()) ? tm.getInstance()
+			Object instanceToUse = m.getDeclaringClass().equals(tm.getConstructorOrMethod().getDeclaringClass())
+					? tm.getInstance()
 					: ClassUtil.newInstanceOrNull(m.getDeclaringClass());
 			return InvocatoinHelper.invokeDataProvider(instanceToUse, m, tm, c, null,
 					new Configuration().getAnnotationFinder());
@@ -446,9 +490,8 @@ public class QAFInetrceptableDataProvider {
 	}
 
 	private static class InvocatoinHelper extends MethodInvocationHelper {
-		public static Iterator<Object[]> invokeDataProvider(Object instance, Method dataProvider,
-				ITestNGMethod method, ITestContext testContext, Object fedInstance,
-				IAnnotationFinder annotationFinder) {
+		public static Iterator<Object[]> invokeDataProvider(Object instance, Method dataProvider, ITestNGMethod method,
+				ITestContext testContext, Object fedInstance, IAnnotationFinder annotationFinder) {
 			return MethodInvocationHelper.invokeDataProvider(instance, dataProvider, method, testContext, fedInstance,
 					annotationFinder);
 		}
@@ -462,7 +505,8 @@ public class QAFInetrceptableDataProvider {
 			try {
 				Class<?> listenerClass = Class.forName(listener);
 				if (QAFDataProviderIntercepter.class.isAssignableFrom(listenerClass)) {
-					QAFDataProviderIntercepter intercepter = (QAFDataProviderIntercepter) listenerClass.getDeclaredConstructor().newInstance();
+					QAFDataProviderIntercepter intercepter = (QAFDataProviderIntercepter) listenerClass
+							.getDeclaredConstructor().newInstance();
 					intercepters.add(intercepter);
 				}
 			} catch (Exception e) {
@@ -470,11 +514,11 @@ public class QAFInetrceptableDataProvider {
 		}
 		return intercepters;
 	}
-	
-	private static String getConfigParameters(String key){
-		if(getBundle().containsKey(key) || !getBundle().subset(key).isEmpty()){
+
+	private static String getConfigParameters(String key) {
+		if (getBundle().containsKey(key) || !getBundle().subset(key).isEmpty()) {
 			org.apache.commons.configuration.Configuration config = getBundle().subset(key);
-			if(config.isEmpty()){
+			if (config.isEmpty()) {
 				return getBundle().getString(key);
 			}
 			return new JSONObject(ConfigurationConverter.getMap(config)).toString();

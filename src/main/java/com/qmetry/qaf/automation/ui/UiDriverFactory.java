@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
@@ -214,9 +215,15 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 	private static QAFExtendedWebDriver getDriver(WebDriverCommandLogger reporter, String... args) throws Exception {
 
 		String b = STBArgs.browser_str.getFrom(args).toLowerCase();
-
-		String seleniumGridUrl = STBArgs.sel_server.getFrom(args).startsWith("http") ? STBArgs.sel_server.getFrom(args)
-				: String.format("http://%s:%s/wd/hub", STBArgs.sel_server.getFrom(args), STBArgs.port.getFrom(args));
+		
+		String seleniumGridUrl = null;
+		
+		String selServer = STBArgs.sel_server.getFrom(args);
+		
+		if(!"".equals(selServer)) {
+			seleniumGridUrl = selServer.startsWith("http") ? selServer: String.format("http://%s:%s/wd/hub", selServer, 
+					STBArgs.port.getFrom(args));
+		}
 
 		// Added based on new http client
 		System.setProperty("webdriver.http.factory", "jdk-http-client");
@@ -277,14 +284,76 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			throw e;
 		}
 	}
+	
+	
 
+	
 	private static WebDriver getLocalSeleniumDriver(Class<? extends WebDriver> of, Capabilities capabilities) {
 		try {
 
-			logger.info("Retrying the Driver initialization - 1");
+			logger.info("Local Driver initialization");
+			
+			Constructor<? extends WebDriver> constructor = null;
+			
+			String className = of.getName().toUpperCase();
+			
+			WebDriver driver = null;
+			
+			if(className.contains("CHROMEDRIVER")) {
+				constructor = of.getConstructor(ChromeOptions.class);
+				
+				WebDriverManager.chromedriver().setup();
+				
+				ChromeOptions chromeOptions = new ChromeOptions();
+				Map<String, Object> capMap = capabilities.asMap();
+				
+				Set<Entry<String, Object>> capEntries = capMap.entrySet();
+				
+				for(Entry<String, Object> entry : capEntries) {
+					chromeOptions.setCapability(entry.getKey(), entry.getValue());
+				}
+				
+				driver = constructor.newInstance(chromeOptions);
+				
+			}
+			
+			if(className.contains("FIREFOXDRIVER")) {
+				constructor = of.getConstructor(FirefoxOptions.class);
+				
+				WebDriverManager.firefoxdriver().setup();
+				
+				FirefoxOptions firefoxOptions = new FirefoxOptions();
+				Map<String, Object> capMap = capabilities.asMap();
+				
+				Set<Entry<String, Object>> capEntries = capMap.entrySet();
+				
+				for(Entry<String, Object> entry : capEntries) {
+					firefoxOptions.setCapability(entry.getKey(), entry.getValue());
+				}
+				
+				driver = constructor.newInstance(firefoxOptions);
+				
+			}
+			
+			if(className.contains("EDGEDRIVER")) {
+				constructor = of.getConstructor(EdgeOptions.class);
+				
+				WebDriverManager.edgedriver().setup();
+				
+				EdgeOptions edgeOptions = new EdgeOptions();
+				Map<String, Object> capMap = capabilities.asMap();
+				
+				Set<Entry<String, Object>> capEntries = capMap.entrySet();
+				
+				for(Entry<String, Object> entry : capEntries) {
+					edgeOptions.setCapability(entry.getKey(), entry.getValue());
+				}
+				
+				driver = constructor.newInstance(edgeOptions);
+				
+			}
 
-			Constructor<? extends WebDriver> constructor = of.getConstructor(Capabilities.class);
-			return constructor.newInstance(capabilities);
+			return driver;
 		} catch (Exception e) {
 			throw (WebDriverException) e.getCause();
 		}

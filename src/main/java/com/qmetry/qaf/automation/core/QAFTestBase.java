@@ -83,7 +83,10 @@ public class QAFTestBase {
 	 * @author chirag.jayswal
 	 */
 	public enum STBArgs {
-		browser_str("firefoxDriver"), base_url("http://localhost"), sel_server("localhost"), port("4444");
+		browser_str("firefoxDriver"), base_url("http://localhost"), 
+//		sel_server("localhost"), 
+		sel_server(null),
+		port("4444");
 		public String defaultVal;
 
 		private STBArgs(String def) {
@@ -468,6 +471,7 @@ public class QAFTestBase {
 		}
 		stb = initStbArgs();
 		logger.info("Initializing Driver..." + STBArgs.allToString(stb));
+		
 		// uiDriver = new UiDriverFactory().get(commandLog, stb);
 		DriverInitExpectedCondition driverInitExpectedCondition = new DriverInitExpectedCondition(
 				(ArrayList<LoggingBean>) getLog(), stb);
@@ -545,6 +549,7 @@ public class QAFTestBase {
 		args = STBArgs.browser_str.setIfEmpty(getBrowser(), args);
 		return STBArgs.browser_str.setIfEmpty(
 				ApplicationProperties.DRIVER_NAME.getStringVal(STBArgs.browser_str.defaultVal),
+				
 				STBArgs.base_url.setIfEmpty(
 						ApplicationProperties.SELENIUM_BASE_URL.getStringVal(STBArgs.base_url.defaultVal),
 						STBArgs.port.setIfEmpty(

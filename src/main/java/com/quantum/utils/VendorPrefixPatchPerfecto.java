@@ -39,6 +39,8 @@ public class VendorPrefixPatchPerfecto implements VendorPrefixPatch {
 
 				if (!matcher.find()) {
 					perfectoCaps.addProperty("perfecto:" + capName, config.getProperty(capName));
+				}else {
+					perfectoCaps.addProperty(capName, config.getProperty(capName));
 				}
 
 			} else {
@@ -55,6 +57,12 @@ public class VendorPrefixPatchPerfecto implements VendorPrefixPatch {
 			String securityToken = ConfigurationManager.getBundle().getString("perfecto.capabilities.securityToken", "");
 			
 			perfectoCaps.addProperty("perfecto:securityToken", securityToken);
+		}
+		
+		
+		// By default Appium Version is set to latest version if explicitly not mentioned
+		if(!perfectoCaps.containsKey("perfecto:appiumVersion")) {
+			perfectoCaps.addProperty("perfecto:appiumVersion", "latest");
 		}
 
 		return new ConfigurationMap(perfectoCaps);

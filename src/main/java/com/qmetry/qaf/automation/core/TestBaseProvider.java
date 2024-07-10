@@ -48,7 +48,9 @@ public class TestBaseProvider extends ThreadLocal<QAFTestBase> {
 
 	@Override
 	public void remove() {
-		get().tearDown();
+		
+		QAFTestBase qafTestBase = this.get();
+		qafTestBase.tearDown();
 		super.remove();
 	}
 
@@ -88,8 +90,10 @@ public class TestBaseProvider extends ThreadLocal<QAFTestBase> {
 		// lst.iterator();
 		while (iter.hasNext()) {
 			System.out.println("Preparing For Shut Down...");
+			
+			QAFTestBase qafTestBase = iter.next();
 
-			iter.next().setPrepareForShutdown(true);
+			qafTestBase.setPrepareForShutdown(true);
 		}
 
 	}
