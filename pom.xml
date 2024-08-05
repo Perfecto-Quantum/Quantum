@@ -6,11 +6,12 @@
 
 	<groupId>com.quantum</groupId>
 	<artifactId>quantum-support</artifactId>
-	<version>1.31.0</version>
+	<version>1.31.2</version>
 
 	<properties>
 		<jvm.version>11</jvm.version>
 		<selenium.version>4.8.3</selenium.version>
+		<selenium-http.version>4.8.3</selenium-http.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<reportium-sdk.version>2.3</reportium-sdk.version>
@@ -253,26 +254,26 @@
 					<groupId>org.testng</groupId>
 					<artifactId>testng</artifactId>
 				</exclusion>
-				<exclusion>
-					<groupId>org.seleniumhq.selenium</groupId>
-					<artifactId>selenium-java</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.seleniumhq.selenium</groupId>
-					<artifactId>java-client</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.seleniumhq.selenium</groupId>
-					<artifactId>selenium-remote-driver</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.seleniumhq.selenium</groupId>
-					<artifactId>selenium-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.seleniumhq.selenium</groupId>
-					<artifactId>selenium-support</artifactId>
-				</exclusion>
+					<exclusion>
+						<groupId>org.seleniumhq.selenium</groupId>
+						<artifactId>selenium-java</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.seleniumhq.selenium</groupId>
+						<artifactId>java-client</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.seleniumhq.selenium</groupId>
+						<artifactId>selenium-remote-driver</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.seleniumhq.selenium</groupId>
+						<artifactId>selenium-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.seleniumhq.selenium</groupId>
+						<artifactId>selenium-support</artifactId>
+					</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -348,7 +349,7 @@
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-http-jdk-client</artifactId>
-			<version>${selenium.version}</version>
+			<version>${selenium-http.version}</version>
 		</dependency>
 		
 		<dependency>

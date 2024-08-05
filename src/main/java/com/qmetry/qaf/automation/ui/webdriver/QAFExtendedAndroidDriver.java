@@ -18,7 +18,6 @@ import com.qmetry.qaf.automation.util.StringMatcher;
 import com.quantum.utils.Appium2Capabilities;
 
 import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.ExecutesMethod;
 import io.appium.java_client.android.AndroidDriver;
 
 public class QAFExtendedAndroidDriver extends AndroidDriver implements QAFWebDriver, QAFWebDriverCommandListener {
@@ -147,19 +146,28 @@ public class QAFExtendedAndroidDriver extends AndroidDriver implements QAFWebDri
 	    return execute(payload.getName(), payload.getParameters());
 	}
 
-
 	@Override
-	public ExecutesMethod assertExtensionExists(String extName) {
-		// TODO Auto-generated method stub
-		return null;
+	public AppiumDriver assertExtensionExists(String extName) {
+		return super.assertExtensionExists(extName);
+	}
+	
+	@Override
+	public AppiumDriver markExtensionAbsence(String arg0) {
+		return super.markExtensionAbsence(arg0);
 	}
 
-
-	@Override
-	public ExecutesMethod markExtensionAbsence(String extName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+//	@Override
+//	public ExecutesMethod assertExtensionExists(String extName) {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
+//
+//
+//	@Override
+//	public ExecutesMethod markExtensionAbsence(String extName) {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
 
 
 	@Override

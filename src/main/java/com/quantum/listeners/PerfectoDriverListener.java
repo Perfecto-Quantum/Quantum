@@ -271,9 +271,11 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 		// Set Reportium related capabilities
 		setReportiumJobDetails(desiredCapabilities);
 		
-		// Enable Appium Behaviour - Perfecto specific capabilities
-		enableAppiumBehaviour(desiredCapabilities);
-
+		if(desiredCapabilities.getCapability("perfecto:options")==null) {
+			// Enable Appium Behaviour - Perfecto specific capabilities
+			enableAppiumBehaviour(desiredCapabilities);
+		}
+		
 	}
 
 	private void setExecutionId(Capabilities desiredCapabilities) {

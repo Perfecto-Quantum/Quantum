@@ -13,7 +13,6 @@ import com.qmetry.qaf.automation.core.TestBaseProvider;
 import com.qmetry.qaf.automation.ui.WebDriverTestBase;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 
-import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.TouchAction;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
@@ -217,7 +216,11 @@ public class DriverUtils {
 		
 		if (null!=driver) {
 			
-			if((driver instanceof AppiumDriver)) {
+			String className = driver.getClass().getName();
+			
+//			if((driver instanceof AppiumDriver)) {
+			
+			if(className.startsWith("io.appium")) {
 				
 				driver = DriverUtils.getAppiumDriver();
 				

@@ -14,10 +14,7 @@ public interface ProxyEnableConnectionProvider {
 	 **/
 	
 	default HttpClient.Factory getProxyEnabledCommandExecutor(ClientConfig clientConfig){
-
-
-		HttpClient.Factory factory = new NettyClientFactory();
-		return factory;
+		return null;
 		
 	}
 

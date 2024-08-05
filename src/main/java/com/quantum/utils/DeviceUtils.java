@@ -6,10 +6,10 @@ package com.quantum.utils;
 
 import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.LogFactoryImpl;
@@ -17,8 +17,6 @@ import org.hamcrest.Matchers;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.Rectangle;
-import org.openqa.selenium.remote.DriverCommand;
-import org.openqa.selenium.remote.RemoteExecuteMethod;
 import org.openqa.selenium.remote.RemoteWebElement;
 
 //import com.perfectomobile.httpclient.device.DeviceParameter;
@@ -28,6 +26,8 @@ import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebElement;
 import com.qmetry.qaf.automation.util.Validator;
 import com.quantum.axe.AxeHelper;
+
+import io.appium.java_client.AppiumDriver;
 
 /**
 * DeviceUtils class contains set of utility methods, which help in interacting with 
@@ -366,10 +366,26 @@ public class DeviceUtils {
 	 */
 
 	public static void switchToContext(String context) {
-		RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(getQAFDriver());
-		Map<String, String> params = new HashMap<String, String>();
-		params.put("name", context);
-		executeMethod.execute(DriverCommand.SWITCH_TO_CONTEXT, params);
+		
+		AppiumDriver appiumDriver = AppiumUtils.getAppiumDriver();
+		
+		String className = appiumDriver.getClass().getName();
+		
+		if(className.startsWith("io.appium")) {
+			
+			if(className.contains("AndroidDriver")) {
+				AppiumUtils.getAndroidDriver().context(context);
+			}else {
+				AppiumUtils.getIOSDriver().context(context);
+			}
+			
+		}
+			
+		
+//		RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(getQAFDriver());
+//		Map<String, String> params = new HashMap<String, String>();
+//		params.put("name", context);
+//		executeMethod.execute(DriverCommand.SWITCH_TO_CONTEXT, params);
 	}
 
 	/**
@@ -504,27 +520,66 @@ public class DeviceUtils {
 	 * @return the current context - "NATIVE_APP", "WEBVIEW", "VISUAL"
 	 */
 	public static String getCurrentContext() {
-		RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(getQAFDriver());
-		return (String) executeMethod.execute(DriverCommand.GET_CURRENT_CONTEXT_HANDLE, null);
+		
+		AppiumDriver appiumDriver = AppiumUtils.getAppiumDriver();
+		
+		String className = appiumDriver.getClass().getName();
+		
+		if(className.startsWith("io.appium")) {
+			
+			if(className.contains("AndroidDriver")) {
+				return AppiumUtils.getAndroidDriver().getContext();
+			}else {
+				return AppiumUtils.getIOSDriver().getContext();
+			}
+			
+		}else {
+			return "";
+		}
+		
+//		RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(getQAFDriver());
+//		return (String) executeMethod.execute(DriverCommand.GET_CURRENT_CONTEXT_HANDLE, null);
 	}
 
 	/**
 	 * @return Get all Available Context Handles - "NATIVE_APP", "WEBVIEW", "VISUAL"
 	 */
 	public static String getCurrentContextHandles() {
-		RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(getQAFDriver());
-		@SuppressWarnings("unchecked")
-		ArrayList<String> al = (ArrayList<String>) executeMethod.execute(DriverCommand.GET_CONTEXT_HANDLES, null);
-		StringBuffer sb = new StringBuffer();
-
-		for (String s : al) {
-			sb.append(s);
-			sb.append(",");
+		
+		
+AppiumDriver appiumDriver = AppiumUtils.getAppiumDriver();
+		
+		String className = appiumDriver.getClass().getName();
+		
+		Set<String> contextHandles;
+		
+		if(className.startsWith("io.appium")) {
+			
+			if(className.contains("AndroidDriver")) {
+				contextHandles = AppiumUtils.getAndroidDriver().getContextHandles();
+				return String.join(",", contextHandles);
+			}else {
+				contextHandles = AppiumUtils.getIOSDriver().getContextHandles();
+				return String.join(",", contextHandles);
+			}
+			
+		}else {
+			return "";
 		}
-		String str = sb.toString();
-		System.out.println(str);
-
-		return str;
+		
+//		RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(getQAFDriver());
+//		@SuppressWarnings("unchecked")
+//		ArrayList<String> al = (ArrayList<String>) executeMethod.execute(DriverCommand.GET_CONTEXT_HANDLES, null);
+//		StringBuffer sb = new StringBuffer();
+//
+//		for (String s : al) {
+//			sb.append(s);
+//			sb.append(",");
+//		}
+//		String str = sb.toString();
+//		System.out.println(str);
+//
+//		return str;
 	}
 
 	// device utils
