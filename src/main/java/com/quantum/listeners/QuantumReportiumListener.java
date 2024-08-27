@@ -592,6 +592,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener implements
 			}
 			logTestEnd(result);
 		}
+		
 	}
 
 	@Override

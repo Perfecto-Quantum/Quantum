@@ -6,12 +6,12 @@
 
 	<groupId>com.quantum</groupId>
 	<artifactId>quantum-support</artifactId>
-	<version>1.31.2</version>
+	<version>1.31.3</version>
 
 	<properties>
 		<jvm.version>11</jvm.version>
-		<selenium.version>4.8.3</selenium.version>
-		<selenium-http.version>4.8.3</selenium-http.version>
+		<selenium.version>4.13.0</selenium.version>
+		<selenium-http.version>4.13.0</selenium-http.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<reportium-sdk.version>2.3</reportium-sdk.version>
