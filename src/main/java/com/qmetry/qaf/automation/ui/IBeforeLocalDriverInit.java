@@ -16,21 +16,38 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 
 public interface IBeforeLocalDriverInit {
 	
+	public static String CHROME_DRIVER_EXEC_PATH_KEY = "webdriver.chrome.driver";
+	public static String FIREFOX_DRIVER_EXEC_PATH_KEY = "webdriver.firefox.driver";
+	public static String EDGE_DRIVER_EXEC_PATH_KEY = "webdriver.edge.driver";
+	
+	default boolean hasLocalDriverExecPath(String key) {
+		return System.getProperty(key)!=null;
+	}
+	
 	default void setUpBrowserExec(Class<? extends WebDriver> of) {
 		String className = of.getName().toUpperCase();
 		
 		if(className.contains("CHROMEDRIVER")) {
-			WebDriverManager.chromedriver().setup();
+			
+			if(!hasLocalDriverExecPath(CHROME_DRIVER_EXEC_PATH_KEY)) {
+				WebDriverManager.chromedriver().setup();
+			}
+
 			return;
 		}
 		
 		if(className.contains("FIREFOXDRIVER")) {
-			WebDriverManager.firefoxdriver().setup();
+			if(!hasLocalDriverExecPath(FIREFOX_DRIVER_EXEC_PATH_KEY)) {
+				WebDriverManager.firefoxdriver().setup();
+			}
 			return;
 		}
 		
 		if(className.contains("EDGEDRIVER")) {
-			WebDriverManager.edgedriver().setup();
+			
+			if(!hasLocalDriverExecPath(EDGE_DRIVER_EXEC_PATH_KEY)) {
+				WebDriverManager.edgedriver().setup();
+			}
 			return;
 		}
 		

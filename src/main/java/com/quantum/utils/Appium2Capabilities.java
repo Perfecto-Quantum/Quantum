@@ -36,23 +36,26 @@ public class Appium2Capabilities implements Capabilities{
 				
 				Map<String,Object> desiredCapabilitiesMap = (Map<String, Object>)desiredCapabilitiesObject;
 				
-				capabilityValue = desiredCapabilitiesMap.getOrDefault(capabilityName, "");
+				capabilityValue = desiredCapabilitiesMap.getOrDefault(capabilityName, null);
+			}else {
+				capabilityValue = null;
 			}
 		}
 		
-		if(null != capabilityValue) {
-			
-			if(capabilityName.contains("platformName")) {
-				return getPlatformName();
-			}
-			
-			if(capabilityValue.toString().isBlank()) {
-//				System.out.println(String.format("%s capability not available!", capabilityName));
-			}
+//		if(null != capabilityValue) {
+//			
+//			if(capabilityName.contains("platformName")) {
+//				return getPlatformName();
+//			}
+//			
+//			if(capabilityValue.toString().isBlank()) {
+////				System.out.println(String.format("%s capability not available!", capabilityName));
+//			}
+//
+//		}else{
+//			capabilityValue = "";
+//		}
 
-		}else{
-			capabilityValue = "";
-		}
 		
 		
 		return capabilityValue;
@@ -81,8 +84,13 @@ public class Appium2Capabilities implements Capabilities{
 			      .map(this::getCapability)
 			      .filter(Objects::nonNull)
 			      .map(cap -> {
+			    	  
 			        if (cap instanceof Platform) {
 			          return (Platform) cap;
+			        }
+			        
+			        if("".equals(cap)) {
+			        	return null;
 			        }
 
 			        try {
