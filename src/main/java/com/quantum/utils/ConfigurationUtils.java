@@ -8,9 +8,9 @@ import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import com.perfectomobile.intellij.connector.ConnectorConfiguration;
-import com.perfectomobile.intellij.connector.impl.client.ClientSideLocalFileSystemConnector;
-import com.perfectomobile.intellij.connector.impl.client.ProcessOutputLogAdapter;
+//import com.perfectomobile.intellij.connector.ConnectorConfiguration;
+//import com.perfectomobile.intellij.connector.impl.client.ClientSideLocalFileSystemConnector;
+//import com.perfectomobile.intellij.connector.impl.client.ProcessOutputLogAdapter;
 //import com.perfectomobile.selenium.util.EclipseConnector;
 import com.qmetry.qaf.automation.core.ConfigurationManager;
 import com.qmetry.qaf.automation.core.TestBaseProvider;
@@ -55,12 +55,12 @@ public class ConfigurationUtils {
 		String pluginType = getBaseBundle().getPropertyValue("driver.pluginType");
 		try {
 			if ("intellij".equalsIgnoreCase(pluginType)) {
-				ClientSideLocalFileSystemConnector intellijConnector = new ClientSideLocalFileSystemConnector(
-						new ProcessOutputLogAdapter(System.err, System.out, System.out, System.out));
-				ConnectorConfiguration connectorConfiguration = intellijConnector.getConnectorConfiguration();
-				if (connectorConfiguration != null && connectorConfiguration.getHost() != null) {
-					return connectorConfiguration.getExecutionId();
-				}
+//				ClientSideLocalFileSystemConnector intellijConnector = new ClientSideLocalFileSystemConnector(
+//						new ProcessOutputLogAdapter(System.err, System.out, System.out, System.out));
+//				ConnectorConfiguration connectorConfiguration = intellijConnector.getConnectorConfiguration();
+//				if (connectorConfiguration != null && connectorConfiguration.getHost() != null) {
+//					return connectorConfiguration.getExecutionId();
+//				}
 			} else if ("eclipse".equalsIgnoreCase(pluginType)) {
 				try {
 //					EclipseConnector connector = new EclipseConnector();

@@ -78,12 +78,14 @@ public class ReportPDF extends RESTClient {
 
 		HttpClientBuilder clientBuilder = HttpClientBuilder.create()
 				.setRetryHandler(new DefaultHttpRequestRetryHandler(3, true))
-				.setDefaultRequestConfig(RequestConfig.custom().setSocketTimeout(TIMEOUT_MILLIS)
+				.setDefaultRequestConfig(RequestConfig.custom()
+						.setSocketTimeout(TIMEOUT_MILLIS)
 						.setConnectTimeout(TIMEOUT_MILLIS).setConnectionRequestTimeout(TIMEOUT_MILLIS).build());
 
 		addProxyDetailsIfRequired(clientBuilder);
 
 		HttpPost httpPost = new HttpPost(taskUriBuilder.build());
+		
 		addDefaultRequestHeaders(httpPost);
 
 		try (CloseableHttpClient httpClient = clientBuilder.build()) {

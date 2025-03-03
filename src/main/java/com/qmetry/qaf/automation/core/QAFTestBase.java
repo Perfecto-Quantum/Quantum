@@ -481,7 +481,7 @@ public class QAFTestBase {
 		long retryInterval = ApplicationProperties.DRIVER_INIT_INTERVAL_SECONDS.getIntVal(10);
 		
 		
-		UiDriver uiDriver = new UiDriverInitializer()
+ 		UiDriver uiDriver = new UiDriverInitializer()
 				.withTimeout(waitTimeOutInSecs, TimeUnit.SECONDS)
 				.pollingEvery(retryInterval, TimeUnit.SECONDS).withMessage(driverInitExpectedCondition)
 				.ignoring(WebDriverException.class).until(driverInitExpectedCondition);
@@ -547,6 +547,9 @@ public class QAFTestBase {
 
 	private String[] initStbArgs(String... args) {
 		args = STBArgs.browser_str.setIfEmpty(getBrowser(), args);
+		
+		System.out.println();
+		
 		return STBArgs.browser_str.setIfEmpty(
 				ApplicationProperties.DRIVER_NAME.getStringVal(STBArgs.browser_str.defaultVal),
 				

@@ -29,8 +29,6 @@ import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.ie.InternetExplorerDriver;
-import org.openqa.selenium.ie.InternetExplorerOptions;
 import org.openqa.selenium.remote.AbstractDriverOptions;
 import org.openqa.selenium.remote.CommandInfo;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -343,7 +341,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 		chrome(new ChromeOptions(), ChromeDriver.class), edge(new EdgeOptions(), EdgeDriver.class),
 		firefox(new FirefoxOptions(), FirefoxDriver.class),
-		iexplorer(new InternetExplorerOptions(), InternetExplorerDriver.class),
+//		iexplorer(new InternetExplorerOptions(), InternetExplorerDriver.class),
 		safari(new SafariOptions(), "org.openqa.selenium.safari.SafariDriver"),
 //		opera(new OperaOptions(), "com.opera.core.systems.OperaDriver"),
 

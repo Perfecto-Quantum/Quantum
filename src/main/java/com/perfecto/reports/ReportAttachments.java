@@ -2,7 +2,7 @@ package com.perfecto.reports;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.LogFactoryImpl;
-import org.apache.http.client.utils.URIBuilder;
+import org.apache.hc.core5.net.URIBuilder;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;

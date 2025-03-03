@@ -238,7 +238,7 @@ public class DriverUtils {
 				
 				
 			}else {
-				QAFExtendedWebDriver qafDriver = (QAFExtendedWebDriver) driver;
+				QAFExtendedWebDriver qafDriver = DriverUtils.getDriver();
 				Capabilities cap = qafDriver.getCapabilities();
 				String platformName = cap.getPlatformName().name();
 				return platformName;

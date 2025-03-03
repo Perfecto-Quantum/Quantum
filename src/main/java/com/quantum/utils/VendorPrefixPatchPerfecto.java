@@ -29,23 +29,36 @@ public class VendorPrefixPatchPerfecto implements VendorPrefixPatch {
 		Pattern pattern = Pattern.compile("^perfecto.*:", Pattern.CASE_INSENSITIVE);
 
 		Matcher matcher;
+		
+		Object propValue;
+		
+		String propValueStr;
 
 		while (iter.hasNext()) {
 
 			capName = iter.next();
+			
+			propValueStr = config.getProperty(capName).toString();
+			
+			if("true".equals(propValueStr) || "false".equals(propValueStr)) {
+				propValue = Boolean.valueOf(propValueStr);
+			}else {
+				propValue = config.getProperty(capName);
+			}
+			
 			if (!ignoreList.contains(capName)) {
 
 				matcher = pattern.matcher(capName);
-
+				
 				if (!matcher.find()) {
-					perfectoCaps.addProperty("perfecto:" + capName, config.getProperty(capName));
+					perfectoCaps.addProperty("perfecto:" + capName, propValue);
 				}else {
-					perfectoCaps.addProperty(capName, config.getProperty(capName));
+					perfectoCaps.addProperty(capName, propValue);
 				}
 
 			} else {
 				if (!"driverClass".equalsIgnoreCase(capName)) {
-					perfectoCaps.addProperty(capName, config.getProperty(capName));
+					perfectoCaps.addProperty(capName, propValue);
 				}
 
 			}
@@ -58,7 +71,6 @@ public class VendorPrefixPatchPerfecto implements VendorPrefixPatch {
 			
 			perfectoCaps.addProperty("perfecto:securityToken", securityToken);
 		}
-		
 		
 		// By default Appium Version is set to latest version if explicitly not mentioned
 		if(!perfectoCaps.containsKey("perfecto:appiumVersion")) {

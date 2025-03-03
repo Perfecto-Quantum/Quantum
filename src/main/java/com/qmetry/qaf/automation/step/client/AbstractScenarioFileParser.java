@@ -21,6 +21,8 @@
  ******************************************************************************/
 package com.qmetry.qaf.automation.step.client;
 
+import static com.qmetry.qaf.automation.data.MetaDataScanner.hasDP;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -43,7 +45,6 @@ import com.qmetry.qaf.automation.step.TestStep;
 import com.qmetry.qaf.automation.util.FileUtil;
 import com.qmetry.qaf.automation.util.JSONUtil;
 import com.qmetry.qaf.automation.util.StringUtil;
-import static com.qmetry.qaf.automation.data.MetaDataScanner.hasDP;
 /**
  * @author chirag.jayswal
  */
@@ -198,7 +199,7 @@ public abstract class AbstractScenarioFileParser implements ScenarioFileParser {
 					customStep.setDescription(description);
 				}
 				if (metadata.containsKey("threshold")) {
-					int threshold = ((Number) metadata.get("threshold")).intValue();
+					int threshold = Integer.parseInt(metadata.get("threshold").toString());
 					customStep.setThreshold(threshold);
 				}
 

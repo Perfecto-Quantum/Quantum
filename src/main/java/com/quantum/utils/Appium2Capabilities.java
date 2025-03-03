@@ -63,7 +63,9 @@ public class Appium2Capabilities implements Capabilities{
 	
 	@Override
 	public String getBrowserName() {
-		return getCapability("browserName").toString();
+		Object browserName = getCapability("browserName");
+		return browserName!=null? browserName.toString():"";
+//		return browserName.toString();
 	}
 	
 	@Override

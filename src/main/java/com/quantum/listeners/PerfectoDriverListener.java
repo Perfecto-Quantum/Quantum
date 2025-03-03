@@ -32,6 +32,7 @@ package com.quantum.listeners;
 import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -220,22 +221,47 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 	}
 
 	private void setReportiumJobDetails(Capabilities desiredCapabilities) {
+		
+		
 		String jobName = getBundle().getString("JOB_NAME", System.getProperty("reportium-job-name"));
+		
 		int jobNumber = getBundle().getInt("BUILD_NUMBER", System.getProperty("reportium-job-number") == null ? 0
 				: Integer.parseInt(System.getProperty("reportium-job-number")));
+		
 		String jobBranch = System.getProperty("reportium-job-branch");
+		
 		String tags = System.getProperty("reportium-tags");
 
-		if (jobName != null) {
-			((DesiredCapabilities) desiredCapabilities).setCapability("perfecto:report.jobName", jobName);
-			((DesiredCapabilities) desiredCapabilities).setCapability("perfecto:report.jobNumber", jobNumber);
+		if(desiredCapabilities.getCapability("perfecto:options")==null) {
+			if (jobName != null) {
+				((DesiredCapabilities) desiredCapabilities).setCapability("perfecto:report.jobName", jobName);
+				((DesiredCapabilities) desiredCapabilities).setCapability("perfecto:report.jobNumber", jobNumber);
+			}
+			if (jobBranch != null) {
+				((DesiredCapabilities) desiredCapabilities).setCapability("perfecto:report.jobBranch", jobBranch);
+			}
+			if (tags != null) {
+				((DesiredCapabilities) desiredCapabilities).setCapability("perfecto:report.tags", tags);
+			}
+		}else {
+			
+			HashMap<String, Object> perfectoOptions = ((HashMap<String, Object>)desiredCapabilities.getCapability("perfecto:options"));
+			if(jobName != null) {
+				perfectoOptions.put("report.jobName", jobName);
+				perfectoOptions.put("report.jobNumber", jobNumber);
+			}
+			
+			if (jobBranch != null) {
+				((DesiredCapabilities) desiredCapabilities).setCapability("report.jobBranch", jobBranch);
+			}
+			if (tags != null) {
+				((DesiredCapabilities) desiredCapabilities).setCapability("report.tags", tags);
+			}
+			
+			((DesiredCapabilities) desiredCapabilities).setCapability("perfecto:options",perfectoOptions);
 		}
-		if (jobBranch != null) {
-			((DesiredCapabilities) desiredCapabilities).setCapability("perfecto:report.jobBranch", jobBranch);
-		}
-		if (tags != null) {
-			((DesiredCapabilities) desiredCapabilities).setCapability("perfecto:report.tags", tags);
-		}
+		
+		
 	}
 
 	public void enablePerfectoHARFile(Capabilities desiredCapabilities) {

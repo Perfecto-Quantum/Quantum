@@ -98,9 +98,33 @@ public class QuantumPatch {
 		Map<String,Object> capabilities = new HashMap<>();
 		
 		String key;
+		
+		String propValueStr;
+		Object propValue;
+		
 		while(iter.hasNext()) {
 			key = iter.next();
-			capabilities.put(key, config.getProperty(key));
+			
+			propValueStr = config.getProperty(key).toString();
+			
+			if("true".equals(propValueStr) || "false".equals(propValueStr)) {
+				propValue = Boolean.valueOf(propValueStr);
+			}else {
+				propValue = config.getProperty(key);
+			}
+			
+//			try {
+//				propValue = Double.valueOf(propValueStr);
+//			}catch(Exception e) {
+//				try {
+//					
+//					
+//					
+//				}catch(Exception e1) {
+//					propValue = config.getProperty(key);
+//				}
+//			}
+			capabilities.put(key, propValue);
 		}
 		
 		return capabilities;

@@ -66,21 +66,19 @@ import io.appium.java_client.ios.IOSDriver;
  * @author chirag
  * 
  * 
- * Note: Moved the file out of QAF framework to handle deprecation of 
+ *         Note: Moved the file out of QAF framework to handle deprecation of
  * 
- * TouchScreen class
+ *         TouchScreen class
  */
 
 public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDriver, QAFWebDriverCommandListener {
-	
-	
+
 	protected final Log logger = LogFactory.getLog(getClass());
 	private WebDriverCommandLogger commandLogger;
 	private Set<QAFWebDriverCommandListener> listners;
 	private WebDriver underLayingDriver;
 	private Capabilities capabilities;
 	private QAFElementConverter qafElementConverter;
-
 
 	public QAFExtendedWebDriver(URL url, Capabilities capabilities) {
 		this(url, capabilities, null);
@@ -114,11 +112,11 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 		init(reporter);
 
 	}
-	
+
 	public QAFExtendedWebDriver getKeyboard() {
 		return this;
 	}
-	
+
 	public void sendKeys(String text) {
 		new Actions(underLayingDriver).sendKeys(text).perform();
 	}
@@ -128,15 +126,15 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 
 		if (capabilities == null)
 			capabilities = super.getCapabilities();
-		
+
 		Capabilities currentCapabilities = capabilities;
-		
-		if(underLayingDriver instanceof AppiumDriver) {
+
+		if (underLayingDriver instanceof AppiumDriver) {
 			currentCapabilities = new Appium2Capabilities(currentCapabilities);
 		}
-		
+
 		return currentCapabilities;
-		
+
 	}
 
 	public WebDriver getUnderLayingDriver() {
@@ -146,7 +144,7 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 	}
 
 	private void init(WebDriverCommandLogger reporter) {
-		//setElementConverter(new QAFExtendedWebElement.JsonConvertor(this));
+		// setElementConverter(new QAFExtendedWebElement.JsonConvertor(this));
 		qafElementConverter = new QAFElementConverter(this);
 		try {
 			listners = new LinkedHashSet<QAFWebDriverCommandListener>();
@@ -160,11 +158,11 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 			listners = ConfigurationManager.getBundle().getStringArray(ApplicationProperties.QAF_LISTENERS.key);
 			for (String listener : listners) {
 				try {
-					
+
 					Constructor<?> qafListnerConstructor = Class.forName(listener).getConstructors()[0];
-					
+
 					QAFListener cls = (QAFListener) (qafListnerConstructor.newInstance());
-							
+
 					if (QAFWebDriverCommandListener.class.isAssignableFrom(cls.getClass()))
 						this.listners.add((QAFWebDriverCommandListener) cls);
 				} catch (Exception e) {
@@ -188,9 +186,9 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 
 	@Override
 	public QAFExtendedWebElement findElement(By by) {
-		
+
 //		WebElement element1 = (QAFExtendedWebElement)super.findElement(by);
-		
+
 //		new QAFExtendedWebEl
 //		
 		QAFExtendedWebElement element = (QAFExtendedWebElement) super.findElement(by);
@@ -200,9 +198,8 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 	}
 
 	/**
-	 * @param locator
-	 *            - selenium 1 type locator for example "id=eleid", "name=eleName"
-	 *            etc...
+	 * @param locator - selenium 1 type locator for example "id=eleid",
+	 *                "name=eleName" etc...
 	 * @return
 	 */
 	public QAFWebElement findElement(String locator) {
@@ -235,59 +232,82 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 		if (elements != null) {
 			for (QAFExtendedWebElement element : elements) {
 				final By by = element.getBy();
-				element.setId(((QAFExtendedWebElement) new QAFWebDriverWait(this).ignoring(NoSuchElementException.class,
-						StaleElementReferenceException.class, RuntimeException.class)
-						.until(ExpectedConditions.presenceOfElementLocated(by))).getId());
+
+//				WebDriverWait webDriverWait = new WebDriverWait(this.getUnderLayingDriver(), 
+//						Duration.ofSeconds(15));
+//				webDriverWait.ignoring(NoSuchElementException.class)
+//				.ignoring(StaleElementReferenceException.class)
+//				.ignoring(RuntimeException.class);
+//				
+//				WebElement elem = webDriverWait.until(ExpectedConditions.presenceOfElementLocated(by));
+
+//						StaleElementReferenceException.class, RuntimeException.class);
+
+				QAFWebDriverWait wait = new QAFWebDriverWait(this);
+
+				wait.ignoring(NoSuchElementException.class, StaleElementReferenceException.class,
+						RuntimeException.class);
+				
+				WebElement elem = wait.until(ExpectedConditions.presenceOfElementLocated(by));
+				
+				element.setId(((QAFExtendedWebElement)elem).getId());
+
+//				element.setId(((QAFExtendedWebElement) 
+//						.until(ExpectedConditions.presenceOfElementLocated(by))).getId());
 			}
 		}
 
 	}
 
 	protected Response execute(CommandPayload payload) {
-		
+
 //		String className = underLayingDriver.getClass().getName();
 //		
 //		if(className.startsWith("io.appium")) {
 //			return ((AppiumDriver)underLayingDriver).execute(payload.getName(), payload.getParameters());
 //		}
-		
-	    return execute(payload.getName(), payload.getParameters());
+
+		return execute(payload.getName(), payload.getParameters());
 	}
-	
+
 	private Response executeSuper(CommandPayload payload) {
 		try {
-	        MethodHandle h1 = MethodHandles.lookup().findSpecial(getClass().getSuperclass(), "execute", MethodType.methodType(Response.class,CommandPayload.class), getClass());
-	        return (Response) h1.invoke(this, payload);
-	        
+			MethodHandle h1 = MethodHandles.lookup().findSpecial(getClass().getSuperclass(), "execute",
+					MethodType.methodType(Response.class, CommandPayload.class), getClass());
+			return (Response) h1.invoke(this, payload);
+
 		} catch (NoSuchMethodException | NoSuchFieldException | SecurityException e) {
 			return super.execute(payload.getName(), payload.getParameters());
-		}catch (Throwable e) {
+		} catch (Throwable e) {
 			if (e instanceof RuntimeException) {
-				throw (RuntimeException)e;
+				throw (RuntimeException) e;
 			}
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	private Response executeWithoutLog(CommandPayload payload) {
-		// in order to compatibility with 3.x, compiled with 3.x. so method from 4.x super class will not be available. 
+		// in order to compatibility with 3.x, compiled with 3.x. so method from 4.x
+		// super class will not be available.
 		// Once min version set to 4.0 we don't need executeSuper method.
 
-		//Response response = super.execute(payload);
+		// Response response = super.execute(payload);
 		Response response = executeSuper(payload);
-		
+
 		if (response == null) {
-	        return null;
-	    }
+			return null;
+		}
 		Object value = getQafElementConverter().apply(response.getValue());
-	    response.setValue(value);
+		response.setValue(value);
 		return response;
 	}
+
 	private QAFElementConverter getQafElementConverter() {
-		if(null==qafElementConverter)
+		if (null == qafElementConverter)
 			qafElementConverter = new QAFElementConverter(this);
 		return qafElementConverter;
 	}
+
 	@Override
 	protected Response execute(String driverCommand, Map<String, ?> parameters) {
 		CommandTracker commandTracker = new CommandTracker(driverCommand, parameters);
@@ -297,7 +317,8 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 			// already handled in before command?
 			if (commandTracker.getResponce() == null) {
 				commandTracker.setStartTime(System.currentTimeMillis());
-				commandTracker.setResponce(executeWitoutLog(commandTracker.getCommand(), commandTracker.getParameters()));
+				commandTracker
+						.setResponce(executeWitoutLog(commandTracker.getCommand(), commandTracker.getParameters()));
 				commandTracker.setEndTime(System.currentTimeMillis());
 			}
 			afterCommand(this, commandTracker);
@@ -308,7 +329,8 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 		}
 		if (commandTracker.hasException()) {
 			if (commandTracker.retry) {
-				commandTracker.setResponce(executeWitoutLog(commandTracker.getCommand(), commandTracker.getParameters()));
+				commandTracker
+						.setResponce(executeWitoutLog(commandTracker.getCommand(), commandTracker.getParameters()));
 				commandTracker.setException(null);
 				commandTracker.setEndTime(System.currentTimeMillis());
 			} else {
@@ -331,27 +353,28 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 	@Override
 	public <X> X getScreenshotAs(OutputType<X> target) throws WebDriverException {
 		boolean takeScreenshot = true;
-		
-				//getCapabilities().getCapability(CapabilityType.TAKES_SCREENSHOT);
-		if (/*null == takeScreenshot || (Boolean)*/ takeScreenshot) {
+
+		// getCapabilities().getCapability(CapabilityType.TAKES_SCREENSHOT);
+		if (/* null == takeScreenshot || (Boolean) */ takeScreenshot) {
 
 			String className = underLayingDriver.getClass().getName();
-			
+
 			String base64Str = "";
-			
-			if(className.startsWith("io.appium")) {
-				
+
+			if (className.startsWith("io.appium")) {
+
 //				base64Str = AppiumUtils.getAppiumDriver().getScreenshotAs(OutputType.BASE64);
-				if(className.contains("AndroidDriver")) {
-					base64Str = ((AndroidDriver)underLayingDriver).getScreenshotAs(OutputType.BASE64);
-				}else {
-					base64Str = ((IOSDriver)underLayingDriver).getScreenshotAs(OutputType.BASE64);
+				if (className.contains("AndroidDriver")) {
+					base64Str = ((AndroidDriver) underLayingDriver).getScreenshotAs(OutputType.BASE64);
+				} else {
+					base64Str = ((IOSDriver) underLayingDriver).getScreenshotAs(OutputType.BASE64);
 				}
-				
-			}else {
-				base64Str = execute(DriverCommand.SCREENSHOT).getValue().toString();;
+
+			} else {
+				base64Str = execute(DriverCommand.SCREENSHOT).getValue().toString();
+				;
 			}
-			
+
 			return target.convertFromBase64Png(base64Str);
 		}
 		return null;
@@ -430,9 +453,9 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 
 	private void registerListeners(String className) {
 		try {
-			
+
 			Constructor<?> cmdListenerConstructor = Class.forName(className).getConstructors()[0];
-			
+
 			QAFWebDriverCommandListener cls = (QAFWebDriverCommandListener) cmdListenerConstructor.newInstance();
 			listners.add(cls);
 		} catch (Exception e) {
@@ -565,13 +588,15 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 		new DynamicWait<List<QAFWebElement>>(Arrays.asList(elements))
 				.until(QAFWebElementExpectedConditions.allElementVisible());
 	}
-	
+
 	public void waitForWindowTitle(StringMatcher titlematcher, long... timeout) {
 		new QAFWebDriverWait(this, timeout).withMessage("Timed out waiting for window title " + titlematcher.toString())
 				.until(QAFWebDriverExpectedConditions.windowTitle(titlematcher));
 	}
+
 	public void waitForCurrentUrl(StringMatcher matcher, long... timeout) {
-		new QAFWebDriverWait(this, timeout).withMessage("Timed out waiting for url " + matcher.toString() + " timed out")
+		new QAFWebDriverWait(this, timeout)
+				.withMessage("Timed out waiting for url " + matcher.toString() + " timed out")
 				.until(QAFWebDriverExpectedConditions.currentURL(matcher));
 	}
 
@@ -579,7 +604,7 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 		new QAFWebDriverWait(this, timeout).withMessage("Timed out waiting for no of windows " + count)
 				.until(QAFWebDriverExpectedConditions.noOfwindowsPresent(count));
 	}
-	
+
 	public boolean verifyTitle(StringMatcher text, long... timeout) {
 
 		boolean outcome = true;
@@ -592,7 +617,6 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 
 		return outcome;
 	}
-	
 
 	public boolean verifyCurrentUrl(StringMatcher text, long... timeout) {
 
@@ -611,7 +635,8 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 
 		boolean outcome = true;
 		try {
-			waitForNoOfWindows(count, timeout);;
+			waitForNoOfWindows(count, timeout);
+			;
 		} catch (Exception e) {
 			outcome = false;
 		}
@@ -625,8 +650,7 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 			throw new AssertionError();
 		}
 	}
-	
-	
+
 	public void assertCurrentUrl(StringMatcher text, long... timeout) {
 		if (!verifyCurrentUrl(text, timeout)) {
 			throw new AssertionError();
@@ -672,11 +696,14 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 	 */
 
 	public QAFExtendedWebElement findElementByCustomStretegy(String stetegy, String loc) {
-		return (QAFExtendedWebElement) execute(DriverCommand.FIND_ELEMENT, ImmutableMap.of("using",stetegy,"value",loc)).getValue();
+		return (QAFExtendedWebElement) execute(DriverCommand.FIND_ELEMENT,
+				ImmutableMap.of("using", stetegy, "value", loc)).getValue();
 	}
+
 	@SuppressWarnings("unchecked")
 	public List<WebElement> findElementsByCustomStretegy(String stetegy, String loc) {
-		return (List<WebElement>) execute(DriverCommand.FIND_ELEMENTS, ImmutableMap.of("using",stetegy,"value",loc)).getValue();
+		return (List<WebElement>) execute(DriverCommand.FIND_ELEMENTS, ImmutableMap.of("using", stetegy, "value", loc))
+				.getValue();
 	}
 
 	@Override
@@ -694,8 +721,7 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 		// Escape the quote marks
 		script = script.replaceAll("\"", "\\\"");
 
-		List<Object> convertedArgs = Stream.of(args).map(new WebElementToJsonConverter()).collect(
-		        Collectors.toList());
+		List<Object> convertedArgs = Stream.of(args).map(new WebElementToJsonConverter()).collect(Collectors.toList());
 		Map<String, ?> params = ImmutableMap.of("script", script, "args", Lists.newArrayList(convertedArgs));
 
 		return execute(DriverCommand.EXECUTE_SCRIPT, params).getValue();
@@ -711,8 +737,7 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 		// Escape the quote marks
 		script = script.replaceAll("\"", "\\\"");
 
-		List<Object> convertedArgs = Stream.of(args).map(new WebElementToJsonConverter()).collect(
-		        Collectors.toList());
+		List<Object> convertedArgs = Stream.of(args).map(new WebElementToJsonConverter()).collect(Collectors.toList());
 		Map<String, ?> params = ImmutableMap.of("script", script, "args", Lists.newArrayList(convertedArgs));
 
 		return execute(DriverCommand.EXECUTE_ASYNC_SCRIPT, params).getValue();
