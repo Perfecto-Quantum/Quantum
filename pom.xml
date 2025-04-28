@@ -46,7 +46,7 @@
 		<hamcrest.version>2.2</hamcrest.version>
 		<org.json.version>20240303</org.json.version>
 		<qaf.version>3.2.0</qaf.version>
-		<poi.version>5.3.0</poi.version>
+		<poi.version>5.4.0</poi.version>
 		<appium.client.version>8.6.0</appium.client.version>
 		<jsoup.version>1.15.4</jsoup.version>
 		<jackson.version>2.18.2</jackson.version>
