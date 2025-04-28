@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.perfecto</groupId>
 	<artifactId>quantum</artifactId>
-	<version>3.1.0</version>
+	<version>3.1.1</version>
 	<packaging>jar</packaging>
 	<description>Quantum is QAF based open source project powered by Perforce</description>
 	<url>
