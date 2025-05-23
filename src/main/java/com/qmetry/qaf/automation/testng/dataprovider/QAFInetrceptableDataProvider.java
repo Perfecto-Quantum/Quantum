@@ -33,8 +33,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.configuration.ConfigurationConverter;
+import org.apache.commons.jexl3.JexlBuilder;
+import org.apache.commons.jexl3.JexlContext;
+import org.apache.commons.jexl3.JexlEngine;
+import org.apache.commons.jexl3.JexlExpression;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.LogFactoryImpl;
@@ -63,6 +69,7 @@ import com.qmetry.qaf.automation.util.DatabaseUtil;
 import com.qmetry.qaf.automation.util.JSONUtil;
 import com.qmetry.qaf.automation.util.ListUtils;
 import com.qmetry.qaf.automation.util.PoiExcelUtil;
+import com.qmetry.qaf.automation.util.QAFJexlContext;
 import com.qmetry.qaf.automation.util.StringUtil;
 
 /**
@@ -71,6 +78,8 @@ import com.qmetry.qaf.automation.util.StringUtil;
  */
 public class QAFInetrceptableDataProvider {
 	private static final Log logger = LogFactoryImpl.getLog(QAFInetrceptableDataProvider.class);
+	
+	private static final JexlEngine JEXL_ENGINE = new JexlBuilder().create();
 
 	/**
 	 * 
@@ -83,7 +92,7 @@ public class QAFInetrceptableDataProvider {
 		return interceptedDataProvider(method, c);
 	}
 
-	private static List<Object[]> getTestDataForBDDScenarios(ITestNGMethod method, ITestContext c) {
+	private static List<Object[]> getTestDataForBDDScenarios(ITestNGMethod method, ITestContext testContext) {
 
 		Object methodInstance = method.getInstance();
 
@@ -93,21 +102,89 @@ public class QAFInetrceptableDataProvider {
 
 		Map<String, Object> metadata = dataDrivenScenario.getMetadata();
 
+		replaceParameter(metadata, testContext);
+
 		String dataProvider = (String) metadata.get(params.DATAPROVIDER.name());
+
 		boolean hasCustomDataProvider = null != dataProvider && !dataProvider.startsWith(QAFDataProvider.NAME);
 
 		if (hasCustomDataProvider) {
 			// get data provider from description!...
 			String dataProviderClass = (String) metadata.get(params.DATAPROVIDERCLASS.name());
-			Iterator<Object[]> testData = invokeCustomDataProvider(method, c, dataProvider, dataProviderClass);
+			Iterator<Object[]> testData = invokeCustomDataProvider(method, testContext, dataProvider, dataProviderClass);
 			dataList = ListUtils.toList(testData);
 		} else {
 			Object[][] testData = getData(metadata);
 			dataList = ListUtils.toList(testData);
 		}
+		
+		List<Object[]> finalDataList = dataList;
+		
+		if(metadata.containsKey(params.FILTER.name())) {
+			
+			String filterExpression = (String) metadata.get(params.FILTER.name());
+			
+			finalDataList = applyFilter(dataList, filterExpression);
+			
+		}else {
+			finalDataList = dataList;
+		}
 
-		return dataList;
+		return finalDataList;
+	}
+	
+	private static void replaceParameter(Map<String, Object> metadata, ITestContext c) {
+		Map<String, String> testNGParam = c.getCurrentXmlTest().getAllParameters();
 
+		Pattern pattern = Pattern.compile("^\\$\\{(.+)\\}");
+
+		String dataSheetName = (String) metadata.get("sheetname");
+
+		dataSheetName = dataSheetName == null ? (String) metadata.get("sheetName") : dataSheetName;
+
+		if (null != dataSheetName) {
+			Matcher matcher = pattern.matcher(dataSheetName);
+
+			if (matcher.find()) {
+				String paramName = matcher.group(1);
+
+				String testNGValue = testNGParam.get(paramName);
+
+				if (null != testNGValue) {
+					metadata.put("sheetname", testNGValue);
+				} else {
+					String bundleValue = (String) getBundle().getProperty(paramName);
+					if (null != bundleValue) {
+						metadata.put("sheetname", testNGValue);
+					} else {
+						throw new DataProviderException("Invalid Key. No Value found for Key - " + paramName);
+					}
+				}
+			}
+		}
+	}
+	
+	private static List<Object[]> applyFilter(List<Object[]> dataList, String filterExpression){
+		
+		List<Object[]> finalDataList = new ArrayList<Object[]>();
+		
+		JexlExpression jexlExpression = JEXL_ENGINE.createExpression(filterExpression);
+				
+		for(Object[] dataObject: dataList) {
+			
+			for(Object data: dataObject) {
+				
+				@SuppressWarnings("unchecked")
+				JexlContext jexlContext = new QAFJexlContext((Map<String, Object>) data);
+				boolean filterResult = (boolean) jexlExpression.evaluate(jexlContext);
+				if(filterResult) {
+					finalDataList.add(dataObject);
+				}
+				
+			}
+		}
+		
+		return finalDataList;
 	}
 
 	private static List<Object[]> getTestDataForTDDScenarios(ITestNGMethod method, ITestContext c) {
@@ -115,9 +192,9 @@ public class QAFInetrceptableDataProvider {
 		TestNGScenario scenario = new TestNGScenario((TestNGMethod) method);
 
 		List<Object[]> dataList = null;
-		
+
 		Map<String, Object> metadata = scenario.getMetaData();
-		
+
 		String dataProvider = (String) metadata.get(params.DATAPROVIDER.name());
 		boolean hasCustomDataProvider = null != dataProvider && !dataProvider.startsWith(QAFDataProvider.NAME);
 
@@ -130,8 +207,7 @@ public class QAFInetrceptableDataProvider {
 			Object[][] testData = getData(metadata);
 			dataList = ListUtils.toList(testData);
 		}
-		
-		
+
 		return dataList;
 
 	}
@@ -151,11 +227,13 @@ public class QAFInetrceptableDataProvider {
 
 		if (methodInstance instanceof DataDrivenScenario) {
 			dataList = getTestDataForBDDScenarios(method, c);
+		}else {
+			if (methodInstance instanceof TestNGTestCase) {
+				dataList = getTestDataForTDDScenarios(method, c);
+			}
 		}
-
-		if (methodInstance instanceof TestNGTestCase) {
-			dataList = getTestDataForTDDScenarios(method, c);
-		}
+		
+		return dataList.iterator();
 
 //		TestNGScenario scenario = new TestNGScenario(null, null, null, dataDrivenScenario);
 
@@ -174,8 +252,6 @@ public class QAFInetrceptableDataProvider {
 //		for (QAFDataProviderIntercepter intercepter : intercepters) {
 //			intercepter.beforeFech(scenario, c);
 //		}
-
-		return dataList.iterator();
 
 //		List<Object[]> data = process(scenario, dataList);
 //		
@@ -427,11 +503,17 @@ public class QAFInetrceptableDataProvider {
 			 * metadata.get(params.SHEETNAME.name())); }
 			 */
 			if (file.endsWith("xlsx") || file.endsWith("xls")) {
+
+				String sheetName = (String) metadata.get(params.SHEETNAME.name());
+
 				if (isNotBlank(key)) {
-					return PoiExcelUtil.getTableDataAsMap(file, ((String) metadata.get(params.KEY.name())),
-							(String) metadata.get(params.SHEETNAME.name()));
+
+					String keyName = (String) metadata.get(params.KEY.name());
+
+					return PoiExcelUtil.getTableDataAsMap(file, keyName, sheetName);
+
 				}
-				return PoiExcelUtil.getExcelDataAsMap(file, (String) metadata.get(params.SHEETNAME.name()));
+				return PoiExcelUtil.getExcelDataAsMap(file, sheetName);
 			}
 			// csv, text
 			List<Object[]> csvData = CSVUtil.getCSVDataAsMap(file);

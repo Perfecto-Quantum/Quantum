@@ -112,6 +112,7 @@
 				<extensions>true</extensions>
 				<configuration>
 					<publishingServerId>central</publishingServerId>
+					<centralBaseUrl>https://central.sonatype.com</centralBaseUrl>
 				</configuration>
 			</plugin>
 
