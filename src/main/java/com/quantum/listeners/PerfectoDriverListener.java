@@ -245,6 +245,7 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 			}
 		}else {
 			
+			@SuppressWarnings("unchecked")
 			HashMap<String, Object> perfectoOptions = ((HashMap<String, Object>)desiredCapabilities.getCapability("perfecto:options"));
 			if(jobName != null) {
 				perfectoOptions.put("report.jobName", jobName);

@@ -237,7 +237,9 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 	public void beforeInitialize(Capabilities desiredCapabilities) {
 		boolean skipDriverInitList = false;
 		Iterator<String> it = ConfigurationManager.getBundle().getKeys();
+		
 		while (it.hasNext()) {
+			
 			String key = it.next();
 			if (key.contains("capabilities.deviceSessionId") || key.contains("additional.capabilities")) {
 				System.out.println("Value - " + ConfigurationManager.getBundle().getString(key));
@@ -248,6 +250,7 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 				}
 			}
 		}
+		
 		if (!skipDriverInitList) {
 			Device device = new Device();
 			Map<String, ?> capabilities = desiredCapabilities.asMap();
@@ -258,24 +261,24 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 				credentials.put("securityToken", capabilities.get("perfecto:securityToken").toString());
 			}
 
-			if (capabilities.get("model") != null) {
-				device.addAttribute("model", capabilities.get("model").toString());
+			if (capabilities.get("perfecto:model") != null) {
+				device.addAttribute("model", capabilities.get("perfecto:model").toString());
 			}
 
-			if (capabilities.get("deviceId") != null) {
-				device.addAttribute("deviceId", capabilities.get("deviceId").toString());
+			if (capabilities.get("perfecto:deviceId") != null) {
+				device.addAttribute("deviceId", capabilities.get("perfecto:deviceId").toString());
 			}
 
-			if (capabilities.get("deviceName") != null) {
-				device.addAttribute("deviceId", capabilities.get("deviceName").toString());
+			if (capabilities.get("perfecto:deviceName") != null) {
+				device.addAttribute("deviceId", capabilities.get("perfecto:deviceName").toString());
 			}
 
-			if (capabilities.get("os") != null) {
-				device.addAttribute("os", capabilities.get("os").toString());
+			if (capabilities.get("perfecto:os") != null) {
+				device.addAttribute("perfecto:os", capabilities.get("perfecto:os").toString());
 			}
 
-			if (capabilities.get("osVersion") != null) {
-				device.addAttribute("osVersion", capabilities.get("osVersion").toString());
+			if (capabilities.get("perfecto:osVersion") != null) {
+				device.addAttribute("osVersion", capabilities.get("perfecto:osVersion").toString());
 			}
 			if (!ConfigurationManager.getBundle().getBoolean("device_not_available", false)) {
 				try {
@@ -292,7 +295,7 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 							System.out.println("Creating driver for report result"
 									+ getBundle().getString("ScenarioExecution", "FromListener"));
 							ConfigurationManager.getBundle().setProperty("device_not_available", true);
-							((DesiredCapabilities) desiredCapabilities).setCapability("scriptName",
+							((DesiredCapabilities) desiredCapabilities).setCapability("perfecto:scriptName",
 									getBundle().getString("ScenarioExecution", "FromListener"));
 							getBundle().setProperty("ScenarioExecution", "FromListener");
 							WebDriver driver = new RemoteWebDriver(

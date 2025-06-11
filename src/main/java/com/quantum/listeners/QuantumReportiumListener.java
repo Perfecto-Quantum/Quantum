@@ -5,14 +5,11 @@ import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.jar.JarInputStream;
-import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -21,8 +18,6 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.impl.LogFactoryImpl;
 import org.openqa.selenium.WebDriver;
 import org.testng.IInvokedMethod;
 import org.testng.ISuite;
@@ -120,8 +115,8 @@ class Messages {
 
 public class QuantumReportiumListener extends ReportiumTestNgListener
 		implements QAFTestStepListener, ITestListener, ISuiteListener {
-	
-	private static final Log logger = LogFactoryImpl.getLog(QuantumReportiumListener.class);
+
+//	private static final Log logger = LogFactoryImpl.getLog(QuantumReportiumListener.class);
 
 	public static final String PERFECTO_REPORT_CLIENT = "perfecto.report.client";
 
@@ -237,7 +232,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 		if (isExecutingOnPerfecto()) {
 
 			getBundle().setProperty("ScenarioExecution", testResult.getMethod().getMethodName());
-			
+
 			// compile actual groups
 			String[] groups = TestNode.getScenarioGroups(testResult);
 
@@ -269,13 +264,12 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 			}
 			try {
 
-				cfc.add(new CustomField("quantumFrameworkVersion","3.0.0"));
-				
-			}catch(Exception e) {
+				cfc.add(new CustomField("quantumFrameworkVersion", "3.0.0"));
+
+			} catch (Exception e) {
 				System.out.println(e);
 			}
-			
-			
+
 			// Get custom fields "%name-value" from groups
 			if (ConfigurationManager.getBundle().getString("custom.field") != null) {
 				String customFieldValue = ConfigurationManager.getBundle().getString("custom.field");
@@ -378,13 +372,14 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 		ReportiumClient client = getReportClient();
 
 		if (ConfigurationManager.getBundle().getPropertyValue("perfecto.harfile.enable").equals("true")) {
-			String platformName = DriverUtils.getDriver().getCapabilities().getCapability("platformName").toString();
+			Object platformNameObj = DriverUtils.getDriver().getCapabilities().getCapability("platformName");
 
-			if (platformName != null && platformName.equalsIgnoreCase("android") || platformName.equalsIgnoreCase("ios")
-					|| platformName.equalsIgnoreCase("any") || platformName.equalsIgnoreCase("linux"))
-				DeviceUtils.stopGenerateHAR();
+			String platformName = null == platformNameObj ? "" : ((String) platformNameObj).toLowerCase();
 
-			if (platformName != null && platformName.equalsIgnoreCase("mac")) {
+			switch (platformName) {
+			case "":
+				break;
+			case "mac": {
 				Object deviceNameObj = DriverUtils.getDriver().getCapabilities().getCapability("deviceName");
 				if (deviceNameObj != null) {
 
@@ -394,6 +389,26 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 					}
 				}
 			}
+				break;
+			default:
+				DeviceUtils.stopGenerateHAR();
+
+			}
+
+//			if (platformName != null && platformName.equalsIgnoreCase("android") || platformName.equalsIgnoreCase("ios")
+//					|| platformName.equalsIgnoreCase("any") || platformName.equalsIgnoreCase("linux"))
+//				DeviceUtils.stopGenerateHAR();
+//
+//			if (platformName != null && platformName.equalsIgnoreCase("mac")) {
+//				Object deviceNameObj = DriverUtils.getDriver().getCapabilities().getCapability("deviceName");
+//				if (deviceNameObj != null) {
+//
+//					String deviceName = deviceNameObj.toString().toLowerCase();
+//					if (deviceName.contains("iphone") || deviceName.contains("ipad")) {
+//						DeviceUtils.stopGenerateHAR();
+//					}
+//				}
+//			}
 		}
 
 		if (null != client) {
@@ -425,6 +440,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 		TestResult reportiumResult;
 
 		if (ConfigurationManager.getBundle().getPropertyValue("perfecto.harfile.enable").equals("true")) {
+
 			String platformName = DriverUtils.getDriver().getCapabilities().getCapability("platformName").toString();
 			if (platformName != null && platformName.equalsIgnoreCase("android") || platformName.equalsIgnoreCase("ios")
 					|| platformName.equalsIgnoreCase("any") || platformName.equalsIgnoreCase("linux"))

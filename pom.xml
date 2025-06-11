@@ -2,10 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<name>Quantum Framework</name>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.perfecto</groupId>
 	<artifactId>quantum</artifactId>
-	<version>3.1.1</version>
+	<version>3.1.2</version>
 	<packaging>jar</packaging>
 	<description>Quantum is QAF based open source project powered by Perforce</description>
 	<url>

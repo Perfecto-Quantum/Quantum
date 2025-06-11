@@ -22,7 +22,7 @@ import io.appium.java_client.ios.IOSDriver;
 * the underlying driver.
 */
 
-@SuppressWarnings({ "rawtypes", "deprecation" })
+@SuppressWarnings({ "rawtypes" })
 public class DriverUtils {
 	
 	/**
@@ -159,7 +159,9 @@ public class DriverUtils {
 	 * @return boolean value.
 	 */
 	public static boolean isAndroid() {
-		return Platform.ANDROID.name().equalsIgnoreCase(getOS());
+		WebDriver driver = getDriver().getUnderLayingDriver();
+		return driver instanceof AndroidDriver;
+//		return Platform.ANDROID.name().equalsIgnoreCase(getOS());
 	}
 
 	/**
@@ -168,7 +170,10 @@ public class DriverUtils {
 	 * @return boolean value.
 	 */
 	public static boolean isIOS() {
-		return Platform.IOS.name().equalsIgnoreCase(getOS());
+		
+		WebDriver driver = getDriver().getUnderLayingDriver();
+		return driver instanceof IOSDriver;
+//		return Platform.IOS.name().equalsIgnoreCase(getOS());
 	}
 
 	/**

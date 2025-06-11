@@ -28,18 +28,19 @@ import com.google.gson.JsonObject;
 import com.qmetry.qaf.automation.core.ConfigurationManager;
 
 public class ReportPDF extends RESTClient {
-	
+
 	private String executionID;
-	
-	public ReportPDF(String executionID) throws Exception{
+
+	public ReportPDF(String executionID) throws Exception {
 		this.executionID = executionID;
 	}
 
 	private static final Log logger = LogFactoryImpl.getLog(ReportPDF.class);
 
 	public void download() throws Exception {
-		
-		if(!ConfigurationManager.getBundle().getBoolean("perfecto.download.reports", false)) return ;
+
+		if (!ConfigurationManager.getBundle().getBoolean("perfecto.download.reports", false))
+			return;
 
 		logger.info("Download PDF started for execution ID: " + executionID);
 
@@ -51,6 +52,7 @@ public class ReportPDF extends RESTClient {
 		String testID;
 
 		for (JsonElement resDetail : resourceDetails) {
+
 			resJObject = resDetail.getAsJsonObject();
 
 			fileName = getDownloadedFileName(resJObject);
@@ -59,16 +61,46 @@ public class ReportPDF extends RESTClient {
 			logger.info("Initiate PDF started for execution ID: " + executionID);
 			ReportTaskEntity reportEntity = initiatePDFGeneration(testID, fileName);
 
+			JsonArray artifacts = resJObject.getAsJsonArray("artifacts");
+
+			downloadAccessibilityReport(fileName, artifacts);
+
 			if (reportEntity == null) {
 				logger.error("Not able to download the PDF");
 			} else {
 				logger.info("Waiting for PDF generation for execution ID: " + executionID);
 				ReportTaskEntity pdfTask = waitForPDFRenerationTask(reportEntity);
-				
+
 				logger.info("Downloading of generated PDF started for execution ID: " + executionID);
-				downloadPDF(fileName,pdfTask);
+				downloadPDF(fileName, pdfTask);
 			}
 		}
+	}
+
+	private void downloadAccessibilityReport(String fileName, JsonArray artifacts) throws Exception {
+
+		int index = 1;
+
+		for (JsonElement artifact : artifacts) {
+
+			JsonObject artifactJsonObj = artifact.getAsJsonObject();
+
+			String type = artifactJsonObj.get("type").getAsString().toLowerCase();
+
+			if ("accessibility report".equals(type)) {
+
+				fileName = String.format("%s_%s", fileName, index);
+
+				String path = artifactJsonObj.get("path").getAsString();
+
+				URI url = new URI(path);
+				downloadFile(fileName, url, ".zip", "test Accessibility report");
+
+				++index;
+			}
+
+		}
+
 	}
 
 	private @CheckForNull ReportTaskEntity initiatePDFGeneration(String testId, String fileName) throws Exception {
@@ -78,14 +110,13 @@ public class ReportPDF extends RESTClient {
 
 		HttpClientBuilder clientBuilder = HttpClientBuilder.create()
 				.setRetryHandler(new DefaultHttpRequestRetryHandler(3, true))
-				.setDefaultRequestConfig(RequestConfig.custom()
-						.setSocketTimeout(TIMEOUT_MILLIS)
+				.setDefaultRequestConfig(RequestConfig.custom().setSocketTimeout(TIMEOUT_MILLIS)
 						.setConnectTimeout(TIMEOUT_MILLIS).setConnectionRequestTimeout(TIMEOUT_MILLIS).build());
 
 		addProxyDetailsIfRequired(clientBuilder);
 
 		HttpPost httpPost = new HttpPost(taskUriBuilder.build());
-		
+
 		addDefaultRequestHeaders(httpPost);
 
 		try (CloseableHttpClient httpClient = clientBuilder.build()) {
@@ -116,17 +147,17 @@ public class ReportPDF extends RESTClient {
 
 			@Override
 			public ReportTaskEntity apply(String taskID) {
-				
+
 				try {
 					ReportTaskEntity task = getReportTaskStatus(taskID);
-					
-					if(task==null) {
+
+					if (task == null) {
 						logger.error("Not able to get Report Task status");
 						return null;
-					}else {
-						if(ReportTaskEntity.TaskStatus.COMPLETE != task.getStatus()) {
+					} else {
+						if (ReportTaskEntity.TaskStatus.COMPLETE != task.getStatus()) {
 							return null;
-						}else {
+						} else {
 							return task;
 						}
 					}
@@ -135,7 +166,6 @@ public class ReportPDF extends RESTClient {
 					return null;
 				}
 
-				
 			}
 		});
 	}
@@ -170,11 +200,11 @@ public class ReportPDF extends RESTClient {
 		}
 
 	}
-	
+
 	private void downloadPDF(String fileName, ReportTaskEntity pdfTask) throws Exception {
-		
+
 		URI url = new URI(pdfTask.getUrl());
-		downloadFile(fileName, url,".pdf", "test PDF report");
+		downloadFile(fileName, url, ".pdf", "test PDF report");
 	}
 
 	@Override
@@ -184,7 +214,7 @@ public class ReportPDF extends RESTClient {
 		} catch (Exception e) {
 			logger.error("Report PDF Doenload : ", e);
 		}
-		
+
 	}
 
 }

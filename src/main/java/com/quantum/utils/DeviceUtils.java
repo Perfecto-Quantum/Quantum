@@ -9,6 +9,8 @@ import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -1204,15 +1206,24 @@ AppiumDriver appiumDriver = AppiumUtils.getAppiumDriver();
 	 *                help match it to the application screen.
 	 */
 	public static void checkAccessibility(String tagName) {
-		// declare the Map for script parameters
-		String browserName = DriverUtils.getDriver().getCapabilities().getCapability("browserName").toString();
-		String platformName = DriverUtils.getDriver().getCapabilities().getCapability("platformName").toString();
-		if (platformName.equalsIgnoreCase("ios") && browserName.equalsIgnoreCase("safari")) {
+		
+		
+		Map<String, Object> capabilities = DriverUtils.getDriver().getCapabilities().asMap();
+		
+		Optional<Entry<String, Object>> browserEntry = capabilities.entrySet().stream().filter(entry -> {return entry.getKey().contains("browserName");}).findFirst();
+		
+		String browserName = (!browserEntry.isPresent() ? "" : (String)browserEntry.get().getValue());
+
+		boolean isIOS = DriverUtils.isIOS();
+		boolean isAndroid = DriverUtils.isAndroid();
+
+		if (isIOS && browserName.equalsIgnoreCase("safari")) {
 			Log logger = LogFactoryImpl.getLog(DeviceUtils.class);
 			logger.error(
 					"Accessibility testing is not supported for Safari browser on iPhone/iPad. Skipping Accessibility check.");
 		} else {
-			if (DriverUtils.getDriver().getCapabilities().getCapability("driverClass") != null) {
+			
+			if (isAndroid || isIOS) {
 				Map<String, Object> params = new HashMap<>();
 				params.put("tag", tagName);
 				getQAFDriver().executeScript("mobile:checkAccessibility:audit", params);
