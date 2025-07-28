@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.impl.LogFactoryImpl;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
@@ -22,6 +24,8 @@ import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.touch.offset.PointOption;
 
 public final class AppiumUtils {
+	
+	private static final Log logger = LogFactoryImpl.getLog(AppiumUtils.class);
 
 	public static AppiumDriver getAppiumDriver() {
 		return checkType(AppiumDriver.class);
@@ -124,7 +128,7 @@ public final class AppiumUtils {
 	// For instance Month, Day, Year for a birthday would have this loop 3 times
 	// dynamically selecting each scroll wheel
 	public static void iosScrollKeys(String[] list) {
-		System.out.println("Starting the process");
+		logger.debug("Starting the process");
 		By xpath;
 		for (int i = 0; i < list.length; i++) {
 			

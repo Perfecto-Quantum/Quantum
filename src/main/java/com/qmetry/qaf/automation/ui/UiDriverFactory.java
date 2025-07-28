@@ -231,7 +231,11 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 		DesiredCapabilities desiredCapabilities = browser.getDesiredCapabilities();
 
 		Map<String, Object> desiredCapAsMap = desiredCapabilities.asMap();
+		
+		logger.debug("Desired Capabilities : " + desiredCapAsMap);
 
+		logger.debug("Browser Name : " + browser.browserName);
+		
 		ConfigurationManager.getBundle().setProperty("driver.desiredCapabilities", desiredCapAsMap);
 
 		QAFExtendedWebDriver driver = browser.getRemoteWebDriver(reporter, seleniumGridUrl, desiredCapabilities);
@@ -414,6 +418,11 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 		}
 
 		private String getPlatformName(Map<String, Object> capabilities, Configuration config) {
+			
+//			String driverName = ConfigurationManager.getBundle().getString("driver_name", "perfecto");
+			
+//			driverName = driverName.replace("Driver", "").replace("driver", "").replace("Remote", "").replace("remote", "");
+			
 			Object platformObject = capabilities.get("platformName");
 
 			String platformName = null;
@@ -425,7 +434,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 				if (null != platformObject) {
 					platformName = (String) platformObject;
 				} else {
-					platformObject = capabilities.get("perfecto:options");
+					platformObject = capabilities.get( "perfecto:options");
 
 					if (null != platformObject) {
 						if (platformObject instanceof Map<?, ?>) {
@@ -454,7 +463,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 		@SuppressWarnings("unchecked")
 		private DesiredCapabilities getDesiredCapabilities() {
-
+			
 			Map<String, Object> capabilities = new HashMap<String, Object>(desiredCapabilities.asMap());
 			Gson gson = new GsonBuilder().create();
 
@@ -514,7 +523,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 				try {
 					setDriverCls((Class<? extends WebDriver>) Class.forName(String.valueOf(driverclass)));
 				} catch (Exception e) {
-					System.out.println("Error while setting Driver class : " + e.getMessage());
+					logger.error("Error while setting Driver class : " + e.getMessage());
 					// throw new AutomationError(e);
 				}
 			}
@@ -545,12 +554,17 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 		private static Browsers getBrowser(String name) {
 			for (Browsers browser : Browsers.values()) {
-				if (name.contains(browser.name())) {
+				
+				if(name.startsWith(browser.name())) {
+//				if (name.contains(browser.name())) {
 					browser.setBrowserName(name);
 					return browser;
 				}
 			}
 			Browsers b = Browsers.other;
+			
+			name = name.replace("Driver", "").replace("driver", "").replace("Remote", "").replace("remote", "");
+			
 			b.setBrowserName(name);
 			return b;
 		}

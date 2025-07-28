@@ -18,6 +18,8 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.impl.LogFactoryImpl;
 import org.openqa.selenium.WebDriver;
 import org.testng.IInvokedMethod;
 import org.testng.ISuite;
@@ -119,6 +121,8 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 //	private static final Log logger = LogFactoryImpl.getLog(QuantumReportiumListener.class);
 
 	public static final String PERFECTO_REPORT_CLIENT = "perfecto.report.client";
+	
+	private final Log logger = LogFactoryImpl.getLog(QuantumReportiumListener.class);
 
 	public static ReportiumClient getReportClient() {
 		return (ReportiumClient) getBundle().getObject(PERFECTO_REPORT_CLIENT);
@@ -149,7 +153,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 		File failureConfigFile = new File(failureConfigLoc);
 
 		if (!failureConfigFile.exists()) {
-			System.out.println("Ignoring Failure Reasons because JSON file was not found in path: " + failureConfigLoc);
+			logger.debug ("Ignoring Failure Reasons because JSON file was not found in path: " + failureConfigLoc);
 			return null;
 		}
 
@@ -161,14 +165,14 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 		try {
 			reader = new JsonReader(new FileReader(failureConfigLoc));
 		} catch (FileNotFoundException e) {
-			System.out.println("Problem parsing Failure Reason JSON file: " + failureConfigLoc);
-			e.printStackTrace();
+			logger.error("Problem parsing Failure Reason JSON file: " + failureConfigLoc);
+			logger.error(e);
 		}
 		Messages[] response = gson.fromJson(reader, Messages[].class);
 
 		for (Messages messages : response) {
 			if (messages.getStackTraceErrors() == null) {
-				System.out.println(
+				logger.error(
 						"Failure Reason JSON file has wrong formmat, please read here https://developers.perfectomobile.com/pages/viewpage.action?pageId=31103917: "
 								+ failureConfigLoc);
 				return null;
@@ -267,7 +271,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 				cfc.add(new CustomField("quantumFrameworkVersion", "3.0.0"));
 
 			} catch (Exception e) {
-				System.out.println(e);
+				logger.error("On Test Start : " + e);
 			}
 
 			// Get custom fields "%name-value" from groups
@@ -430,7 +434,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 			XmlTest currentTest = testResult.getMethod().getXmlTest();
 			FailedTestSuite.addTest(currentTest);
 		} catch (Exception e) {
-			System.out.println(e.getLocalizedMessage());
+			logger.error("On Test Failure : " + e.getLocalizedMessage());
 		} finally {
 			ConfigurationManager.getBundle().clearProperty(FailedTestSuite.UNIQUE_TEST_IDENTIFIER);
 		}
@@ -576,15 +580,21 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 	}
 
 	private void tearIt(ITestResult testResult) {
-		if ((testResult.getTestContext().getCurrentXmlTest().getParallel().toString().equalsIgnoreCase("methods")
+		
+		XmlTest xmlTest = testResult.getTestContext().getCurrentXmlTest();
+		
+		boolean doResetDriver = resetDriver(testResult);
+		
+		String className = xmlTest.getXmlClasses().get(0).getName();
+		
+		String isGlobalDatadrivenParallel = ConfigurationManager.getBundle().getString("global.datadriven.parallel", "false");
+		
+		if ((xmlTest.getParallel().toString().equalsIgnoreCase("methods")
 				& testResult.getTestClass().getName().toLowerCase().contains("scenario"))
-				|| ConfigurationManager.getBundle().getString("global.datadriven.parallel", "false")
-						.equalsIgnoreCase("true")
-				|| testResult.getTestContext().getCurrentXmlTest().getXmlClasses().get(0).getName()
-						.contains("com.qmetry.qaf.automation.step.client.excel.ExcelTestFactory")
-				|| testResult.getTestContext().getCurrentXmlTest().getXmlClasses().get(0).getName()
-						.contains("com.qmetry.qaf.automation.step.client.csv.KwdTestFactory")
-				|| resetDriver(testResult)
+				|| isGlobalDatadrivenParallel.equalsIgnoreCase("true")
+				|| className.contains("com.qmetry.qaf.automation.step.client.excel.ExcelTestFactory")
+				|| className.contains("com.qmetry.qaf.automation.step.client.csv.KwdTestFactory")
+				|| doResetDriver
 
 		) {
 			Object testInstance = testResult.getInstance();
@@ -603,7 +613,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 			XmlTest currentTest = result.getMethod().getXmlTest();
 			FailedTestSuite.addTest(currentTest);
 		} catch (Exception e) {
-			System.out.println(e.getLocalizedMessage());
+			logger.error("On Test Skipped : " + e.getLocalizedMessage());
 		} finally {
 			ConfigurationManager.getBundle().clearProperty(FailedTestSuite.UNIQUE_TEST_IDENTIFIER);
 		}
@@ -730,9 +740,11 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 			driverList.put("Default Driver", driver);
 		} else {
 			for (String driverName : driverNameList.split(",")) {
-				System.out.println("Adding driver with name - " + driverName);
+				logger.info("Adding driver with name - " + driverName);
+//				ConfigurationManager.getBundle().setProperty("driver_name", driverName);
 				DriverUtils.switchToDriver(driverName);
 				driverList.put(driverName, DeviceUtils.getQAFDriver());
+				logger.info("Added driver with name - " + driverName);
 			}
 		}
 
@@ -812,8 +824,6 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 
 		}
 
-//		System.out.println(testNGMethod.getClass());
-
 //		((TestNGScenario) testNGMethod).getMetaData().put("Perfecto-report",
 //				"<a href=\"" + url + "\" target=\"_blank\">view</a>");
 	}
@@ -866,7 +876,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 			paramMap.putAll(step.getStepExecutionTracker().getContext());
 			List<String> paramNames = getArgNames(def);
 
-			System.out.println(paramNames);
+			logger.debug("Get Process Step Description : " + paramNames);
 
 			if ((paramNames != null) && (!paramNames.isEmpty())) {
 
@@ -922,8 +932,10 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 	}
 
 	private boolean resetDriver(ITestResult result) {
+		
 		String driverResetTimerFlag = ConfigurationManager.getBundle().getString("perfecto.driver.restart.timer.flag",
 				"false");
+		
 		int driverResetTimerValue = ConfigurationManager.getBundle().getInt("perfecto.driver.restart.timer.value",
 				3600);
 
@@ -933,21 +945,25 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 			String[] m_groups = sc.getM_groups();
 			for (String tag : m_groups) {
 				if (tag.equalsIgnoreCase("@RestartDriverAfterTimeout")) {
-					System.out.println("Driver Reset tag found!");
+					logger.info("Driver Reset tag found!");
 					driverResetTag = true;
 				}
 			}
 		} catch (Exception e) {
-//			System.out.println("Gherkin scenarios were not found so skipping the reset driver tag check.");
+			logger.warn("Gherkin scenarios were not found so skipping the reset driver tag check.");
 		}
 
 		if (driverResetTimerFlag.equalsIgnoreCase("true") || driverResetTag) {
-			long currentTime = System.currentTimeMillis();
-			long driverStartTime = ConfigurationManager.getBundle().getLong(PerfectoDriverListener.DRIVER_START_TIMER);
+			long currentTimeInMsec = System.currentTimeMillis();
+			long driverStartTimeInMsec = ConfigurationManager.getBundle().getLong(PerfectoDriverListener.DRIVER_START_TIMER);
+			
+			long timeElapsedInMsec = currentTimeInMsec - driverStartTimeInMsec;
+			
+			long timeElapsedInSec = (long) Math.ceil(timeElapsedInMsec);
 
 //			Check the timer and the tag for restart @RestartDriverAfterTimeout
-			if ((currentTime - driverStartTime) / 1000 > driverResetTimerValue || driverResetTag) {
-				System.out.println("Closing the driver and restarting the driver");
+			if ( (timeElapsedInSec > driverResetTimerValue) || driverResetTag) {
+				logger.info("Closing the driver and restarting the driver");
 				return true;
 			}
 			return false;

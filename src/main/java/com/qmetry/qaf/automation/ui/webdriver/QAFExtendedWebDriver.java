@@ -408,7 +408,7 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 		String sessionId = new WebDriverTestBase().getDriver().getSessionId().toString();
 
 		this.setSessionId(sessionId);
-		System.out.println("Current session: " + getSessionId() + " updated with:" + sessionId);
+		logger.debug("Current session: " + getSessionId() + " updated with:" + sessionId);
 	}
 
 	@Override

@@ -548,8 +548,6 @@ public class QAFTestBase {
 	private String[] initStbArgs(String... args) {
 		args = STBArgs.browser_str.setIfEmpty(getBrowser(), args);
 		
-		System.out.println();
-		
 		return STBArgs.browser_str.setIfEmpty(
 				ApplicationProperties.DRIVER_NAME.getStringVal(STBArgs.browser_str.defaultVal),
 				
@@ -581,7 +579,7 @@ public class QAFTestBase {
 				return driverFectory.get(commandLog, stb);
 			} catch (Throwable e) {
 				String msg = get();
-				System.err.println(msg + e.getMessage());
+				logger.error(msg + e.getMessage());
 				throw new WebDriverException(msg, e.getCause());
 			}
 		}
@@ -622,30 +620,5 @@ public class QAFTestBase {
 
 	private Map<String, UiDriver> getDriverContext() {
 		return driverContext;
-	}
-
-	public static void main(String[] args) {
-		System.setProperty("driver.name", "chromeDriver");
-		System.setProperty("webdriver.chrome.driver", "/Users/chiragjayswal/Downloads/chromedriver");
-		System.setProperty("webdriver.gecko.driver", "/Users/chiragjayswal/Downloads/geckodriver");
-
-		new WebDriverTestBase().getDriver().get("http://www.google.com");
-		pause(5000);
-
-		System.out.println(TestBaseProvider.instance().get().getDriverName());
-
-		TestBaseProvider.instance().get().setDriver("chrome2Driver");
-		System.out.println(TestBaseProvider.instance().get().getDriverName());
-		new WebDriverTestBase().getDriver().get("http://www.google.com");
-		new WebDriverTestBase().getDriver().findElement("name=q").sendKeys("firefoxDriver");
-
-		TestBaseProvider.instance().get().setDriver("chromeDriver");
-		System.out.println(TestBaseProvider.instance().get().getDriverName());
-		new WebDriverTestBase().getDriver().findElement("name=q").sendKeys("chromeDriver");
-
-		pause(50000);
-
-		System.exit(0);
-
 	}
 }

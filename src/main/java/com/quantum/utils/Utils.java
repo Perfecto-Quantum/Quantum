@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.impl.LogFactoryImpl;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.JavascriptExecutor;
@@ -24,6 +26,8 @@ import io.appium.java_client.touch.offset.PointOption;
 public class Utils {
 
 	public static final String KEY_DEVICE_MODEL_IPHONE_11 = "iPhone-11";
+	
+	private static final Log logger = LogFactoryImpl.getLog(Utils.class);
 
 	/**
 	 * Return true if element is displayed after X milliseconds.
@@ -37,7 +41,7 @@ public class Utils {
 			element.waitForVisible(milliSecs);
 			return true;
 		} catch (Exception e) {
-			System.out.println("Element was not displayed and wait for Visible timed out method threw an exception.");
+			logger.error("Element was not displayed and wait for Visible timed out method threw an exception.");
 			return false;
 		}
 	}
@@ -54,7 +58,7 @@ public class Utils {
 			element.waitForNotPresent(milliSecs);
 			return true;
 		} catch (Exception e) {
-			System.out.println("Element was still displayed and wait for Visible timed out method threw an exception.");
+			logger.error("Element was still displayed and wait for Visible timed out method threw an exception.");
 			return false;
 		}
 	}
@@ -71,7 +75,7 @@ public class Utils {
 			element.waitForPresent(milliSecs);
 			return true;
 		} catch (Exception e) {
-			System.out.println("Element was not present and wait for present method threw an exception.");
+			logger.error("Element was not present and wait for present method threw an exception.");
 			return false;
 		}
 	}
@@ -111,7 +115,7 @@ public class Utils {
 	public static boolean horizontalSwipeWithScaleFactor(QAFWebElement ele) {
 
 		int scalevalu = DeviceUtils.getScale();
-		System.out.println("Device Status" + scalevalu);
+		logger.debug("Device Status" + scalevalu);
 		int x = ele.getLocation().getX() * scalevalu;
 		int y = ele.getLocation().getY() * scalevalu;
 		int height = ele.getSize().getHeight() * scalevalu;
@@ -119,7 +123,7 @@ public class Utils {
 		int startX = (width / 4) + x;
 		int startY = (height / 2) + y;
 		int endX = (width / 2) + x;
-		System.out.println("variables" + startX + startY + endX);
+		logger.debug("variables" + startX + startY + endX);
 
 		Map<String, Object> params = new HashMap<>();
 		params.put("start", startX + "," + startY);
@@ -134,7 +138,7 @@ public class Utils {
 	public static boolean horizntalSwipeWithScaleFactorRightToLeft(QAFWebElement ele) {
 
 		int scalevalu = DeviceUtils.getScale();
-		System.out.println("Device Status" + scalevalu);
+		logger.debug("Device Status" + scalevalu);
 		int x = ele.getLocation().getX() * scalevalu;
 		int y = ele.getLocation().getY() * scalevalu;
 		int height = ele.getSize().getHeight() * scalevalu;
@@ -142,7 +146,7 @@ public class Utils {
 		int startX = (3 * width / 4) + x;
 		int startY = (height / 2) + y;
 		int endX = (width / 3) + x;
-		System.out.println("variables" + startX + startY + endX);
+		logger.debug("variables" + startX + startY + endX);
 
 		Map<String, Object> params = new HashMap<>();
 		params.put("start", startX + "," + startY);
@@ -159,7 +163,7 @@ public class Utils {
 	public static boolean horizntalSwipeWithScaleFactorRightToLeftRemoveCart(QAFWebElement ele) {
 
 		int scalevalu = DeviceUtils.getScale();
-		System.out.println("Device Status" + scalevalu);
+		logger.debug("Device Status" + scalevalu);
 		int x = ele.getLocation().getX() * scalevalu;
 		int y = ele.getLocation().getY() * scalevalu;
 		int height = ele.getSize().getHeight() * scalevalu;
@@ -168,7 +172,7 @@ public class Utils {
 		int startY = (height / 2) + y;
 		int endX = (width / 4) + x;
 		// int endX=startX/5;
-		System.out.println("variables" + startX + startY + endX);
+		logger.debug("variables" + startX + startY + endX);
 
 		Map<String, Object> params = new HashMap<>();
 		params.put("start", startX + "," + startY);
@@ -185,7 +189,7 @@ public class Utils {
 	public static boolean horizntalLongSwipeWithScaleFactorRightToLeft(QAFWebElement ele) {
 
 		int scalevalu = DeviceUtils.getScale();
-		System.out.println("Device Status" + scalevalu);
+		logger.debug("Device Status" + scalevalu);
 		int x = ele.getLocation().getX() * scalevalu;
 		int y = ele.getLocation().getY() * scalevalu;
 		int height = ele.getSize().getHeight() * scalevalu;
@@ -193,7 +197,7 @@ public class Utils {
 		int startX = (4 * width / 5) + x;
 		int startY = (height / 2) + y;
 		int endX = 10;
-		System.out.println("variables" + startX + startY + endX);
+		logger.debug("variables" + startX + startY + endX);
 
 		Map<String, Object> params = new HashMap<>();
 		params.put("start", startX + "," + startY);
@@ -210,7 +214,7 @@ public class Utils {
 	public static boolean horizntalSwipeWithScaleFactorLeftToRight(QAFWebElement ele) {
 
 		int scalevalu = DeviceUtils.getScale();
-		System.out.println("Device Status" + scalevalu);
+		logger.debug("Device Status" + scalevalu);
 		int x = ele.getLocation().getX() * scalevalu;
 		int y = ele.getLocation().getY() * scalevalu;
 		int height = ele.getSize().getHeight() * scalevalu;
@@ -218,7 +222,7 @@ public class Utils {
 		int startX = (width / 5) + x;
 		int startY = (height / 4) + y;
 		int endX = (3 * width / 4) + x;
-		System.out.println("variables" + startX + startY + endX);
+		logger.debug("variables" + startX + startY + endX);
 
 		Map<String, Object> params = new HashMap<>();
 		params.put("start", startX + "," + startY);
@@ -235,7 +239,7 @@ public class Utils {
 	public static boolean horizntalLongSwipeWithScaleFactorLeftToRight(QAFWebElement ele) {
 
 		int scalevalu = DeviceUtils.getScale();
-		System.out.println("Device Status" + scalevalu);
+		logger.debug("Device Status" + scalevalu);
 		int x = ele.getLocation().getX() * scalevalu;
 		int y = ele.getLocation().getY() * scalevalu;
 		int height = ele.getSize().getHeight() * scalevalu;
@@ -244,7 +248,7 @@ public class Utils {
 		int startY = (height / 2) + y;
 		int endX = width + x - 10;
 		// x + width - 10;
-		System.out.println("variables" + startX + startY + endX);
+		logger.debug("variables" + startX + startY + endX);
 
 		Map<String, Object> params = new HashMap<>();
 		params.put("start", startX + "," + startY);
@@ -261,7 +265,7 @@ public class Utils {
 	public static boolean horizntalLongSwipeWithScaleFactorLeftToRightCustom(QAFWebElement ele) {
 
 		int scalevalu = DeviceUtils.getScale();
-		System.out.println("Device Status" + scalevalu);
+		logger.debug("Device Status" + scalevalu);
 		int x = ele.getLocation().getX() * scalevalu;
 		int y = ele.getLocation().getY() * scalevalu;
 		int height = ele.getSize().getHeight() * scalevalu;
@@ -270,7 +274,7 @@ public class Utils {
 		int startY = (height / 2) + y + 100;
 		int endX = width + x - 10;
 		// x + width - 10;
-		System.out.println("variables" + startX + startY + endX);
+		logger.debug("variables" + startX + startY + endX);
 
 		Map<String, Object> params = new HashMap<>();
 		params.put("start", startX + "," + startY);
@@ -286,7 +290,7 @@ public class Utils {
 	// Vertical swipe down with scale factor
 	public static boolean verticalSwipeWithScaleFactor(QAFWebElement ele) {
 		int scalevalu = DeviceUtils.getScale();
-		System.out.println("Device Status" + scalevalu);
+		logger.debug("Device Status" + scalevalu);
 		int x = ele.getLocation().getX() * scalevalu;
 		int y = ele.getLocation().getY() * scalevalu;
 		int height = ele.getSize().getHeight() * scalevalu;
@@ -297,7 +301,7 @@ public class Utils {
 		int endX = (width / 2);
 		// int endY = y + 20;
 		int endY = (height) / 4 + y;
-		System.out.println("variables" + startX + startY + endX);
+		logger.debug("variables" + startX + startY + endX);
 
 		Map<String, Object> params = new HashMap<>();
 		params.put("start", startX + "," + startY);
@@ -313,7 +317,7 @@ public class Utils {
 	@Deprecated
 	public static boolean verticalSwipeInOrderHistory(QAFWebElement ele) {
 		int scalevalu = DeviceUtils.getScale();
-		System.out.println("Device Status" + scalevalu);
+		logger.debug("Device Status" + scalevalu);
 		int x = ele.getLocation().getX() * scalevalu;
 		int y = ele.getLocation().getY() * scalevalu;
 		int height = ele.getSize().getHeight() * scalevalu;
@@ -324,7 +328,7 @@ public class Utils {
 		int endX = ((width / 2)) * 2;
 		// int endY = y + 20;
 		int endY = ((height) / 4 + y) * 2;
-		System.out.println("variables" + startX + startY + endX);
+		logger.debug("variables" + startX + startY + endX);
 
 		Map<String, Object> params = new HashMap<>();
 		params.put("start", startX + "," + startY);
@@ -339,7 +343,7 @@ public class Utils {
 	// Vertical swipe up with scale factor
 	public static boolean verticalSwipeUpWithScaleFactor(QAFWebElement ele) {
 		int scalevalu = DeviceUtils.getScale();
-		System.out.println("Device Status" + scalevalu);
+		logger.debug("Device Status" + scalevalu);
 		int x = ele.getLocation().getX() * scalevalu;
 		int y = ele.getLocation().getY() * scalevalu;
 		int height = ele.getSize().getHeight() * scalevalu;
@@ -350,7 +354,7 @@ public class Utils {
 		int endX = (width / 2);
 		// int endY = y + 20;
 		int endY = (height) / 4 - y;
-		System.out.println("variables" + startX + startY + endX);
+		logger.debug("variables" + startX + startY + endX);
 
 		Map<String, Object> params = new HashMap<>();
 		params.put("start", startX + "," + startY);
@@ -366,7 +370,7 @@ public class Utils {
 	// view
 	public static boolean verticalSwipeWithScaleFactorTopHalf(QAFWebElement ele) {
 		int scalevalu = DeviceUtils.getScale();
-		System.out.println("Device Status" + scalevalu);
+		logger.debug("Device Status" + scalevalu);
 		int x = ele.getLocation().getX() * scalevalu;
 		int y = ele.getLocation().getY() * scalevalu;
 		int height = ele.getSize().getHeight() * scalevalu;
@@ -377,7 +381,7 @@ public class Utils {
 		int endX = (width / 2);
 		// int endY = y + 20;
 		int endY = (height) / 6 + y;
-		System.out.println("variables" + startX + startY + endX);
+		logger.debug("variables" + startX + startY + endX);
 
 		Map<String, Object> params = new HashMap<>();
 		params.put("start", startX + "," + startY);
@@ -392,7 +396,7 @@ public class Utils {
 	// Vertical swipe up half way with scale factor
 	public static boolean verticalSwipeHalfwayUp(QAFWebElement ele) {
 		int scalevalu = DeviceUtils.getScale();
-		System.out.println("Device Status" + scalevalu);
+		logger.debug("Device Status" + scalevalu);
 		int x = ele.getLocation().getX() * scalevalu;
 		int y = ele.getLocation().getY() * scalevalu;
 		int height = ele.getSize().getHeight() * scalevalu;
@@ -401,7 +405,7 @@ public class Utils {
 		int startY = 3 * (height) / 4 + y + 100 * scalevalu;
 		int endX = (width / 2);
 		int endY = 3 * (height) / 4 + y;
-		System.out.println("variables" + startX + startY + endX);
+		logger.debug("variables" + startX + startY + endX);
 
 		Map<String, Object> params = new HashMap<>();
 		params.put("start", startX + "," + startY);
@@ -605,7 +609,7 @@ public class Utils {
 	@Deprecated
 	public static boolean verticalSwipeWithScaleFactorInCart(QAFWebElement parent) {
 		int scalevalu = DeviceUtils.getScale();
-		System.out.println("Device Status" + scalevalu);
+		logger.debug("Device Status" + scalevalu);
 		int x = parent.getLocation().getX() * scalevalu;
 		int y = parent.getLocation().getY() * scalevalu;
 		int height = parent.getSize().getHeight() * scalevalu;
@@ -616,7 +620,7 @@ public class Utils {
 		int endX = (width / 2);
 		int endY = y + 20;
 		// int endY = (height) / 6 + y;
-		System.out.println("variables" + startX + startY + endX);
+		logger.debug("variables" + startX + startY + endX);
 
 		Map<String, Object> params = new HashMap<>();
 		params.put("start", startX + "," + startY);
@@ -704,7 +708,7 @@ public class Utils {
 	public static boolean verticalSwipeHalfwayDown(QAFWebElement ele) {
 
 		int scalevalu = DeviceUtils.getScale();
-		System.out.println("Device Status" + scalevalu);
+		logger.debug("Device Status" + scalevalu);
 		int x = ele.getLocation().getX() * scalevalu;
 		int y = ele.getLocation().getY() * scalevalu;
 		int height = ele.getSize().getHeight() * scalevalu;
@@ -713,7 +717,7 @@ public class Utils {
 		int startY = height / 6 + y;
 		int endX = (width / 2);
 		int endY = height / 6 + y + 100 * scalevalu;
-		System.out.println("variables" + startX + startY + endX);
+		logger.debug("variables" + startX + startY + endX);
 
 		Map<String, Object> params = new HashMap<>();
 		params.put("start", startX + "," + startY);
@@ -729,7 +733,7 @@ public class Utils {
 	public static boolean verticalSwipeDownWithScaleFactor(QAFWebElement ele) {
 
 		int scalevalu = DeviceUtils.getScale();
-		System.out.println("Device Status" + scalevalu);
+		logger.debug("Device Status" + scalevalu);
 		int x = ele.getLocation().getX() * scalevalu;
 		int y = ele.getLocation().getY() * scalevalu;
 		int height = ele.getSize().getHeight() * scalevalu;
@@ -738,7 +742,7 @@ public class Utils {
 		int startY = y + 20;
 		int endX = (width / 2);
 		int endY = (height) + y - 20;
-		System.out.println("variables" + startX + startY + endX);
+		logger.debug("variables" + startX + startY + endX);
 
 		Map<String, Object> params = new HashMap<>();
 		params.put("start", startX + "," + startY);
@@ -906,7 +910,7 @@ public class Utils {
 			QAFTestBase.pause(2 * 1000);
 			// PerfectoApplicationSteps.switchWebviewContext();
 		} else {
-			System.out.println("Device OS was not mentioned");
+			logger.warn("Device OS was not mentioned");
 		}
 	}
 

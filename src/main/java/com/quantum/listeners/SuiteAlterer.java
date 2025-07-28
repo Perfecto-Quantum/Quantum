@@ -11,12 +11,16 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.impl.LogFactoryImpl;
 import org.testng.IAlterSuiteListener;
 import org.testng.xml.XmlClass;
 import org.testng.xml.XmlSuite;
 import org.testng.xml.XmlTest;
 
 public class SuiteAlterer implements IAlterSuiteListener {
+	
+	private final Log logger = LogFactoryImpl.getLog(SuiteAlterer.class);
 
 	@Override
 	public void alter(List<XmlSuite> suites) {
@@ -224,7 +228,7 @@ public class SuiteAlterer implements IAlterSuiteListener {
 		}
 		originalSuite.setTests(finalTest);
 
-//		System.out.println(originalSuite.toXml());
+		logger.debug("Alter method : " + originalSuite.toXml());
 
 	}
 

@@ -105,7 +105,7 @@ public class GherkinFileParser extends AbstractScenarioFileParser {
 		BufferedReader br = null;
 		try {
 
-			logger.info("loading feature file: " + strFile);
+			logger.debug("loading feature file: " + strFile);
 			textFile = new File(strFile);
 			br = new BufferedReader(new FileReader(textFile));
 			String strLine = "";

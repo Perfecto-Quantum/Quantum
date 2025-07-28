@@ -37,6 +37,8 @@ import io.appium.java_client.AppiumDriver;
 */
 
 public class DeviceUtils {
+	
+	private static final Log logger = LogFactoryImpl.getLog(DeviceUtils.class);
 
 //	private static final String REPOSITORY_KEY = "perfecto.repository.folder";
 
@@ -108,7 +110,7 @@ public class DeviceUtils {
 		params.put("instrument", getBundle().getString(instrument, instrument));
 
 		String resultStr = (String) getQAFDriver().executeScript("mobile:application:install", params);
-		System.out.println(resultStr);
+		logger.debug("Install App : " + resultStr);
 	}
 
 	/**
@@ -134,7 +136,7 @@ public class DeviceUtils {
 			params.put("resign", resignEnable);
 
 		String resultStr = (String) getQAFDriver().executeScript("mobile:application:install", params);
-		System.out.println(resultStr);
+		logger.debug("Install App : " + resultStr);
 	}
 
 	/**
@@ -187,7 +189,7 @@ public class DeviceUtils {
 		}
 
 		String resultStr = (String) getQAFDriver().executeScript("mobile:application:install", params);
-		System.out.println(resultStr);
+		logger.debug("Install App with instrumentation on Android : " + resultStr);
 	}
 	
 	/**
@@ -1015,7 +1017,7 @@ AppiumDriver appiumDriver = AppiumUtils.getAppiumDriver();
 		value = value.replaceAll("[^\\x00-\\x7F]", "");
 		String name = picker.getAttribute("value").replaceAll("[^\\x00-\\x7F]", "");
 		while (!name.equals(value)) {
-			System.out.println(name);
+			logger.debug("Set Picker Wheel name : " + name);
 			pickerwheelStep(picker, direction);
 			// title based will retrieve the title as a string,
 			// view based will retrieve a string that represent the view
@@ -1367,7 +1369,7 @@ AppiumDriver appiumDriver = AppiumUtils.getAppiumDriver();
 		
 		while (true) {
 			violation = axe.nextHighlight();
-			System.out.println("violation: " + violation);
+			logger.debug("violation: " + violation);
 			if (violation == null) {
 				break;
 			}

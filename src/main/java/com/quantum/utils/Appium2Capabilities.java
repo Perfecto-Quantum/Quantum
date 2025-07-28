@@ -41,23 +41,7 @@ public class Appium2Capabilities implements Capabilities{
 				capabilityValue = null;
 			}
 		}
-		
-//		if(null != capabilityValue) {
-//			
-//			if(capabilityName.contains("platformName")) {
-//				return getPlatformName();
-//			}
-//			
-//			if(capabilityValue.toString().isBlank()) {
-////				System.out.println(String.format("%s capability not available!", capabilityName));
-//			}
-//
-//		}else{
-//			capabilityValue = "";
-//		}
-
-		
-		
+				
 		return capabilityValue;
 	}
 	

@@ -23,6 +23,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.impl.LogFactoryImpl;
 import org.testng.xml.XmlGroups;
 import org.testng.xml.XmlRun;
 import org.testng.xml.XmlSuite;
@@ -38,6 +40,8 @@ public class FailedTestSuite {
 	
 	public static String UNIQUE_TEST_PREFIX_KEY = "scenario.unique.identifier.prefix";
 	public static String UNIQUE_TEST_IDENTIFIER = "test.unique.identifier";
+	
+	private static final Log logger = LogFactoryImpl.getLog(FailedTestSuite.class);
 	
 	private  ConcurrentHashMap<TestNode,TestNode> failedTests;
 	
@@ -85,6 +89,8 @@ public class FailedTestSuite {
 		
 		if (!uniqueIdentifier.isBlank()) {
 			
+			logger.debug("Adding Failed test with uinque identifier - " + uniqueIdentifier);
+			
 			XmlRun xmlRun = new XmlRun();;
 			XmlGroups uniqueGroup =new XmlGroups();
 			xmlRun.onInclude(uniqueIdentifier);
@@ -121,9 +127,11 @@ public class FailedTestSuite {
 			TestNode testNode = new TestNode(currentFailedTest);
 			
 			failedTests.put(testNode,testNode);
+			
+			logger.debug("Added Failed test with uinque identifier - " + uniqueIdentifier);
 
 		} else {
-//			System.out.println("No Unique Tag found");
+			logger.debug("No Unique Tag found");
 		}
 	}
 
@@ -206,7 +214,7 @@ public class FailedTestSuite {
 	public static void saveXml() {
 		
 		if(Objects.isNull(failedTestSuite)) {	
-//			System.out.println("The test suite is not initialized yet");
+			logger.debug("The test suite is not initialized yet");
 			return;
 		}
 		
@@ -234,7 +242,7 @@ public class FailedTestSuite {
 			        StreamResult result = new StreamResult(xmlFileOutput);
 			        transformer.transform(source, result);
 			        
-			        System.out.println("Quantum Failed TestNG Xml file generated - " + quantumFailedSuiteXmlFileStr);
+			        logger.info("Quantum Failed TestNG Xml file generated - " + quantumFailedSuiteXmlFileStr);
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				} catch (IOException e) {

@@ -163,8 +163,6 @@ public class RESTClient implements Runnable{
 			try (InputStreamReader inputStreamReader = new InputStreamReader(responseStream)) {
 				Gson gson = new GsonBuilder().setPrettyPrinting().create();
 				return gson.fromJson(IOUtils.toString(inputStreamReader), JsonObject.class);
-				// System.out.println("\nList of test executions response:\n" +
-				// gson.toJson(executions));
 			}
 		}
 		
@@ -192,7 +190,7 @@ public class RESTClient implements Runnable{
 
 					return "PROCESSING_COMPLETE".equalsIgnoreCase(execStatus) && resourcesSize > 0;
 				} catch (Exception e) {
-					e.printStackTrace();
+					logger.error(e.getStackTrace());
 					return true;
 				}
 
@@ -227,10 +225,10 @@ public class RESTClient implements Runnable{
 					File file = new File(dir, fileName + "_" + dateFormat.format(date) + suffix);
 					fileOutputStream = new FileOutputStream(file);
 					IOUtils.copy(response.getEntity().getContent(), fileOutputStream);
-					System.out.println("\nSaved " + description + " to: " + file.getAbsolutePath());
+					logger.info("\nSaved " + description + " to: " + file.getAbsolutePath());
 				} else {
 					String errorMsg = IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset());
-					System.err.println(
+					logger.error (
 							"Error downloading file. Status: " + response.getStatusLine() + ".\nInfo: " + errorMsg);
 				}
 			}catch(Exception e) {

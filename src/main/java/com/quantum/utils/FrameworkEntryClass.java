@@ -13,7 +13,7 @@ public class FrameworkEntryClass {
 	public static void main(String[] suiteFiles) {
 
 		if (suiteFiles.length == 0) {
-			System.out.println("No TestNG File provided!!");
+			logger.error("No TestNG File provided!!");
 			return;
 		}
 

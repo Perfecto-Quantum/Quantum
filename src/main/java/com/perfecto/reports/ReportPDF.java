@@ -69,7 +69,7 @@ public class ReportPDF extends RESTClient {
 				logger.error("Not able to download the PDF");
 			} else {
 				logger.info("Waiting for PDF generation for execution ID: " + executionID);
-				ReportTaskEntity pdfTask = waitForPDFRenerationTask(reportEntity);
+				ReportTaskEntity pdfTask = waitForPDFGenerationTask(reportEntity);
 
 				logger.info("Downloading of generated PDF started for execution ID: " + executionID);
 				downloadPDF(fileName, pdfTask);
@@ -124,20 +124,20 @@ public class ReportPDF extends RESTClient {
 
 			int statusCode = response.getStatusLine().getStatusCode();
 
-			logger.info("Download PDF response code: " + statusCode);
+			logger.debug("Download PDF response code: " + statusCode);
 
 			if (statusCode >= 200 && statusCode < 300) {
 				Gson gson = new GsonBuilder().setPrettyPrinting().create();
 				return gson.fromJson(EntityUtils.toString(response.getEntity()), ReportTaskEntity.class);
 			} else {
-				System.out.println("PDF Generation status code : " + statusCode);
+				logger.info("PDF Generation status code : " + statusCode);
 				return null;
 			}
 		}
 
 	}
 
-	private @CheckForNull ReportTaskEntity waitForPDFRenerationTask(ReportTaskEntity entity) {
+	private @CheckForNull ReportTaskEntity waitForPDFGenerationTask(ReportTaskEntity entity) {
 
 		FluentWait<String> wait = new FluentWait<String>(entity.getTaskId());
 		wait.withTimeout(Duration.ofMinutes(2));

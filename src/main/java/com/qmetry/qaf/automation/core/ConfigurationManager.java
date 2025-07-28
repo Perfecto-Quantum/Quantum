@@ -59,7 +59,6 @@ import com.qmetry.qaf.automation.step.client.csv.KwdTestFactory;
 import com.qmetry.qaf.automation.step.client.excel.ExcelTestFactory;
 import com.qmetry.qaf.automation.step.client.text.BDDTestFactory;
 import com.qmetry.qaf.automation.util.PropertyUtil;
-import com.qmetry.qaf.automation.util.StringMatcher;
 import com.qmetry.qaf.automation.util.StringUtil;
 
 /**
@@ -103,6 +102,7 @@ public class ConfigurationManager {
 			InputStream stream=null;
 			Scanner s = null;
 			try {
+				@SuppressWarnings("deprecation")
 				Process proc = Runtime.getRuntime().exec("hostname");
 				stream = proc.getInputStream();
 				if (stream != null) {
@@ -169,7 +169,7 @@ public class ConfigurationManager {
 					if(!p.containsKey("project.name"))
 					p.setProperty("project.name", prjDir.getName());
 
-					log.info("ISFW build info: " + p.getProperty("isfw.build.info"));
+					log.debug("ISFW build info: " + p.getProperty("isfw.build.info"));
 					String[] resources = p.getStringArray("env.resources", "resources");
 					for (String resource : resources) {
 						p.addBundle(resource);
@@ -345,16 +345,16 @@ public class ConfigurationManager {
 				}
 
 				// driver reset
-				if (key.equalsIgnoreCase(ApplicationProperties.DRIVER_NAME.key)
-						// single capability or set of capabilities change
-						|| StringMatcher.containsIgnoringCase(".capabilit").match(key)
-						|| key.equalsIgnoreCase(ApplicationProperties.REMOTE_SERVER.key)
-						|| key.equalsIgnoreCase(ApplicationProperties.REMOTE_PORT.key)) {
-					TestBaseProvider.instance().get().tearDown();
-					if(key.equalsIgnoreCase(ApplicationProperties.DRIVER_NAME.key)){
-						TestBaseProvider.instance().get().setDriver((String)value);
-					}
-				}
+//				if (key.equalsIgnoreCase(ApplicationProperties.DRIVER_NAME.key)
+//						// single capability or set of capabilities change
+//						|| StringMatcher.containsIgnoringCase(".capabilit").match(key)
+//						|| key.equalsIgnoreCase(ApplicationProperties.REMOTE_SERVER.key)
+//						|| key.equalsIgnoreCase(ApplicationProperties.REMOTE_PORT.key)) {
+//					TestBaseProvider.instance().get().tearDown();
+//					if(key.equalsIgnoreCase(ApplicationProperties.DRIVER_NAME.key)){
+//						TestBaseProvider.instance().get().setDriver((String)value);
+//					}
+//				}
 				String[] bundles = null;
 				// Resource loading
 				if (key.equalsIgnoreCase("env.resources")) {
@@ -371,7 +371,7 @@ public class ConfigurationManager {
 					}
 					if (null != bundles && bundles.length > 0) {
 						for (String res : bundles) {
-							log.info("Adding resources from: " + res);
+							log.debug("Adding resources from: " + res);
 							ConfigurationManager.addBundle(res);
 						}
 						executeOnChangeListeners();

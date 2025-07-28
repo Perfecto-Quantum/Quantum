@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Vector;
 
-import com.qmetry.qaf.automation.integration.ResultUpdator;
-import com.qmetry.qaf.automation.ui.webdriver.ChromeDriverHelper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.impl.LogFactoryImpl;
 
 /**
  * This class provides thread-local {@link #QAFTestBase}.
@@ -38,6 +38,7 @@ public class TestBaseProvider extends ThreadLocal<QAFTestBase> {
 //	private final Vector<QAFTestBase> lst = new Vector<QAFTestBase>();
 
 	private final ArrayList<QAFTestBase> lst = new ArrayList<QAFTestBase>();
+	private final Log logger = LogFactoryImpl.getLog(TestBaseProvider.class);
 
 	@Override
 	protected QAFTestBase initialValue() {
@@ -48,7 +49,7 @@ public class TestBaseProvider extends ThreadLocal<QAFTestBase> {
 
 	@Override
 	public void remove() {
-		
+
 		QAFTestBase qafTestBase = this.get();
 		qafTestBase.tearDown();
 		super.remove();
@@ -64,24 +65,13 @@ public class TestBaseProvider extends ThreadLocal<QAFTestBase> {
 	}
 
 	public Vector<QAFTestBase> getAll() {
-
-		Vector<QAFTestBase> vector = new Vector<QAFTestBase>(lst);
-
-		return vector;
-//		return lst;
+		return new Vector<QAFTestBase>(lst);
 	}
 
 	public void stopAll() {
-//		Iterator<QAFTestBase> iter = lst.listIterator();
-		
-//		while (iter.hasNext()) {
-//			
-//			QAFTestBase testBase = 
-//			iter.next().tearDown();
-////			iter.remove();
-//		}
-		
+
 		lst.removeAll(lst);
+		logger.info("Shut Down Completed...");
 	}
 
 	public void prepareForShutDown() {
@@ -89,8 +79,8 @@ public class TestBaseProvider extends ThreadLocal<QAFTestBase> {
 		Iterator<QAFTestBase> iter = lst.listIterator();
 		// lst.iterator();
 		while (iter.hasNext()) {
-			System.out.println("Preparing For Shut Down...");
-			
+			logger.info("Preparing For Shut Down...");
+
 			QAFTestBase qafTestBase = iter.next();
 
 			qafTestBase.setPrepareForShutdown(true);
@@ -113,8 +103,9 @@ public class TestBaseProvider extends ThreadLocal<QAFTestBase> {
 			public void run() {
 				TestBaseProvider.instance().prepareForShutDown();
 				TestBaseProvider.instance().stopAll();
-				ChromeDriverHelper.teardownService();
-				ResultUpdator.awaitTermination();
+
+//				ChromeDriverHelper.teardownService();
+//				ResultUpdator.awaitTermination();
 			}
 		});
 	}

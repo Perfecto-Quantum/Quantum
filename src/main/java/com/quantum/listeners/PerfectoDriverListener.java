@@ -40,6 +40,8 @@ import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.impl.LogFactoryImpl;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
@@ -62,6 +64,8 @@ import com.quantum.utils.DeviceUtils;
 
 public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 	public static final String DRIVER_START_TIMER = "DriverTimer";
+	
+	private final Log logger = LogFactoryImpl.getLog(PerfectoDriverListener.class);
 
 	private boolean isQuitCommand(CommandTracker commandTracker) {
 		
@@ -159,7 +163,7 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 				}
 
 			} catch (Exception ex) {
-				System.out.println(ex.getMessage());
+				logger.error(ex.getMessage());
 			}
 		}
 	}

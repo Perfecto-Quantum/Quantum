@@ -6,7 +6,11 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 
 import com.qmetry.qaf.automation.core.ConfigurationManager;
+import com.quantum.listeners.PerfectoDriverListener;
+
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.impl.LogFactoryImpl;
 import org.openqa.selenium.Capabilities;
 import org.testng.Reporter;
 
@@ -29,6 +33,7 @@ public class ConsoleUtils {
 	public static final String WARNING_PADDING = upper_block + lower_block;
 	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss");
 
+	private static final Log logger = LogFactoryImpl.getLog(ConsoleUtils.class);
 
 	public static String getDeviceDesc(Capabilities caps) {
 		if (ConfigurationUtils.isDevice(caps))

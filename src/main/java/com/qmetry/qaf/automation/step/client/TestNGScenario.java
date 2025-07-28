@@ -55,6 +55,7 @@ public class TestNGScenario extends TestNGMethod {
 //		super(method, finder, xmlTest, instance);
 		
 		super(new DefaultTestObjectFactory(), method, finder, xmlTest, instance);
+		
 		init(instance);
 	}
 

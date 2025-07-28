@@ -10,6 +10,8 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.impl.LogFactoryImpl;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
@@ -35,6 +37,8 @@ import com.quantum.listeners.QuantumReportiumListener;
 public class ReportUtils {
 
 	public static final String PERFECTO_REPORT_CLIENT = "perfecto.report.client";
+	
+	private static final Log logger = LogFactoryImpl.getLog(ReportUtils.class);
 
 	public static ReportiumClient getReportClient() {
 		return (ReportiumClient) ConfigurationManager.getBundle().getObject(PERFECTO_REPORT_CLIENT);
@@ -95,7 +99,7 @@ public class ReportUtils {
 				CloseableHttpClient httpClient = clientBuilder.build();
 				getCommandsResponse = httpClient.execute(getCommands);
 			} catch (Exception e) {
-				System.out.println(
+				logger.error(
 						"ERROR -----------> proxyPort key was not mentioned along with the proxyHost configuration for report downloading");
 			}
 
@@ -107,7 +111,7 @@ public class ReportUtils {
 				getCommandsResponse.getEntity().getContent())) {
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
 			JsonObject commands = gson.fromJson(IOUtils.toString(inputStreamReader), JsonObject.class);
-			System.out.println("\nList of commands response:\n" + gson.toJson(commands));
+			logger.debug("\nList of commands response:\n" + gson.toJson(commands));
 			return gson.toJson(commands);
 		}
 	}

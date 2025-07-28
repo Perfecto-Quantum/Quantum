@@ -19,6 +19,8 @@ import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.impl.LogFactoryImpl;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -39,6 +41,8 @@ import com.qmetry.qaf.automation.core.ConfigurationManager;
 import com.qmetry.qaf.automation.ui.webdriver.QAFWebDriverCommandAdapter;
 
 public class DriverInitListener extends QAFWebDriverCommandAdapter {
+	
+	private static final Log logger = LogFactoryImpl.getLog(DriverInitListener.class);
 
 	private static String baseUrl = "%s.perfectomobile.com/services/handsets?operation=list&status=connected";
 //	private static String getOptionalParameters(Device deviceInformation) {
@@ -86,11 +90,12 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 				url = url.append(URLEncoder.encode(entrySet.getValue(), "UTF-8").replaceAll("\\++", "%20"));
 
 			} catch (UnsupportedEncodingException e) {
+				logger.error(e);
 			}
 
 		}
-		System.out.println("*************************");
-		System.out.println(url);
+	
+		logger.debug("URL Parameters : " + url);
 //
 //        try {
 //            return URLEncoder.encode(url.toString(), "UTF-8").replaceAll("\\++", "%20") ;
@@ -163,11 +168,11 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 				remoteServer.substring(remoteServer.indexOf("https://"), remoteServer.indexOf(".perfectomobile")));
 		String commonDevicesUrl = String.format("%s%s%s", finalBaseURL, credentialString, optionalParameters);
 
-		System.out.println(commonDevicesUrl);
+		logger.debug("Wait for device - Common Device URL - " + commonDevicesUrl);
 
 		String availableDevicesUrl = String.format("%s%s", commonDevicesUrl, "&inUse=false");
 
-		System.out.println(availableDevicesUrl);
+		logger.debug("Wait for device - Available Device URL - " + availableDevicesUrl);
 
 		int deviceAvailableTimeout = ConfigurationManager.getBundle().getInt("device.available.api.check.timeout", 15);
 		int deviceAvailableCheckPollTime = ConfigurationManager.getBundle()
@@ -183,11 +188,10 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 
 				@Override
 				public Boolean apply(String apiUrl) {
-//					System.out.println("Polling for device availability");
+					logger.debug("Polling for device availability");
 					if (!isDeviceCombinationValid(commonDevicesUrl)) {
-//						System.out.println("Polled for device combination check and it failed.");
+						logger.debug("Polled for device combination check and it failed. Returning false");
 						return false;
-//						return new Exception("Device Not Found");
 					}
 
 					HttpClient httpClient = HttpClientBuilder.create().build();
@@ -210,8 +214,8 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 							try {
 								builder = factory.newDocumentBuilder();
 								Document document = builder.parse(new InputSource(new StringReader(result.toString())));
-//								System.out.println("Device Available API Response"
-//										+ document.getElementsByTagName("handset").getLength());
+								logger.debug("Device Available API Response"
+										+ document.getElementsByTagName("handset").getLength());
 								return document.getElementsByTagName("handset").getLength() > 0;
 							} catch (Exception e) {
 								throw new Exception("Device Not Available");
@@ -242,10 +246,10 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 			
 			String key = it.next();
 			if (key.contains("capabilities.deviceSessionId") || key.contains("additional.capabilities")) {
-				System.out.println("Value - " + ConfigurationManager.getBundle().getString(key));
+				logger.debug("Value - " + ConfigurationManager.getBundle().getString(key));
 				if (ConfigurationManager.getBundle().getString(key).contains("-")
 						|| ConfigurationManager.getBundle().getString(key).contains("'useVirtualDevice':true")) {
-					System.out.println("Executing on VD or Shared Session, therefore skipping DriverInitListener");
+					logger.debug("Executing on VD or Shared Session, therefore skipping DriverInitListener");
 					skipDriverInitList = true;
 				}
 			}
@@ -283,16 +287,16 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 			if (!ConfigurationManager.getBundle().getBoolean("device_not_available", false)) {
 				try {
 					boolean deviceAvailableFlag = waitForDeviceAvailable(device, credentials);
-					System.out.println("Device availability flag - " + deviceAvailableFlag);
+					logger.debug("Device availability flag - " + deviceAvailableFlag);
 					if (!deviceAvailableFlag) {
-						System.out.println("Throwing the Device Not Available exception");
+						logger.debug("Throwing the Device Not Available exception");
 						throw new SkipException("Device not available");
 					}
 				} catch (Exception e) {
 					try {
 						if (!getBundle().getString("ScenarioExecution", "FromListener")
 								.equalsIgnoreCase("FromListener")) {
-							System.out.println("Creating driver for report result"
+							logger.debug("Creating driver for report result"
 									+ getBundle().getString("ScenarioExecution", "FromListener"));
 							ConfigurationManager.getBundle().setProperty("device_not_available", true);
 							((DesiredCapabilities) desiredCapabilities).setCapability("perfecto:scriptName",

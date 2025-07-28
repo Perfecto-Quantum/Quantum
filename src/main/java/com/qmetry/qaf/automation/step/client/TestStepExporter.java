@@ -21,8 +21,6 @@
  ******************************************************************************/
 package com.qmetry.qaf.automation.step.client;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.PrintStream;
 
 /**
@@ -92,18 +90,5 @@ public class TestStepExporter {
 //			stream.close();
 //		}
 
-	}
-
-	public static void main(String[] args) throws IOException {
-		PrintStream printStream;
-		if ((args.length > 0)) {
-			File file = new File(args[0]);
-			file.createNewFile();
-			printStream = new PrintStream(file);
-		} else {
-			printStream = System.out;
-		}
-		export(printStream);
-		System.out.println("Export Completed...");
 	}
 }

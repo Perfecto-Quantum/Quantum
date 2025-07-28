@@ -129,6 +129,8 @@ public class QAFInetrceptableDataProvider {
 		}else {
 			finalDataList = dataList;
 		}
+		
+		logger.debug("No of Tests iteration using Data Provider - " + finalDataList.size());
 
 		return finalDataList;
 	}

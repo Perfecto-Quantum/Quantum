@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.perfecto</groupId>
 	<artifactId>quantum</artifactId>
-	<version>3.1.2</version>
+	<version>3.1.5</version>
 	<packaging>jar</packaging>
 	<description>Quantum is QAF based open source project powered by Perforce</description>
 	<url>
@@ -38,8 +38,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<testng.version>7.7.1</testng.version>
-		<commons.logging.version>1.3.4</commons.logging.version>
-		<log4j.version>2.23.1</log4j.version>
+		<commons.logging.version>1.3.5</commons.logging.version>
+		<log4j.version>2.25.1</log4j.version>
 		<commons.collections.version>4.1</commons.collections.version>
 		<dom4j.version>2.1.4</dom4j.version>
 		<apache.http.client5.version>5.4.1</apache.http.client5.version>
@@ -47,16 +47,16 @@
 		<hamcrest.version>2.2</hamcrest.version>
 		<org.json.version>20240303</org.json.version>
 		<qaf.version>3.2.0</qaf.version>
-		<poi.version>5.4.0</poi.version>
+		<poi.version>5.4.1</poi.version>
 		<appium.client.version>8.6.0</appium.client.version>
 		<jsoup.version>1.15.4</jsoup.version>
 		<jackson.version>2.18.2</jackson.version>
 		<guava.jre.version>33.3.1-jre</guava.jre.version>
-		<webdriver.manager.version>5.6.4</webdriver.manager.version>
-		<slf4j.version>2.0.16</slf4j.version>
+		<!--		<webdriver.manager.version>6.2.0</webdriver.manager.version>-->
+		<!--		<slf4j.version>2.0.16</slf4j.version>-->
 		<http.components.version>4.5.14</http.components.version>
 		<commons.io.version>2.18.0</commons.io.version>
-		<commons.beanutils.version>1.9.4</commons.beanutils.version>
+		<commons.beanutils.version>1.11.0</commons.beanutils.version>
 		<maven.java.doc.plugin.version>3.5.0</maven.java.doc.plugin.version>
 		<maven.compiler.plugin.version>3.10.1</maven.compiler.plugin.version>
 		<maven.source.plugin.version>3.2.1</maven.source.plugin.version>
@@ -142,6 +142,9 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>${maven.compiler.plugin.version}</version>
 				<configuration>
+					<fork>true</fork>
+					<meminitial>1024m</meminitial>
+					<maxmem>2024m</maxmem>
 					<source>${jvm.version}</source>
 					<target>${jvm.version}</target>
 					<encoding>${project.build.sourceEncoding}</encoding>
@@ -271,6 +274,21 @@
 			<version>${jsoup.version}</version>
 		</dependency>
 
+		<!--
+		https://mvnrepository.com/artifact/org.apache.commons/commons-configuration2 -->
+<!--		<dependency>-->
+<!--			<groupId>org.apache.commons</groupId>-->
+<!--			<artifactId>commons-configuration2</artifactId>-->
+<!--			<version>2.12.0</version>-->
+<!--		</dependency>-->
+
+		<dependency>
+			<groupId>commons-configuration</groupId>
+			<artifactId>commons-configuration</artifactId>
+			<version>1.7</version>
+		</dependency>
+
+
 		<!-- https://mvnrepository.com/artifact/commons-logging/commons-logging -->
 		<dependency>
 			<groupId>commons-logging</groupId>
@@ -281,6 +299,12 @@
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
+			<version>${log4j.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
 			<version>${log4j.version}</version>
 		</dependency>
 
@@ -371,6 +395,7 @@
 					<groupId>org.seleniumhq.selenium</groupId>
 					<artifactId>selenium-support</artifactId>
 				</exclusion>
+				
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -525,6 +550,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-api</artifactId>
@@ -550,6 +576,7 @@
 			<artifactId>guava</artifactId>
 			<version>${guava.jre.version}</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
@@ -563,11 +590,13 @@
 			<artifactId>jackson-annotations</artifactId>
 			<version>${jackson.version}</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
 			<version>${jackson.version}</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>

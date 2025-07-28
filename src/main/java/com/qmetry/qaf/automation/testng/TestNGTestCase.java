@@ -58,10 +58,6 @@ public abstract class TestNGTestCase extends Validator {
 		this.context = context;
 	}
 
-	
-//	final public void setupSuit() {
-//		System.out.println("In Before Suite!!!");
-//	}
 	@BeforeSuite(alwaysRun = true)
 	final public void setupSuit(ITestContext context) {
 		this.context = context;

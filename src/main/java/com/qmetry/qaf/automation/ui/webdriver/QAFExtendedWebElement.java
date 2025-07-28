@@ -379,8 +379,7 @@ public class QAFExtendedWebElement extends RemoteWebElement implements QAFWebEle
 			}
 			return false;
 		} catch (WebDriverException e) {
-			
-			System.out.println(e);
+			logger.debug("Is Present : " + e);
 			return false;
 		}
 	}

@@ -449,7 +449,7 @@ public class PropertyUtil extends XMLConfiguration {
 					boolean loadSubDirs = getBoolean("resources.load.subdirs", true);
 					File[] propFiles = FileUtil.listFilesAsArray(resourceFile,
 							".properties", StringComparator.Suffix, loadSubDirs);
-					logger.info("Resource dir: " + resourceFile.getAbsolutePath()
+					logger.debug("Resource dir: " + resourceFile.getAbsolutePath()
 							+ ". Found property files to load: " + propFiles.length);
 					File[] locFiles = FileUtil.listFilesAsArray(resourceFile, ".loc",
 							StringComparator.Suffix, loadSubDirs);
@@ -469,7 +469,7 @@ public class PropertyUtil extends XMLConfiguration {
 
 					propFiles = FileUtil.listFilesAsArray(resourceFile, ".xml",
 							StringComparator.Suffix, loadSubDirs);
-					logger.info("Resource dir: " + resourceFile.getAbsolutePath()
+					logger.debug("Resource dir: " + resourceFile.getAbsolutePath()
 							+ ". Found property files to load: " + propFiles.length);
 
 					p1 = new PropertyUtil();
