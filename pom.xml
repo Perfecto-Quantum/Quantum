@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.perfecto</groupId>
 	<artifactId>quantum</artifactId>
-	<version>3.1.6</version>
+	<version>3.1.7</version>
 	<packaging>jar</packaging>
 	<description>Quantum is QAF based open source project powered by Perforce</description>
 	<url>
@@ -23,6 +23,12 @@
 		<developer>
 			<name>Veronika Juhanson</name>
 			<email>vjuhanson@perforce.com</email>
+			<organization>Perfecto Mobile by Perforce</organization>
+			<organizationUrl>https://www.perfecto.io</organizationUrl>
+		</developer>
+		<developer>
+			<name>Brian Clark</name>
+			<email>bclark@perforce.com</email>
 			<organization>Perfecto Mobile by Perforce</organization>
 			<organizationUrl>https://www.perfecto.io</organizationUrl>
 		</developer>
