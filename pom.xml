@@ -64,7 +64,7 @@
 		<jsoup.version>1.15.4</jsoup.version>
 		<jackson.version>2.18.2</jackson.version>
 		<guava.jre.version>33.3.1-jre</guava.jre.version>
-		<!--		<webdriver.manager.version>6.2.0</webdriver.manager.version>-->
+		<webdriver.manager.version>6.2.0</webdriver.manager.version>
 		<!--		<slf4j.version>2.0.16</slf4j.version>-->
 		<http.components.version>4.5.14</http.components.version>
 		<commons.io.version>2.18.0</commons.io.version>
@@ -319,7 +319,14 @@
 			<artifactId>log4j-api</artifactId>
 			<version>${log4j.version}</version>
 		</dependency>
-
+		
+		<!-- https://mvnrepository.com/artifact/io.github.bonigarcia/webdrivermanager-->
+		<dependency>
+			<groupId>io.github.bonigarcia</groupId>
+			<artifactId>webdrivermanager</artifactId>
+			<version>${webdriver.manager.version}</version>
+		</dependency>
+		
 		<!-- https://mvnrepository.com/artifact/org.hamcrest/hamcrest -->
 		<dependency>
 			<groupId>org.hamcrest</groupId>
@@ -406,6 +413,10 @@
 				<exclusion>
 					<groupId>org.seleniumhq.selenium</groupId>
 					<artifactId>selenium-support</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.github.bonigarcia</groupId>
+					<artifactId>webdrivermanager</artifactId>
 				</exclusion>
 				
 			</exclusions>
