@@ -218,7 +218,7 @@ public class FailedTestSuite {
 			return;
 		}
 		
-		if(failedTestSuite.failedTests.size()>0) {
+		if((ConfigurationManager.getBundle().getString("generate.failed.testng.file", "true") == "true") && failedTestSuite.failedTests.size()>0) {
 			
 			failedTestSuite.addAllFailedTests();
 			
@@ -259,6 +259,8 @@ public class FailedTestSuite {
 			} catch (ParserConfigurationException e1) {
 				e1.printStackTrace();
 			}
+		}else {
+			logger.info("Quantum Failed TestNG Xml file NOT generated because no failed tests OR 'generate.failed.testng.file' parameter was not set to true ");
 		}
 	}
 
