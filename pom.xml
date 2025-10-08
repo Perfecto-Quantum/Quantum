@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.perfecto</groupId>
 	<artifactId>quantum</artifactId>
-	<version>3.1.6</version>
+	<version>3.1.7</version>
 	<packaging>jar</packaging>
 	<description>Quantum is QAF based open source project powered by Perforce</description>
 	<url>
@@ -23,6 +23,12 @@
 		<developer>
 			<name>Veronika Juhanson</name>
 			<email>vjuhanson@perforce.com</email>
+			<organization>Perfecto Mobile by Perforce</organization>
+			<organizationUrl>https://www.perfecto.io</organizationUrl>
+		</developer>
+		<developer>
+			<name>Brian Clark</name>
+			<email>bclark@perforce.com</email>
 			<organization>Perfecto Mobile by Perforce</organization>
 			<organizationUrl>https://www.perfecto.io</organizationUrl>
 		</developer>
@@ -58,7 +64,7 @@
 		<jsoup.version>1.15.4</jsoup.version>
 		<jackson.version>2.18.2</jackson.version>
 		<guava.jre.version>33.3.1-jre</guava.jre.version>
-		<!--		<webdriver.manager.version>6.2.0</webdriver.manager.version>-->
+		<webdriver.manager.version>6.1.0</webdriver.manager.version>
 		<!--		<slf4j.version>2.0.16</slf4j.version>-->
 		<http.components.version>4.5.14</http.components.version>
 		<commons.io.version>2.18.0</commons.io.version>
@@ -325,7 +331,14 @@
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
 		</dependency>
-
+		
+		<!-- https://mvnrepository.com/artifact/io.github.bonigarcia/webdrivermanager-->
+		<dependency>
+			<groupId>io.github.bonigarcia</groupId>
+			<artifactId>webdrivermanager</artifactId>
+			<version>${webdriver.manager.version}</version>
+		</dependency>
+		
 		<!-- https://mvnrepository.com/artifact/org.hamcrest/hamcrest -->
 		<dependency>
 			<groupId>org.hamcrest</groupId>
@@ -412,6 +425,10 @@
 				<exclusion>
 					<groupId>org.seleniumhq.selenium</groupId>
 					<artifactId>selenium-support</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.github.bonigarcia</groupId>
+					<artifactId>webdrivermanager</artifactId>
 				</exclusion>
 				
 
