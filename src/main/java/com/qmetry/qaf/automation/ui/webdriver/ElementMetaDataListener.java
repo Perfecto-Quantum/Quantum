@@ -162,11 +162,10 @@ public class ElementMetaDataListener extends QAFWebElementCommandAdapter {
 
 	@Override
 	public void onFailure(QAFExtendedWebElement element, CommandTracker commandTracker) {
-		System.out.println("Check Driver type");
+		// Updated to prevent executing javascript scroll in Native Appium executions
 		
 		String driverType = element.getWrappedDriver().getUnderLayingDriver().getClass().getCanonicalName();
-		System.out.println("Current Driver type: " + driverType);
-		String currentContext = "WEBVIEW";
+		String currentContext = "";
 		if(driverType.contains("Android")) {
 			 currentContext = AndroidDriver.class.cast(element.getWrappedDriver().getUnderLayingDriver()).getContext();
 		}else if(driverType.contains("IOS") ) {
