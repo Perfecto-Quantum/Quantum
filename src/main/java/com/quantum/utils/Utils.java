@@ -28,6 +28,71 @@ public class Utils {
 	public static final String KEY_DEVICE_MODEL_IPHONE_11 = "iPhone-11";
 	
 	private static final Log logger = LogFactoryImpl.getLog(Utils.class);
+	
+	
+	/**
+	 * Return response from AI validation command.
+	 *
+	 * @param aiPrompt   - AI Validation prompt.
+	 * @return - true or false
+	 */
+	public static boolean aiValidation(String aiPrompt) {
+		return aiValidation(aiPrompt, false);
+	}
+	
+	/**
+	 * Return response from AI validation command.
+	 *
+	 * @param aiPrompt   - AI Validation prompt.
+	 * @param includeReasoning - specify true to allocate additional AI resources for tasks that require multi-step logical processing.
+	 * @return - true or false
+	 */
+	public static boolean aiValidation(String aiPrompt, Boolean includeReasoning) {
+		try {
+			Object result = DriverUtils.getDriver().executeScript("perfecto:ai:validation", Map.of("validation", aiPrompt, "reasoning", includeReasoning ));
+			if("true".equalsIgnoreCase(result.toString())){
+				return true;
+			}else {
+				return false;
+			}
+		} catch (Exception e) {
+			logger.error("Failed to execute command ai:validation: " + e.getMessage());
+			return false;
+		}
+	}
+	
+
+	/**
+	 * Return response from AI User Action command.
+	 *
+	 * @param aiPrompt   - AI Validation prompt.
+	 * @return - true or false
+	 */
+	public static boolean aiUserAction(String aiPrompt) {
+		return aiValidation(aiPrompt, false);
+	}
+	
+	/**
+	 * Return response from AI User Action  command.
+	 *
+	 * @param aiPrompt   - AI Validation prompt.
+	 * @param includeReasoning - specify true to allocate additional AI resources for tasks that require multi-step logical processing.
+	 * @return - true or false
+	 */
+	public static boolean aiUserAction(String aiPrompt, Boolean includeReasoning) {
+		try {
+			Object result = DriverUtils.getDriver().executeScript("perfecto:ai:user-action", Map.of("action", aiPrompt, "reasoning", includeReasoning));
+			if("true".equalsIgnoreCase(result.toString())){
+				return true;
+			}else {
+				return false;
+			}
+		} catch (Exception e) {
+			logger.error("Failed to execute command ai:validation: " + e.getMessage());
+			return false;
+		}
+	}
+	
 
 	/**
 	 * Return true if element is displayed after X milliseconds.
