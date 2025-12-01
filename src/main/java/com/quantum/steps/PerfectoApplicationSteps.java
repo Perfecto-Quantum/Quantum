@@ -784,7 +784,7 @@ public class PerfectoApplicationSteps {
 	 */
 	@Then("^I perform AI User-Action with prompt: \"(.*?)\"$")
 	public static void performAIUserAction(String prompt) {
-		ReportUtils.logVerify("Audio checkpoint status ", Utils.aiValidation(prompt));
+		ReportUtils.logVerify("Audio checkpoint status ", Utils.aiUserAction(prompt));
 	}
 	
 	/**
@@ -794,7 +794,7 @@ public class PerfectoApplicationSteps {
 	 */
 	@Then("^I perform AI User-Action with prompt: \"(.*?)\" and reasoning$")
 	public static void performAIUserActionWithReasoning(String prompt) {
-		ReportUtils.logVerify("Audio checkpoint status ", Utils.aiValidation(prompt, true));
+		ReportUtils.logVerify("Audio checkpoint status ", Utils.aiUserAction(prompt, true));
 	}
 
 }

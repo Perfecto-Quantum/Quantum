@@ -53,7 +53,7 @@
 		<testng.version>7.7.1</testng.version>
 		<commons.logging.version>1.3.5</commons.logging.version>
 		<log4j.version>2.25.1</log4j.version>
-		<commons.collections.version>4.1</commons.collections.version>
+		<!-- <commons.colleversion>4.1</commons.colleversion> -->
 		<dom4j.version>2.1.4</dom4j.version>
 		<apache.http.client5.version>5.4.1</apache.http.client5.version>
 		<cukes.version>7.11.1</cukes.version>
@@ -289,12 +289,20 @@
 		</dependency>
 
 		<!--
-		https://mvnrepository.com/artifact/org.apache.commons/commons-configuration2 -->
-<!--		<dependency>-->
-<!--			<groupId>org.apache.commons</groupId>-->
-<!--			<artifactId>commons-configuration2</artifactId>-->
-<!--			<version>2.12.0</version>-->
-<!--		</dependency>-->
+		https://mvnrepository.com/artifact/org.apache.commons/commons-configuration2 
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-configuration2</artifactId>
+			<version>2.12.0</version>
+		</dependency>
+		-->
+		
+		<!--
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+			<version>${commons.collections.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>commons-configuration</groupId>
@@ -306,7 +314,8 @@
 					<artifactId>commons-collections</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
+		</dependency> 
+		-->
 
 
 		<!-- https://mvnrepository.com/artifact/commons-logging/commons-logging -->
@@ -375,10 +384,15 @@
 					<artifactId>commons-beanutils</artifactId>
 				</exclusion>
 
-				<exclusion>
+			<!--	<exclusion>
 					<groupId>commons-collections</groupId>
 					<artifactId>commons-collections</artifactId>
 				</exclusion>
+				
+				<exclusion>
+					<groupId>commons-configuration</groupId>
+					<artifactId>commons-configuration</artifactId>
+				</exclusion> -->
 
 				<exclusion>
 					<groupId>org.hamcrest</groupId>
@@ -626,11 +640,6 @@
 			<version>${guava.jre.version}</version>
 		</dependency>
 		
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-collections4</artifactId>
-			<version>${commons.collections.version}</version>
-		</dependency>
 
 		<!--
 		https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations -->
