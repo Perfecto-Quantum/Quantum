@@ -60,7 +60,6 @@ public class Utils {
 			return false;
 		}
 	}
-	
 
 	/**
 	 * Return response from AI User Action command.
@@ -69,7 +68,7 @@ public class Utils {
 	 * @return - true or false
 	 */
 	public static boolean aiUserAction(String aiPrompt) {
-		return aiValidation(aiPrompt, false);
+		return aiUserAction(aiPrompt, false);
 	}
 	
 	/**
@@ -93,6 +92,28 @@ public class Utils {
 		}
 	}
 	
+	/**
+	 * Return response from AI validation command.
+	 *
+	 * @param aiPrompt   - AI Validation prompt.
+	 * @param includeReasoning - Specify true to allocate additional AI resources for tasks that require multi-step logical processing.
+	 * @return - Map<String,Object> pushed to config property "ai.action.return.value"
+	 */
+	public static boolean aiUserActionWithReturnData(String aiPrompt, Boolean includeReasoning) {
+		try {
+			Map<String, Object> aiOutput = (Map<String, Object>) DriverUtils.getDriver().executeScript("perfecto:ai:user-action", Map.of("validation", aiPrompt, "reasoning", includeReasoning, "outputVariables", true));
+			if(aiOutput.get("result") != null && "true".equalsIgnoreCase(aiOutput.get("result").toString())){
+				ConfigurationManager.getBundle().setProperty("ai.action.return.value", aiOutput.get("outputVariables"));
+				return true;
+			}else {
+				return false;
+			}
+		} catch (Exception e) {
+			logger.error("Failed to execute command ai:validation: " + e.getMessage());
+			return false;
+		}
+	}
+
 
 	/**
 	 * Return true if element is displayed after X milliseconds.
