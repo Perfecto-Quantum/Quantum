@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.perfecto</groupId>
 	<artifactId>quantum</artifactId>
-	<version>3.1.8</version>
+	<version>3.1.8-4j</version>
 	<packaging>jar</packaging>
 	<description>Quantum is QAF based open source project powered by Perforce</description>
 	<url>
@@ -51,9 +51,11 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<testng.version>7.7.1</testng.version>
-		<commons.logging.version>1.3.5</commons.logging.version>
 		<log4j.version>2.25.1</log4j.version>
-		<!-- <commons.colleversion>4.1</commons.colleversion> -->
+		<commons.logging.version>1.3.5</commons.logging.version>
+		<commons.io.version>2.18.0</commons.io.version>
+		<commons.beanutils.version>1.11.0</commons.beanutils.version>
+		<commons.collections.version>4.1</commons.collections.version>
 		<dom4j.version>2.1.4</dom4j.version>
 		<apache.http.client5.version>5.4.1</apache.http.client5.version>
 		<cukes.version>7.11.1</cukes.version>
@@ -69,8 +71,6 @@
 		<jakarta.mail.version>2.0.4</jakarta.mail.version>
 		<!--		<slf4j.version>2.0.16</slf4j.version>-->
 		<http.components.version>4.5.14</http.components.version>
-		<commons.io.version>2.18.0</commons.io.version>
-		<commons.beanutils.version>1.11.0</commons.beanutils.version>
 		<maven.java.doc.plugin.version>3.5.0</maven.java.doc.plugin.version>
 		<maven.compiler.plugin.version>3.10.1</maven.compiler.plugin.version>
 		<maven.source.plugin.version>3.2.1</maven.source.plugin.version>
@@ -202,7 +202,7 @@
 		</repository>
 	</repositories>
 	
-	<dependencyManagement>
+	<!--<dependencyManagement>
 		<dependencies>
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
@@ -212,7 +212,7 @@
 				<type>pom</type>
 			</dependency>
 		</dependencies>
-	</dependencyManagement>
+	</dependencyManagement> -->
 	
 	<dependencies>
 
@@ -309,13 +309,13 @@
 		</dependency>
 		-->
 		
-		<!--
+		
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
 			<version>${commons.collections.version}</version>
 		</dependency>
-
+<!--
 		<dependency>
 			<groupId>commons-configuration</groupId>
 			<artifactId>commons-configuration</artifactId>
@@ -396,11 +396,11 @@
 					<artifactId>commons-beanutils</artifactId>
 				</exclusion>
 
-			<!--	<exclusion>
+				<exclusion>
 					<groupId>commons-collections</groupId>
 					<artifactId>commons-collections</artifactId>
 				</exclusion>
-				
+				<!--
 				<exclusion>
 					<groupId>commons-configuration</groupId>
 					<artifactId>commons-configuration</artifactId>
