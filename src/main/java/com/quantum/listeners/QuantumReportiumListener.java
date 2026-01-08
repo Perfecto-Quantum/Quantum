@@ -116,12 +116,12 @@ class Messages {
 }
 
 public class QuantumReportiumListener extends ReportiumTestNgListener
-		implements QAFTestStepListener, ITestListener, ISuiteListener {
+implements QAFTestStepListener, ITestListener, ISuiteListener {
 
-//	private static final Log logger = LogFactoryImpl.getLog(QuantumReportiumListener.class);
+	//	private static final Log logger = LogFactoryImpl.getLog(QuantumReportiumListener.class);
 
 	public static final String PERFECTO_REPORT_CLIENT = "perfecto.report.client";
-	
+
 	private final Log logger = LogFactoryImpl.getLog(QuantumReportiumListener.class);
 
 	public static ReportiumClient getReportClient() {
@@ -146,7 +146,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 	}
 
 	public Messages parseFailureJsonFile(String actualMessage) {
-//		String jsonStr = null;
+		//		String jsonStr = null;
 		String failureConfigLoc = ConfigurationManager.getBundle().getString("failureReasonConfig",
 				"src/main/resources/failureReasons.json");
 
@@ -286,7 +286,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 					} catch (Exception ex) {
 						new NullPointerException(
 								"Custom field key/value pair not delimited properly.  Example of proper default usage: %Developer-Jeremy.  Check application properties custom.field.delimiter and custom.field.identifier for custom values that may have been set.")
-								.printStackTrace();
+						.printStackTrace();
 					}
 				}
 			}
@@ -295,7 +295,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 
 			if (groupsFinal.size() > 0) {
 				testContext
-						.withTestExecutionTags(groupsFinal.toString().replace('[', ' ').replace(']', ' ').split(","));
+				.withTestExecutionTags(groupsFinal.toString().replace('[', ' ').replace(']', ' ').split(","));
 			}
 
 			if (cfc.size() > 0) {
@@ -342,7 +342,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 		if (method.isTestMethod()) {
 			// Before execution of test method
 			ConsoleUtils.surroundWithSquare("TEST STARTED: " + getTestName(testResult)
-					+ (testResult.getParameters().length > 0 ? " [" + testResult.getParameters()[0] + "]" : ""));
+			+ (testResult.getParameters().length > 0 ? " [" + testResult.getParameters()[0] + "]" : ""));
 
 		}
 	}
@@ -352,7 +352,8 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 		String stepDescription = getProcessStepDescription(stepExecutionTracker.getStep());
 		String msg = "BEGIN STEP: " + stepDescription;
 		ConsoleUtils.logInfoBlocks(msg, ConsoleUtils.lower_block + " ", 10);
-		logStepStart(stepDescription);
+		if(!stepDescription.contains("AI User-Action"))
+			logStepStart(stepDescription);
 	}
 
 	@Override
@@ -393,26 +394,26 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 					}
 				}
 			}
-				break;
+			break;
 			default:
 				DeviceUtils.stopGenerateHAR();
 
 			}
 
-//			if (platformName != null && platformName.equalsIgnoreCase("android") || platformName.equalsIgnoreCase("ios")
-//					|| platformName.equalsIgnoreCase("any") || platformName.equalsIgnoreCase("linux"))
-//				DeviceUtils.stopGenerateHAR();
-//
-//			if (platformName != null && platformName.equalsIgnoreCase("mac")) {
-//				Object deviceNameObj = DriverUtils.getDriver().getCapabilities().getCapability("deviceName");
-//				if (deviceNameObj != null) {
-//
-//					String deviceName = deviceNameObj.toString().toLowerCase();
-//					if (deviceName.contains("iphone") || deviceName.contains("ipad")) {
-//						DeviceUtils.stopGenerateHAR();
-//					}
-//				}
-//			}
+			//			if (platformName != null && platformName.equalsIgnoreCase("android") || platformName.equalsIgnoreCase("ios")
+			//					|| platformName.equalsIgnoreCase("any") || platformName.equalsIgnoreCase("linux"))
+			//				DeviceUtils.stopGenerateHAR();
+			//
+			//			if (platformName != null && platformName.equalsIgnoreCase("mac")) {
+			//				Object deviceNameObj = DriverUtils.getDriver().getCapabilities().getCapability("deviceName");
+			//				if (deviceNameObj != null) {
+			//
+			//					String deviceName = deviceNameObj.toString().toLowerCase();
+			//					if (deviceName.contains("iphone") || deviceName.contains("ipad")) {
+			//						DeviceUtils.stopGenerateHAR();
+			//					}
+			//				}
+			//			}
 		}
 
 		if (null != client) {
@@ -570,7 +571,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 			if (driver != null) {
 
 				driver.getUnderLayingDriver().getPageSource();
-//				driver.getUnderLayingDriver().getWindowHandle();
+				//				driver.getUnderLayingDriver().getWindowHandle();
 			}
 		} catch (Exception e) {
 			Object testInstance = testResult.getInstance();
@@ -580,15 +581,15 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 	}
 
 	private void tearIt(ITestResult testResult) {
-		
+
 		XmlTest xmlTest = testResult.getTestContext().getCurrentXmlTest();
-		
+
 		boolean doResetDriver = resetDriver(testResult);
-		
+
 		String className = xmlTest.getXmlClasses().get(0).getName();
-		
+
 		String isGlobalDatadrivenParallel = ConfigurationManager.getBundle().getString("global.datadriven.parallel", "false");
-		
+
 		if ((xmlTest.getParallel().toString().equalsIgnoreCase("methods")
 				& testResult.getTestClass().getName().toLowerCase().contains("scenario"))
 				|| isGlobalDatadrivenParallel.equalsIgnoreCase("true")
@@ -596,7 +597,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 				|| className.contains("com.qmetry.qaf.automation.step.client.csv.KwdTestFactory")
 				|| doResetDriver
 
-		) {
+				) {
 			Object testInstance = testResult.getInstance();
 			((WebDriverTestCase) testInstance).getTestBase().tearDown();
 		}
@@ -641,11 +642,11 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 	@Override
 	public void onFinish(ITestContext context) {
 
-//		((FileHandler)ConfigurationManager.getBundle().getProperty("seleniumfile")).flush();
-//		((FileHandler)ConfigurationManager.getBundle().getProperty("seleniumfile")).close();
+		//		((FileHandler)ConfigurationManager.getBundle().getProperty("seleniumfile")).flush();
+		//		((FileHandler)ConfigurationManager.getBundle().getProperty("seleniumfile")).close();
 
-//		((FileHandler)ConfigurationManager.getBundle().getProperty("remotewdfile")).flush();
-//		((FileHandler)ConfigurationManager.getBundle().getProperty("remotewdfile")).close();
+		//		((FileHandler)ConfigurationManager.getBundle().getProperty("remotewdfile")).flush();
+		//		((FileHandler)ConfigurationManager.getBundle().getProperty("remotewdfile")).close();
 
 	}
 
@@ -689,11 +690,11 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 				"REPORTIUM URL: " + getReportClient().getReportUrl().replace("[", "%5B").replace("]", "%5D"));
 
 		ConsoleUtils.surroundWithSquare(endText + getTestName(testResult)
-				+ (testResult.getParameters().length > 0 ? " [" + testResult.getParameters()[0] + "]" : ""));
+		+ (testResult.getParameters().length > 0 ? " [" + testResult.getParameters()[0] + "]" : ""));
 
 	}
 
-//	@Override
+	//	@Override
 	protected String getTestName(ITestResult result) {
 
 		return result.getTestName() == null ? result.getMethod().getMethodName() : result.getTestName();
@@ -741,7 +742,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 		} else {
 			for (String driverName : driverNameList.split(",")) {
 				logger.info("Adding driver with name - " + driverName);
-//				ConfigurationManager.getBundle().setProperty("driver_name", driverName);
+				//				ConfigurationManager.getBundle().setProperty("driver_name", driverName);
 				DriverUtils.switchToDriver(driverName);
 				driverList.put(driverName, DeviceUtils.getQAFDriver());
 				logger.info("Added driver with name - " + driverName);
@@ -783,9 +784,9 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 
 		List<Pattern> filterPatterns = cucumberOptions.getNameFilters();
 
-//		List<String> patterns =filterPatterns
-//				.stream().map(Object::toString)
-//				.collect(Collectors.toList());
+		//		List<String> patterns =filterPatterns
+		//				.stream().map(Object::toString)
+		//				.collect(Collectors.toList());
 
 		List<String> optionsList = filterPatterns.stream().map(Object::toString).collect(Collectors.toList());
 
@@ -805,7 +806,7 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 
 			return new RuntimeOptionsBuilder().setObjectFactoryClass(testResultClass).build();
 
-//			return new RuntimeOptionsFactory(Class.forName(testResult.getTestClass().getName())).create();
+			//			return new RuntimeOptionsFactory(Class.forName(testResult.getTestClass().getName())).create();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -824,8 +825,8 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 
 		}
 
-//		((TestNGScenario) testNGMethod).getMetaData().put("Perfecto-report",
-//				"<a href=\"" + url + "\" target=\"_blank\">view</a>");
+		//		((TestNGScenario) testNGMethod).getMetaData().put("Perfecto-report",
+		//				"<a href=\"" + url + "\" target=\"_blank\">view</a>");
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -932,10 +933,10 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 	}
 
 	private boolean resetDriver(ITestResult result) {
-		
+
 		String driverResetTimerFlag = ConfigurationManager.getBundle().getString("perfecto.driver.restart.timer.flag",
 				"false");
-		
+
 		int driverResetTimerValue = ConfigurationManager.getBundle().getInt("perfecto.driver.restart.timer.value",
 				3600);
 
@@ -956,12 +957,12 @@ public class QuantumReportiumListener extends ReportiumTestNgListener
 		if (driverResetTimerFlag.equalsIgnoreCase("true") || driverResetTag) {
 			long currentTimeInMsec = System.currentTimeMillis();
 			long driverStartTimeInMsec = ConfigurationManager.getBundle().getLong(PerfectoDriverListener.DRIVER_START_TIMER);
-			
+
 			long timeElapsedInMsec = currentTimeInMsec - driverStartTimeInMsec;
-			
+
 			long timeElapsedInSec = (long) Math.ceil(timeElapsedInMsec);
 
-//			Check the timer and the tag for restart @RestartDriverAfterTimeout
+			//			Check the timer and the tag for restart @RestartDriverAfterTimeout
 			if ( (timeElapsedInSec > driverResetTimerValue) || driverResetTag) {
 				logger.info("Closing the driver and restarting the driver");
 				return true;
