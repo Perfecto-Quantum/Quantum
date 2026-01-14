@@ -236,32 +236,6 @@ public class QAFInetrceptableDataProvider {
 		}
 		
 		return dataList.iterator();
-
-//		TestNGScenario scenario = new TestNGScenario(null, null, null, dataDrivenScenario);
-
-		// (TestNGScenario) method;
-
-//		@SuppressWarnings("unchecked")
-//		Map<String, Object> parameters = (Map<String, Object>) getParameters(scenario);
-//		// update resolved meta-data should reflect in report
-//		Map<String, Object> metadata = scenario.getMetaData();
-//		metadata.putAll(parameters);
-
-//		Map<String, Object> metadata = dataDrivenScenario.getMetadata();
-
-		// Intercepter registered using property 'qaf.listeners'
-//		Set<QAFDataProviderIntercepter> intercepters = getIntercepters();
-//		for (QAFDataProviderIntercepter intercepter : intercepters) {
-//			intercepter.beforeFech(scenario, c);
-//		}
-
-//		List<Object[]> data = process(scenario, dataList);
-//		
-//		return data;
-
-		// listeners
-//		List<Object[]> interceptedData = intercept(scenario, c, data,intercepters);
-//		return interceptedData.iterator();
 	}
 
 	@SuppressWarnings("unused")
@@ -334,45 +308,6 @@ public class QAFInetrceptableDataProvider {
 			return StringUtil.toMap(testParameters, true);
 		}
 	}
-
-//	private static Map<?, ?> getParameters(DataDrivenScenario scenario) {
-//		
-//		
-//		Map<String, Object> methodParameters = scenario.getMetadata();
-//		String description = scenario.getDescription();
-//		
-//		if (isNotBlank(description) && JSONUtil.isValidJsonString(description)) {
-//			
-//			Map<String, Object> paramsFromDesc = new JSONObject(description).toMap();
-//			description =(String) paramsFromDesc.remove("description");
-//			methodParameters.putAll(paramsFromDesc);
-//			scenario.setDescription(description);
-//		}
-//
-//		// highest priority test data overridden through property with test name prefix
-//		String testParameters = getConfigParameters(scenario.getMethodName() + ".testdata");
-//		if(isBlank(testParameters)){
-//			//second priority overridden through property "global.testdata"
-//			testParameters = getConfigParameters("global.testdata");
-//			if(isBlank(testParameters)){
-//				//default provided with test case
-//				testParameters = new JSONObject(methodParameters).toString();
-//			}
-//		}
-//		
-//		String cls = scenario.getConstructorOrMethod().getMethod().getDeclaringClass().getSimpleName();
-//		String mtd = scenario.getMethodName();
-//		testParameters = testParameters.replace("${class}", cls);
-//		testParameters = testParameters.replace("${method}", mtd);
-//		testParameters = StrSubstitutor.replace(testParameters, methodParameters);
-//		testParameters = getBundle().getSubstitutor().replace(testParameters);
-//		try {
-//			return new JSONObject(testParameters).toMap();
-//		} catch (JsonSyntaxException e) {
-//			// old way of setting global data or testdata using key=value
-//			return StringUtil.toMap(testParameters, true);
-//		}
-//	}
 
 	@SuppressWarnings({ "unchecked", "unused" })
 	private static List<Object[]> process(TestNGScenario scenario, List<Object[]> data) {
@@ -497,13 +432,7 @@ public class QAFInetrceptableDataProvider {
 				List<Object[]> mapData = DataProviderUtil.getDataSetAsMap(key, file);
 				return mapData.toArray(new Object[][] {});
 			}
-			/*
-			 * if (file.endsWith("xls")) { if (isNotBlank(key)) { return
-			 * ExcelUtil.getTableDataAsMap(file, ((String) metadata.get(params.KEY.name())),
-			 * (String) metadata.get(params.SHEETNAME.name())); } return
-			 * ExcelUtil.getExcelDataAsMap(file, (String)
-			 * metadata.get(params.SHEETNAME.name())); }
-			 */
+			
 			if (file.endsWith("xlsx") || file.endsWith("xls")) {
 
 				String sheetName = (String) metadata.get(params.SHEETNAME.name());
@@ -555,6 +484,12 @@ public class QAFInetrceptableDataProvider {
 	}
 
 	private static Method getDataProviderMethod(String dp, String dpc) {
+//		Condition to check if dataprovider property is passed in the feature file, if not this will look for a global property 'global.dataprovider' 
+//		 Now we can pass dataprovider in feature file or globally
+		if (isBlank(dp)) {
+			dp = getBundle().getString("global.dataprovider",
+					getBundle().getString("dataprovider", ""));
+		}
 		try {
 			Class<?> dpClass = Class.forName(dpc);
 			Set<Method> dpMethods = ClassUtil.getAllMethodsWithAnnotation(dpClass, DataProvider.class);
