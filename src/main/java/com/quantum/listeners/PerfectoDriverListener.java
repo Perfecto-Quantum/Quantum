@@ -257,10 +257,10 @@ public class PerfectoDriverListener extends QAFWebDriverCommandAdapter {
 			}
 			
 			if (jobBranch != null) {
-				((DesiredCapabilities) desiredCapabilities).setCapability("report.jobBranch", jobBranch);
+				perfectoOptions.put("report.jobBranch", jobBranch);
 			}
 			if (tags != null) {
-				((DesiredCapabilities) desiredCapabilities).setCapability("report.tags", tags);
+				perfectoOptions.put("report.tags", tags);
 			}
 			
 			((DesiredCapabilities) desiredCapabilities).setCapability("perfecto:options",perfectoOptions);
