@@ -15,13 +15,6 @@
 
 	<developers>
 		<developer>
-			<name>Prasant Kumar Sutaria</name>
-			<email>psutaria@perforce.com</email>
-			<organization>Perfecto Mobile by Perforce</organization>
-			<organizationUrl>https://www.perfecto.io</organizationUrl>
-		</developer>
-		
-		<developer>
 			<name>Veronika Juhanson</name>
 			<email>vjuhanson@perforce.com</email>
 			<organization>Perfecto Mobile by Perforce</organization>
@@ -81,7 +74,7 @@
 		<maven.compiler.plugin.version>3.10.1</maven.compiler.plugin.version>
 		<maven.source.plugin.version>3.2.1</maven.source.plugin.version>
 		<maven.jar.plugin.version>2.4</maven.jar.plugin.version>
-
+		<gpg.skip>true</gpg.skip>
 	</properties>
 
 	<scm>
@@ -207,6 +200,19 @@
 				https://repository.jboss.org/nexus/content/repositories/thirdparty-releases</url>
 		</repository>
 	</repositories>
+		<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-bom</artifactId>
+				<version>${log4j.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+
+		</dependencies>
+
+	</dependencyManagement>
 
 	<dependencies>
 
@@ -334,14 +340,22 @@
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
-			<version>${log4j.version}</version>
+<!--			<version>${log4j.version}</version>-->
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
-			<version>${log4j.version}</version>
+<!--			<version>${log4j.version}</version>-->
 		</dependency>
+		
+		<!-- Source: https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-slf4j-impl -->
+	<dependency>
+	    <groupId>org.apache.logging.log4j</groupId>
+	    <artifactId>log4j-slf4j-impl</artifactId>
+<!--	    <version>${log4j.version}</version>-->
+	    <scope>compile</scope>
+	</dependency>
 		
 		<!-- https://mvnrepository.com/artifact/io.github.bonigarcia/webdrivermanager-->
 		<dependency>
