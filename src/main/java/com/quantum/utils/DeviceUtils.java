@@ -64,6 +64,21 @@ public class DeviceUtils {
 		String result = isText(text, null);
 		return Validator.verifyThat(message,result ,Matchers.equalTo("true"));
 	}
+	
+	/**
+	 * Utility method Verify Text using Perfecto's Visual testing.
+	 * 
+	 * @param text - Text to verify.
+	 * 
+	 * @param timeOutInSec - Timeout in seconds.
+	 * 
+	 * @return Boolean representing whether the text is available or not.
+	 */
+	public static boolean verifyVisualText(String text, int timeOutInSec) {
+		String message = String.format("Text: '%s' should be present", text);
+		String result = isText(text, null);
+		return Validator.verifyThat(message,result ,Matchers.equalTo("true"));
+	}
 
 	/**
 	 * Utility method Assert Text using Perfecto's Visual testing.
