@@ -268,7 +268,7 @@ implements QAFTestStepListener, ITestListener, ISuiteListener {
 			}
 			try {
 
-				cfc.add(new CustomField("quantumFrameworkVersion", "3.0.0"));
+				cfc.add(new CustomField("quantumFrameworkVersion", ConfigurationUtils.getQuantumVersion()));
 
 			} catch (Exception e) {
 				logger.error("On Test Start : " + e);
