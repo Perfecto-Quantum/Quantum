@@ -269,16 +269,6 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 
 			Map<String, String> credentials = new HashMap<>();
 			HashMap<String, String> perfectoCaps = (HashMap<String, String>) capabilities.get("perfecto:options");
-//			perfectoCaps.entrySet().forEach(entry -> {
-//				if (entry.getKey().equalsIgnoreCase("securityToken")) {
-//					credentials.put("securityToken", entry.getValue());
-//				} else if (entry.getKey().equalsIgnoreCase("user")) {
-//					credentials.put("user", entry.getValue());
-//				} else if (entry.getKey().equalsIgnoreCase("password")) {
-//					credentials.put("password", entry.getValue());
-//				}
-//			});
-			Object token = capabilities.get("perfecto:securityToken");
 			if (perfectoCaps.keySet().contains("securityToken")) {
 				credentials.put("securityToken", perfectoCaps.get("securityToken").toString());
 			}
