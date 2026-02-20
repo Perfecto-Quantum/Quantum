@@ -253,6 +253,14 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 					skipDriverInitList = true;
 				}
 			}
+			
+			if(key.contains("capabilities.platformName")){
+				String value = ConfigurationManager.getBundle().getString(key);
+				if(value.equalsIgnoreCase("windows") || value.equalsIgnoreCase("mac")) {
+					logger.debug("Executing on non mobile platform, therefore skipping DriverInitListener");
+					skipDriverInitList = true;
+				}
+			}
 		}
 		
 		if (!skipDriverInitList) {
@@ -260,30 +268,35 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 			Map<String, ?> capabilities = desiredCapabilities.asMap();
 
 			Map<String, String> credentials = new HashMap<>();
-
-			if (capabilities.get("perfecto:securityToken") != null) {
-				credentials.put("securityToken", capabilities.get("perfecto:securityToken").toString());
+			HashMap<String, String> perfectoCaps = (HashMap<String, String>) capabilities.get("perfecto:options");
+			if (perfectoCaps.keySet().contains("securityToken")) {
+				credentials.put("securityToken", perfectoCaps.get("securityToken").toString());
 			}
 
-			if (capabilities.get("perfecto:model") != null) {
-				device.addAttribute("model", capabilities.get("perfecto:model").toString());
+			if (perfectoCaps.keySet().contains("model")) {
+				device.addAttribute("model", perfectoCaps.get("model").toString());
 			}
 
-			if (capabilities.get("perfecto:deviceId") != null) {
-				device.addAttribute("deviceId", capabilities.get("perfecto:deviceId").toString());
+			if (perfectoCaps.keySet().contains("deviceId")) {
+				device.addAttribute("deviceId", perfectoCaps.get("deviceId").toString());
 			}
 
-			if (capabilities.get("perfecto:deviceName") != null) {
-				device.addAttribute("deviceId", capabilities.get("perfecto:deviceName").toString());
+			if (perfectoCaps.keySet().contains("deviceName")) {
+				device.addAttribute("deviceId", perfectoCaps.get("deviceName").toString());
 			}
 
-			if (capabilities.get("perfecto:os") != null) {
-				device.addAttribute("perfecto:os", capabilities.get("perfecto:os").toString());
+			if (perfectoCaps.keySet().contains("os")) {
+				device.addAttribute("perfecto:os", perfectoCaps.get("os").toString());
 			}
 
-			if (capabilities.get("perfecto:osVersion") != null) {
-				device.addAttribute("osVersion", capabilities.get("perfecto:osVersion").toString());
+			if (perfectoCaps.keySet().contains("osVersion")) {
+				device.addAttribute("osVersion", perfectoCaps.get("osVersion").toString());
 			}
+			
+			if (perfectoCaps.keySet().contains("manufacturer")) {
+				device.addAttribute("manufacturer", perfectoCaps.get("manufacturer").toString());
+			}
+			
 			if (!ConfigurationManager.getBundle().getBoolean("device_not_available", false)) {
 				try {
 					boolean deviceAvailableFlag = waitForDeviceAvailable(device, credentials);
