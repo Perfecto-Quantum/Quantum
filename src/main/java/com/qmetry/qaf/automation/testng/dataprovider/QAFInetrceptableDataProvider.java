@@ -138,11 +138,35 @@ public class QAFInetrceptableDataProvider {
 	private static void replaceParameter(Map<String, Object> metadata, ITestContext c) {
 		Map<String, String> testNGParam = c.getCurrentXmlTest().getAllParameters();
 
-		Pattern pattern = Pattern.compile("^\\$\\{(.+)\\}");
+		Pattern pattern = Pattern.compile("^\\$\\{(.+)\\}$");
 
 		String dataSheetName = (String) metadata.get("sheetname");
 
 		dataSheetName = dataSheetName == null ? (String) metadata.get("sheetName") : dataSheetName;
+		
+		String dataFileName = (String) metadata.get("datafile");
+		dataFileName = dataFileName == null ? (String) metadata.get("dataFile") : dataFileName;
+		if (null != dataFileName) {
+			Matcher matcher = pattern.matcher(dataFileName);
+
+			if (matcher.find()) {
+				String paramName = matcher.group(1);
+
+				String testNGValue = testNGParam.get(paramName);
+
+				if (null != testNGValue) {
+					metadata.put("datafile", testNGValue);
+				} else {
+					String bundleValue = (String) getBundle().getProperty(paramName);
+					if (null != bundleValue) {
+						metadata.put("sheetname", testNGValue);
+					} else {
+						throw new DataProviderException("Invalid Key. No Value found for Key - " + paramName);
+					}
+				}
+			}
+		}
+		
 
 		if (null != dataSheetName) {
 			Matcher matcher = pattern.matcher(dataSheetName);
