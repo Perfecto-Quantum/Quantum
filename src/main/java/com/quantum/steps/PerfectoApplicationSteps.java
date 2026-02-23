@@ -27,6 +27,7 @@ import java.util.Map;
 import com.qmetry.qaf.automation.step.QAFTestStepProvider;
 import com.quantum.utils.DeviceUtils;
 import com.quantum.utils.ReportUtils;
+import com.quantum.utils.Utils;
 
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -754,6 +755,68 @@ public class PerfectoApplicationSteps {
 	public static void checkAccessibility(String tagName) {
 		DeviceUtils.checkAccessibility(tagName);
 
+	}
+	
+	/**
+	 * Performs AI Validation.
+	 * 
+	 * @param AI Validation prompt.
+	 */
+	@Then("^I perform AI Validation with prompt: \"(.*?)\"$")
+	public static void performAIValidation(String prompt) {
+		ReportUtils.logVerify("AI validation status ", Utils.aiValidation(prompt));
+	}
+	
+	/**
+	 * Performs AI Validation.
+	 * 
+	 * @param AI Validation prompt.
+	 */
+	@Then("^I perform AI Validation with prompt: \"(.*?)\" and reasoning$")
+	public static void performAIValidationWithReasoning(String prompt) {
+		ReportUtils.logVerify("AI validation status ", Utils.aiValidation(prompt, true));
+	}
+	
+	/**
+	 * Performs AI User-Action.
+	 * 
+	 * @param AI User-Action prompt.
+	 */
+	@Then("^I perform AI User-Action with prompt: \"(.*?)\"$")
+	public static void performAIUserAction(String prompt) {
+		ReportUtils.logVerify("AI user-action status ", Utils.aiUserAction(prompt));
+	}
+	
+	/**
+	 * Performs AI User-Action.
+	 * 
+	 * @param AI User-Action prompt.
+	 */
+	@Then("^I perform AI User-Action with prompt: \"(.*?)\" and reasoning$")
+	public static void performAIUserActionWithReasoning(String prompt) {
+		ReportUtils.logVerify("AI user-action status ", Utils.aiUserAction(prompt, true));
+	}
+	
+	
+	/**
+	 * Performs AI User-Action.
+	 * 
+	 * @param AI User-Action prompt.
+	 */
+	@Then("^I perform AI User-Action with prompt: \"(.*?)\" including return data$")
+	public static void performAIUserActionWithReturnData(String prompt) {
+		ReportUtils.logVerify("AI user-action status ", Utils.aiUserActionWithReturnData(prompt, false));
+	}
+	
+	
+	/**
+	 * Performs AI User-Action.
+	 * 
+	 * @param AI User-Action prompt.
+	 */
+	@Then("^I perform AI User-Action with prompt: \"(.*?)\" and reasoning including return data$")
+	public static void performAIUserActionWithReasoningAndReturnData(String prompt) {
+		ReportUtils.logVerify("AI user-action status ", Utils.aiUserAction(prompt, true));
 	}
 
 }
