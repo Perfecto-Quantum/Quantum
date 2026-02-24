@@ -89,7 +89,7 @@ public class ConfigurationUtils {
 		// first check if driver is a mobile device:
 		if (isDesktopBrowser(caps))
 			return false;
-		return caps.getCapability("deviceName") != null;
+		return ((caps.getCapability("deviceName") != null) || (caps.getCapability("appium:deviceName") != null));
 	}
 
 	public static boolean isDesktopBrowser(Capabilities caps) {
