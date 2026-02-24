@@ -37,16 +37,16 @@ public class ConsoleUtils {
 
 	public static String getDeviceDesc(Capabilities caps) {
 		if (ConfigurationUtils.isDevice(caps))
-			return ("" + caps.getCapability("model")).replace(" ", "") + " " + getDeviceName(caps);
+			return ("" + caps.getCapability("appium:model")).replace(" ", "") + " " + getDeviceName(caps);
 		else return getPlatformName(caps) + " " + getDeviceName(caps) + " " + getVersion(caps);
 	}
 	
 	public static String getDeviceName(Capabilities caps) {
-		return caps.getCapability("deviceName") == null ? 
-				(caps.getCapability("deviceDbName") == null ?
-						(caps.getCapability("description") == null ? "" : caps.getCapability("description") + "")
-						: caps.getCapability("deviceDbName") + "")
-				: caps.getCapability("deviceName") + "";
+		return caps.getCapability("appium:deviceName") == null ? 
+					(caps.getCapability("appium:deviceDbName") == null ?
+							(caps.getCapability("appium:description") == null ? "" : caps.getCapability("appium:description") + "")
+							: caps.getCapability("appium:deviceDbName") + "")
+					: caps.getCapability("appium:deviceName") + "";
 	}
 	
 	public static String getPlatformName(Capabilities caps) {
@@ -54,7 +54,7 @@ public class ConsoleUtils {
 				(ConfigurationUtils.isDesktopBrowser(caps) ?
 						("ANY".equals(caps.getCapability("platform")) 
 							? "Desktop" : caps.getCapability("platform") + "") 
-						: (caps.getCapability("os") == null ? "Device" : caps.getCapability("os") +"")) 
+						: (caps.getCapability("appium:os") == null ? "Device" : caps.getCapability("appium:os") +"")) 
 				: caps.getCapability("platformName") + "";
 	}
 	
@@ -62,13 +62,13 @@ public class ConsoleUtils {
 		return caps.getCapability("platformVersion") == null ? 
 				(caps.getBrowserVersion() == null || caps.getBrowserVersion().isEmpty() ?
 						caps.getBrowserName() : caps.getBrowserVersion())
-				: caps.getCapability("platformVersion") + "";
+				: caps.getCapability("appium:platformVersion") + "";
 	}
 
 
 
 	public static String getTestName(Capabilities caps) {
-		return caps.getCapability("scriptName") == null ? "" : caps.getCapability("scriptName") + "";
+		return caps.getCapability("appium:scriptName") == null ? "" : caps.getCapability("appium:scriptName") + "";
 	}
 
 	public static String getThreadName() {
