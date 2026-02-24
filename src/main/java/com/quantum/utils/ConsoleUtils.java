@@ -37,7 +37,8 @@ public class ConsoleUtils {
 
 	public static String getDeviceDesc(Capabilities caps) {
 		if (ConfigurationUtils.isDevice(caps))
-			return ("" + caps.getCapability("appium:model")).replace(" ", "") + " " + getDeviceName(caps);
+			return  getDeviceName(caps);
+		    //return ("" + caps.getCapability("appium:model")).replace(" ", "") + " " + getDeviceName(caps);
 		else return getPlatformName(caps) + " " + getDeviceName(caps) + " " + getVersion(caps);
 	}
 	
