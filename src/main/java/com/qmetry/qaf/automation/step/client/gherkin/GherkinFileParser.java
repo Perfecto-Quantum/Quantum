@@ -306,8 +306,10 @@ public class GherkinFileParser extends AbstractScenarioFileParser {
 	}
 
 	private String convertParam(String currLine) {
-
-		return StringUtil.replace(StringUtil.replace(currLine, ">", "}", -1), "<", "${", -1);
+		if(currLine.contains("\"<") && currLine.contains(">\"")) {
+			return StringUtil.replace(StringUtil.replace(currLine, ">", "}", -1), "<", "${", -1);
+		}
+		return currLine;
 	}
 
 	private String getType(String line) {
