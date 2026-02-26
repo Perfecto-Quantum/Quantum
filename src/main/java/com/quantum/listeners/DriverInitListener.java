@@ -253,40 +253,33 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 					skipDriverInitList = true;
 				}
 			}
+			
+			if(key.contains("capabilities.platformName")){
+				String value = ConfigurationManager.getBundle().getString(key);
+				if(value.equalsIgnoreCase("windows") || value.equalsIgnoreCase("mac")) {
+					logger.debug("Executing on non mobile platform, therefore skipping DriverInitListener");
+					skipDriverInitList = true;
+				}
+			}
 		}
 		
 		if (!skipDriverInitList) {
-			Device device = new Device();
+//			Device device = new Device();
 			Map<String, ?> capabilities = desiredCapabilities.asMap();
 
 			Map<String, String> credentials = new HashMap<>();
-
-			if (capabilities.get("perfecto:securityToken") != null) {
-				credentials.put("securityToken", capabilities.get("perfecto:securityToken").toString());
+			HashMap<String, String> perfectoCaps = (HashMap<String, String>) capabilities.get("perfecto:options");
+			if (perfectoCaps!=null && perfectoCaps.keySet().contains("securityToken")) {
+				credentials.put("securityToken", perfectoCaps.get("securityToken").toString());
+			}else {
+				if (capabilities.get("perfecto:securityToken") != null) {
+					credentials.put("securityToken", capabilities.get("perfecto:securityToken").toString());
+				}
 			}
-
-			if (capabilities.get("perfecto:model") != null) {
-				device.addAttribute("model", capabilities.get("perfecto:model").toString());
-			}
-
-			if (capabilities.get("perfecto:deviceId") != null) {
-				device.addAttribute("deviceId", capabilities.get("perfecto:deviceId").toString());
-			}
-
-			if (capabilities.get("perfecto:deviceName") != null) {
-				device.addAttribute("deviceId", capabilities.get("perfecto:deviceName").toString());
-			}
-
-			if (capabilities.get("perfecto:os") != null) {
-				device.addAttribute("perfecto:os", capabilities.get("perfecto:os").toString());
-			}
-
-			if (capabilities.get("perfecto:osVersion") != null) {
-				device.addAttribute("osVersion", capabilities.get("perfecto:osVersion").toString());
-			}
+			
 			if (!ConfigurationManager.getBundle().getBoolean("device_not_available", false)) {
 				try {
-					boolean deviceAvailableFlag = waitForDeviceAvailable(device, credentials);
+					boolean deviceAvailableFlag = waitForDeviceAvailable(getDeviceFromCapabilities(capabilities), credentials);
 					logger.debug("Device availability flag - " + deviceAvailableFlag);
 					if (!deviceAvailableFlag) {
 						logger.debug("Throwing the Device Not Available exception");
@@ -338,5 +331,64 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 		public String toString() {
 			return deviceAttributes.toString();
 		}
+	}
+	
+	private Device getDeviceFromCapabilities(Map<String, ?> caps) {
+		Device device = new Device();
+//		Map<String, ?> caps = capabilities.asMap();
+		
+		if(caps.keySet().contains("perfecto:options")) {
+			HashMap<String, String> perfectoCaps = (HashMap<String, String>) caps.get("perfecto:options");
+			if(perfectoCaps.keySet().contains("model")) {
+				device.addAttribute("model", perfectoCaps.get("model").toString());
+			}
+			
+			if(perfectoCaps.keySet().contains("deviceId")) {
+				device.addAttribute("deviceId", perfectoCaps.get("deviceId").toString());
+			}
+			
+			if(perfectoCaps.keySet().contains("deviceName")) {
+				device.addAttribute("deviceId", perfectoCaps.get("deviceName").toString());
+			}
+			
+			if(perfectoCaps.keySet().contains("os")) {
+				device.addAttribute("perfecto:os", perfectoCaps.get("os").toString());
+			}
+			
+			if(perfectoCaps.keySet().contains("osVersion")) {
+				device.addAttribute("osVersion", perfectoCaps.get("osVersion").toString());
+			}
+			
+			if(perfectoCaps.keySet().contains("manufacturer")) {
+				device.addAttribute("manufacturer", perfectoCaps.get("manufacturer").toString());
+			}
+		}else {
+
+			if (caps.get("perfecto:model") != null) {
+				device.addAttribute("model", caps.get("perfecto:model").toString());
+			}
+
+			if (caps.get("perfecto:deviceId") != null) {
+				device.addAttribute("deviceId", caps.get("perfecto:deviceId").toString());
+			}
+
+			if (caps.get("perfecto:deviceName") != null) {
+				device.addAttribute("deviceId", caps.get("perfecto:deviceName").toString());
+			}
+
+			if (caps.get("perfecto:os") != null) {
+				device.addAttribute("perfecto:os", caps.get("perfecto:os").toString());
+			}
+
+			if (caps.get("perfecto:osVersion") != null) {
+				device.addAttribute("osVersion", caps.get("perfecto:osVersion").toString());
+			}
+			
+			if (caps.get("perfecto:manufacturer") != null) {
+				device.addAttribute("manufacturer", caps.get("perfecto:manufacturer").toString());
+			}
+		}
+		
+		return device;
 	}
 }

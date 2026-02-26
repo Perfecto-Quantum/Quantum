@@ -97,9 +97,9 @@ public class QAFInetrceptableDataProvider {
 		Object methodInstance = method.getInstance();
 
 		DataDrivenScenario dataDrivenScenario = (DataDrivenScenario) methodInstance;
-
+		
 		List<Object[]> dataList = null;
-
+		
 		Map<String, Object> metadata = dataDrivenScenario.getMetadata();
 
 		replaceParameter(metadata, testContext);
@@ -138,11 +138,35 @@ public class QAFInetrceptableDataProvider {
 	private static void replaceParameter(Map<String, Object> metadata, ITestContext c) {
 		Map<String, String> testNGParam = c.getCurrentXmlTest().getAllParameters();
 
-		Pattern pattern = Pattern.compile("^\\$\\{(.+)\\}");
+		Pattern pattern = Pattern.compile("^\\$\\{(.+)\\}$");
 
 		String dataSheetName = (String) metadata.get("sheetname");
 
 		dataSheetName = dataSheetName == null ? (String) metadata.get("sheetName") : dataSheetName;
+		
+		String dataFileName = (String) metadata.get("datafile");
+		dataFileName = dataFileName == null ? (String) metadata.get("dataFile") : dataFileName;
+		if (null != dataFileName) {
+			Matcher matcher = pattern.matcher(dataFileName);
+
+			if (matcher.find()) {
+				String paramName = matcher.group(1);
+
+				String testNGValue = testNGParam.get(paramName);
+
+				if (null != testNGValue) {
+					metadata.put("datafile", testNGValue);
+				} else {
+					String bundleValue = (String) getBundle().getProperty(paramName);
+					if (null != bundleValue) {
+						metadata.put("sheetname", testNGValue);
+					} else {
+						throw new DataProviderException("Invalid Key. No Value found for Key - " + paramName);
+					}
+				}
+			}
+		}
+		
 
 		if (null != dataSheetName) {
 			Matcher matcher = pattern.matcher(dataSheetName);
@@ -235,10 +259,13 @@ public class QAFInetrceptableDataProvider {
 			}
 		}
 		
-		return dataList.iterator();
+	 List<Object[]> processedData =	process(new TestNGScenario((TestNGMethod) method), dataList);
+	 
+	 List<Object[]> finalDataList = intercept(new TestNGScenario((TestNGMethod) method), c, processedData, getIntercepters());
+		
+		return finalDataList.iterator();
 	}
 
-	@SuppressWarnings("unused")
 	private static List<Object[]> intercept(TestNGScenario scenario, ITestContext context, List<Object[]> testdata,
 			Set<QAFDataProviderIntercepter> intercepters) {
 
@@ -251,12 +278,13 @@ public class QAFInetrceptableDataProvider {
 
 		Map<String, Object> metadata = scenario.getMetaData();
 		if (metadata.containsKey(params.FROM.name()) || metadata.containsKey(params.TO.name())) {
-			if (metadata.containsKey(params.TO.name()) && (int) metadata.get(params.TO.name()) < to) {
-				to = (int) metadata.get(params.TO.name());
+			if (metadata.containsKey(params.TO.name()) && ((Number) metadata.get(params.TO.name())).intValue() < to) {
+				to = ((Number) metadata.get(params.TO.name())).intValue();
 			}
-			if (metadata.containsKey(params.FROM.name()) && (int) metadata.get(params.FROM.name()) > from) {
-				from = (int) metadata.get(params.FROM.name());
+			if (metadata.containsKey(params.FROM.name()) && ((Number) metadata.get(params.FROM.name())).intValue() > from) {
+				from = ((Number) metadata.get(params.FROM.name())).intValue();
 			}
+			logger.info("Applying FROM=" + from + ", TO=" + to);
 			return testdata.subList(from - 1, to);
 		}
 
@@ -264,7 +292,7 @@ public class QAFInetrceptableDataProvider {
 			List<?> indices = (List<?>) metadata.get(params.INDICES.name());
 			List<Object[]> filteredList = new ArrayList<Object[]>();
 			for (Object i : indices) {
-				filteredList.add(testdata.get((int) i));
+				filteredList.add(testdata.get(((Number) i).intValue()));
 			}
 			return filteredList;
 		}
