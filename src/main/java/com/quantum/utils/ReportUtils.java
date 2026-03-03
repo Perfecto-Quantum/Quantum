@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.LogFactoryImpl;
 import org.apache.http.HttpHost;
@@ -158,7 +158,7 @@ public class ReportUtils {
 		try {
 			if (!status) {
 				TestBaseProvider.instance().get().addVerificationError(e);
-				getReportClient().reportiumAssert(message + "\n" + ExceptionUtils.getFullStackTrace(e), status);
+				getReportClient().reportiumAssert(message + "\n" + ExceptionUtils.getStackTrace(e), status);
 			} else {
 				getReportClient().reportiumAssert(message, status);
 			}
@@ -188,7 +188,7 @@ public class ReportUtils {
 	 * 
 	 * @param message - Assertion message to be displayed in the DZ
 	 * @param status  - Assertion flag status - true or false (pass or fail)
-	 * @param e-      If the exception will be passed then the stacktrace will be
+	 * @param e		  - If the exception will be passed then the stacktrace will be
 	 *                attached on failure flag in DZ
 	 */
 	public static void logAssert(String message, boolean status, Throwable e) {
