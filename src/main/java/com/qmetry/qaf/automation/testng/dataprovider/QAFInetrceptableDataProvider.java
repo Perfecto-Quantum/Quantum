@@ -22,8 +22,8 @@
 package com.qmetry.qaf.automation.testng.dataprovider;
 
 import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -36,12 +36,12 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.configuration.ConfigurationConverter;
+//import org.apache.commons.configuration.ConfigurationConverter;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlExpression;
-import org.apache.commons.lang.text.StrSubstitutor;
+import org.apache.commons.lang3.text.StrSubstitutor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.LogFactoryImpl;
 import org.json.JSONObject;
@@ -347,7 +347,7 @@ List<Object[]> finalDataList = dataList;
 		testParameters = testParameters.replace("${class}", cls);
 		testParameters = testParameters.replace("${method}", mtd);
 		testParameters = StrSubstitutor.replace(testParameters, methodParameters);
-		testParameters = getBundle().getSubstitutor().replace(testParameters);
+		testParameters = getBundle().interpolate(testParameters);
 		try {
 			return new JSONObject(testParameters).toMap();
 		} catch (JsonSyntaxException e) {
@@ -376,7 +376,7 @@ List<Object[]> finalDataList = dataList;
 							scenario.getConstructorOrMethod().getMethod().getDeclaringClass().getSimpleName());
 
 					filter = StrSubstitutor.replace(filter, parametes);
-					filter = getBundle().getSubstitutor().replace(filter);
+					filter = getBundle().interpolate(filter);
 					logger.info("Applying Filter " + filter);
 					int i = 0;
 					Iterator<Object[]> iter = testdata.iterator();
@@ -583,11 +583,18 @@ List<Object[]> finalDataList = dataList;
 
 	private static String getConfigParameters(String key) {
 		if (getBundle().containsKey(key) || !getBundle().subset(key).isEmpty()) {
-			org.apache.commons.configuration.Configuration config = getBundle().subset(key);
+			org.apache.commons.configuration2.Configuration config = getBundle().subset(key);
 			if (config.isEmpty()) {
 				return getBundle().getString(key);
 			}
-			return new JSONObject(ConfigurationConverter.getMap(config)).toString();
+			// Convert config to Map<String, Object>
+			java.util.Iterator<String> keys = config.getKeys();
+			java.util.Map<String, Object> map = new java.util.HashMap<>();
+			while (keys.hasNext()) {
+				String k = keys.next();
+				map.put(k, config.getProperty(k));
+			}
+			return new JSONObject(map).toString();
 		}
 		return "";
 	}

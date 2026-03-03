@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.configuration.ConfigurationConverter;
+//import org.apache.commons.configuration.ConfigurationConverter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.LogFactoryImpl;
 import org.testng.IInvokedMethod;
@@ -153,8 +153,8 @@ public class QAFTestNGListener2 extends QAFTestNGListener
 							testAnnotation.getDescription(), linkRelPath);
 					testAnnotation.setDescription(desc);
 				}
-				testAnnotation.setDescription(getBundle().getSubstitutor().replace(testAnnotation.getDescription()));
-				
+				testAnnotation.setDescription(getBundle().interpolate(testAnnotation.getDescription()));
+
 				testAnnotation.setRetryAnalyzer((Class<? extends IRetryAnalyzer>)Class
 						.forName(ApplicationProperties.RETRY_ANALYZER.getStringVal(RetryAnalyzer.class.getName())));
 
@@ -233,7 +233,17 @@ public class QAFTestNGListener2 extends QAFTestNGListener
 				
 				Map<String, Object> runPrams = new HashMap<String, Object>(
 						tr.getTestContext().getCurrentXmlTest().getAllParameters());
-				runPrams.putAll(ConfigurationConverter.getMap(getBundle().subset("env")));
+				// Patch for commons-configuration2: convert subset to map manually
+				Map<String, Object> envMap = new java.util.HashMap<>();
+				org.apache.commons.configuration2.Configuration envConfig = getBundle().subset("env");
+				if (envConfig != null) {
+					java.util.Iterator<String> keys = envConfig.getKeys();
+					while (keys.hasNext()) {
+						String k = keys.next();
+						envMap.put(k, envConfig.getProperty(k));
+					}
+				}
+				runPrams.putAll(envMap);
 				executionInfo.put("env", runPrams);
 				int retryCount = getBundle().getInt(RetryAnalyzer.RETRY_INVOCATION_COUNT, 0);
 				boolean willRetry =  getBundle().getBoolean(RetryAnalyzer.WILL_RETRY, false);

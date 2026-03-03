@@ -5,8 +5,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.ConfigurationMap;
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.MapConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.LogFactoryImpl;
@@ -46,9 +46,9 @@ public class QuantumPatch {
 
 				VendorPrefixPatch vendorClassInstance = vendorClass.getConstructor().newInstance();
 
-				ConfigurationMap capabilitiesMap = vendorClassInstance.injectVendorPrefix(config);
+				MapConfiguration capabilitiesMap = vendorClassInstance.injectVendorPrefix(config);
 
-				return capabilitiesMap;
+				return capabilitiesMap.getMap();
 
 			} catch (Exception e) {
 				logger.error(
@@ -59,37 +59,31 @@ public class QuantumPatch {
 		}
 	}
 
-	public void capabilitiesPatchSelenium4(Configuration config, Map<String, Object> capabilities) {
-		
-		
-		Map<String, Object> vendorSpecificCaps = convertToMap(config);
-		String vendorName = ConfigurationManager.getBundle().getString("quantum.patch.vendor.name", "");
-		
-		if(StringUtils.isEmpty(vendorName) && ConfigurationUtils.isPerfectoExecution()) {
-			vendorName = "perfecto";
-				
-			// Multiple Driver Security token
-			
-			if(!vendorSpecificCaps.containsKey("securityToken")) {
-				String securityToken = ConfigurationUtils.getSecurityToken();
-				
-				if(!"".equals(securityToken)) {
-					vendorSpecificCaps.put("securityToken", securityToken);
-				}
-			}
-
-		}
-				
-		if(StringUtils.isEmpty(vendorName)) {
-			capabilities.putAll(vendorSpecificCaps);
-		}else {
-			capabilities.put(String.format("%s:options",vendorName),vendorSpecificCaps);
-		}
-		
-		removeVendorSpecificCapabilities(vendorSpecificCaps, capabilities);
-
+	// Patch: Accept both org.apache.commons.configuration.Configuration and org.apache.commons.configuration2.Configuration
+	public void capabilitiesPatchSelenium4(Object config, Map<String, Object> capabilities) {
+	    org.apache.commons.configuration2.Configuration config2 = null;
+	    if (config instanceof org.apache.commons.configuration2.Configuration) {
+	        config2 = (org.apache.commons.configuration2.Configuration) config;
+	    }
+	    Map<String, Object> vendorSpecificCaps = convertToMap(config2);
+	    String vendorName = ConfigurationManager.getBundle().getString("quantum.patch.vendor.name", "");
+	    if(org.apache.commons.lang3.StringUtils.isEmpty(vendorName) && ConfigurationUtils.isPerfectoExecution()) {
+	        vendorName = "perfecto";
+	        if(!vendorSpecificCaps.containsKey("securityToken")) {
+	            String securityToken = ConfigurationUtils.getSecurityToken();
+	            if(!"".equals(securityToken)) {
+	                vendorSpecificCaps.put("securityToken", securityToken);
+	            }
+	        }
+	    }
+	    if(org.apache.commons.lang3.StringUtils.isEmpty(vendorName)) {
+	        capabilities.putAll(vendorSpecificCaps);
+	    } else {
+	        capabilities.put(String.format("%s:options",vendorName),vendorSpecificCaps);
+	    }
+	    removeVendorSpecificCapabilities(vendorSpecificCaps, capabilities);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private Map<String,Object> convertToMap(Configuration config){
 		
@@ -138,18 +132,17 @@ public class QuantumPatch {
 		}
 	}
 
-	public void capabilitiesPatchAppium2(Configuration config, Map<String, Object> capabilities) {
-
-		Map<String,Object> patchedCapabilities = patchCapabilities(config, capabilities, "quantum.patch.appium.vendorprefixclass");
-		
-		removeVendorSpecificCapabilities(convertToMap(config), capabilities);
-		
-		if(patchedCapabilities.size()>0) {
-			capabilities.putAll(patchedCapabilities);
-		}else {
-			capabilities.putAll(convertToMap(config));
-		}
-		
+	public void capabilitiesPatchAppium2(Object config, Map<String, Object> capabilities) {
+	    org.apache.commons.configuration2.Configuration config2 = null;
+	    if (config instanceof org.apache.commons.configuration2.Configuration) {
+	        config2 = (org.apache.commons.configuration2.Configuration) config;
+	    }
+	    Map<String,Object> patchedCapabilities = patchCapabilities(config2, capabilities, "quantum.patch.appium.vendorprefixclass");
+	    removeVendorSpecificCapabilities(convertToMap(config2), capabilities);
+	    if(patchedCapabilities.size()>0) {
+	        capabilities.putAll(patchedCapabilities);
+	    } else {
+	        capabilities.putAll(convertToMap(config2));
+	    }
 	}
-
 }

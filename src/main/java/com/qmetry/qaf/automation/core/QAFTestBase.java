@@ -95,7 +95,7 @@ public class QAFTestBase {
 
 		public String getFrom(String... args) {
 			if ((args != null) && (args.length > ordinal())) {
-				return ConfigurationManager.getBundle().getSubstitutor().replace(args[ordinal()]);
+				return ConfigurationManager.getBundle().interpolate(args[ordinal()]);
 			}
 			return "";
 		}
@@ -138,7 +138,6 @@ public class QAFTestBase {
 
 	protected QAFTestBase() {
 		context = new PropertyUtil();
-		context.setDelimiterParsingDisabled(true);
 		context.setProperty(COMMAND_LOG, new ArrayList<LoggingBean>());
 		context.setProperty(CHECKPOINTS, new ArrayList<CheckpointResultBean>());
 		context.setProperty(VERIFICATION_ERRORS, 0);

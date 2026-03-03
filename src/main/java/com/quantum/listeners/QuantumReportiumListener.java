@@ -15,8 +15,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.ListUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.commons.lang.text.StrSubstitutor;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang3.text.StrSubstitutor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.LogFactoryImpl;
@@ -205,15 +205,14 @@ implements QAFTestStepListener, ITestListener, ISuiteListener {
 
 			getBundle().setProperty("Suite test name", suiteTestName);
 
-			List<String> stepListeners = getBundle().getList(ApplicationProperties.TESTSTEP_LISTENERS.key);
+			List<String> stepListeners = (List<String>)getBundle().getProperty(ApplicationProperties.TESTSTEP_LISTENERS.key);
 			if (!stepListeners.contains(this.getClass().getName())) {
 				stepListeners.add(this.getClass().getName());
 				getBundle().setProperty(ApplicationProperties.TESTSTEP_LISTENERS.key, stepListeners);
 			}
 
 			if (getBundle().getBoolean("perfecto.default.driver.listener", true)) {
-				List<String> driverListeners = getBundle()
-						.getList(ApplicationProperties.WEBDRIVER_COMMAND_LISTENERS.key);
+				List<String> driverListeners = (List<String>)getBundle().getProperty(ApplicationProperties.WEBDRIVER_COMMAND_LISTENERS.key);
 				if (!driverListeners.contains(PerfectoDriverListener.class.getName())) {
 					driverListeners.add(PerfectoDriverListener.class.getName());
 					getBundle().setProperty(ApplicationProperties.WEBDRIVER_COMMAND_LISTENERS.key, driverListeners);
@@ -907,7 +906,7 @@ implements QAFTestStepListener, ITestListener, ISuiteListener {
 											: getBundle().containsKey(pstr) ? getBundle().getObject(pstr)
 													: getBundle().getObject(pname);
 						} else if (pstr.indexOf("$") >= 0) {
-							pstr = getBundle().getSubstitutor().replace(pstr);
+							pstr = getBundle().interpolate(pstr);
 							actualArgs[i] = StrSubstitutor.replace(pstr, paramMap);
 						}
 						// continue;

@@ -1,10 +1,8 @@
 package com.quantum.utils;
 
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.ConfigurationMap;
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.MapConfiguration;
 
 public interface VendorPrefixPatch {
-	
-	public ConfigurationMap injectVendorPrefix(Configuration config);
-
+	public MapConfiguration injectVendorPrefix(Configuration config);
 }
