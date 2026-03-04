@@ -36,14 +36,14 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-//import org.apache.commons.configuration.ConfigurationConverter;
+import org.apache.commons.configuration2.ConfigurationConverter;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlExpression;
-import org.apache.commons.lang3.text.StrSubstitutor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.LogFactoryImpl;
+import org.apache.commons.text.StringSubstitutor;
 import org.json.JSONObject;
 import org.testng.ITestContext;
 import org.testng.ITestNGMethod;
@@ -138,8 +138,7 @@ public class QAFInetrceptableDataProvider {
 	private static void replaceParameter(Map<String, Object> metadata, ITestContext c) {
 		Map<String, String> testNGParam = c.getCurrentXmlTest().getAllParameters();
 
-		//Pattern pattern = Pattern.compile("^\\$\\{(.+)\\}$");
-		Pattern pattern = Pattern.compile("^\\$\\{([^}]+)\\}");
+		Pattern pattern = Pattern.compile("^\\$\\{(.+)\\}$");
 
 		String dataSheetName = (String) metadata.get("sheetname");
 
@@ -346,8 +345,8 @@ List<Object[]> finalDataList = dataList;
 		String mtd = scenario.getMethodName();
 		testParameters = testParameters.replace("${class}", cls);
 		testParameters = testParameters.replace("${method}", mtd);
-		testParameters = StrSubstitutor.replace(testParameters, methodParameters);
-		testParameters = getBundle().interpolate(testParameters);
+		testParameters = StringSubstitutor.replace(testParameters, methodParameters);
+		testParameters = getBundle().getInterpolator().interpolate(testParameters).toString();
 		try {
 			return new JSONObject(testParameters).toMap();
 		} catch (JsonSyntaxException e) {
@@ -375,8 +374,8 @@ List<Object[]> finalDataList = dataList;
 					parametes.put("class",
 							scenario.getConstructorOrMethod().getMethod().getDeclaringClass().getSimpleName());
 
-					filter = StrSubstitutor.replace(filter, parametes);
-					filter = getBundle().interpolate(filter);
+					filter = StringSubstitutor.replace(filter, parametes);
+					filter = getBundle().getInterpolator().interpolate(filter).toString();
 					logger.info("Applying Filter " + filter);
 					int i = 0;
 					Iterator<Object[]> iter = testdata.iterator();
@@ -587,14 +586,7 @@ List<Object[]> finalDataList = dataList;
 			if (config.isEmpty()) {
 				return getBundle().getString(key);
 			}
-			// Convert config to Map<String, Object>
-			java.util.Iterator<String> keys = config.getKeys();
-			java.util.Map<String, Object> map = new java.util.HashMap<>();
-			while (keys.hasNext()) {
-				String k = keys.next();
-				map.put(k, config.getProperty(k));
-			}
-			return new JSONObject(map).toString();
+			return new JSONObject(ConfigurationConverter.getMap(config)).toString();
 		}
 		return "";
 	}

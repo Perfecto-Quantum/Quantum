@@ -28,6 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
+import org.apache.commons.configuration2.convert.DisabledListDelimiterHandler;
+import org.apache.commons.lang3.stream.Streams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.LogFactoryImpl;
 import org.openqa.selenium.WebDriverException;
@@ -94,10 +97,17 @@ public class QAFTestBase {
 		}
 
 		public String getFrom(String... args) {
-			if ((args != null) && (args.length > ordinal())) {
-				return ConfigurationManager.getBundle().interpolate(args[ordinal()]);
-			}
-			return "";
+		    if ((args != null) && (args.length > ordinal())) {
+		        String val = args[ordinal()];
+		        // 1. Check if the value in the array is actually null or empty first
+		        if (val == null) {
+		            return "";
+		        }
+		        // 2. Only interpolate if we have a non-null string
+		        Object result = ConfigurationManager.getBundle().getInterpolator().interpolate(val);
+		        return result == null ? "" : String.valueOf(result);
+		    }
+		    return "";
 		}
 
 		public static String allToString(String... args) {
@@ -123,7 +133,7 @@ public class QAFTestBase {
 		}
 
 		public String[] setIfEmpty(String val, String... args) {
-			if (StringUtil.isBlank(getFrom(args))) {
+			if (StringUtil.isNullOrEmpty(getFrom(args))) {
 
 				return set(val, args);
 			}
@@ -138,11 +148,12 @@ public class QAFTestBase {
 
 	protected QAFTestBase() {
 		context = new PropertyUtil();
-		context.setProperty(COMMAND_LOG, new ArrayList<LoggingBean>());
+		context.setListDelimiterHandler(new DefaultListDelimiterHandler(';'));
+		
+		context.setProperty(COMMAND_LOG, new ArrayList<>());
 		context.setProperty(CHECKPOINTS, new ArrayList<CheckpointResultBean>());
 		context.setProperty(VERIFICATION_ERRORS, 0);
 		driverContext = new HashMap<String, UiDriver>();
-
 		setAlwaysCaptureScreenShot(ApplicationProperties.SUCEESS_SCREENSHOT.getBoolenVal());
 
 		setScreenShotDir(ApplicationProperties.SCREENSHOT_DIR.getStringVal("./img"));
@@ -155,7 +166,7 @@ public class QAFTestBase {
 
 	@SuppressWarnings("unchecked")
 	public List<LoggingBean> getLog() {
-		return (List<LoggingBean>) getContext().getObject(COMMAND_LOG);
+		return (List<LoggingBean>) getContext().getList(LoggingBean.class, COMMAND_LOG);
 	}
 
 	/**
@@ -336,7 +347,7 @@ public class QAFTestBase {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<CheckpointResultBean> getCheckPointResults() {
-		return (List<CheckpointResultBean>) getContext().getObject(CHECKPOINTS);
+		return (List<CheckpointResultBean>) getContext().getList(CheckpointResultBean.class, CHECKPOINTS);
 
 	}
 

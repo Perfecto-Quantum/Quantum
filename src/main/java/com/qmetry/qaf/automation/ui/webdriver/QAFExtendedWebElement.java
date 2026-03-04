@@ -221,7 +221,7 @@ public class QAFExtendedWebElement extends RemoteWebElement implements QAFWebEle
 
 	protected void initLoc(String locator) {
 		this.locator = ConfigurationManager.getBundle().getString(locator, locator);
-		this.locator = ConfigurationManager.getBundle().interpolate(this.locator);
+		this.locator = String.valueOf(ConfigurationManager.getBundle().getInterpolator().interpolate(this.locator));
 		if (JSONUtil.isValidJsonString(this.locator)) {
 			try {
 				metaData.putAll(JSONUtil.toMap(this.locator));

@@ -188,7 +188,7 @@ public class ReportUtils {
 	 * 
 	 * @param message - Assertion message to be displayed in the DZ
 	 * @param status  - Assertion flag status - true or false (pass or fail)
-	 * @param e		  - If the exception will be passed then the stacktrace will be
+	 * @param e-      If the exception will be passed then the stacktrace will be
 	 *                attached on failure flag in DZ
 	 */
 	public static void logAssert(String message, boolean status, Throwable e) {

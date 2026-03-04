@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.configuration2.Configuration;
-import org.apache.commons.configuration2.MapConfiguration;
+import org.apache.commons.configuration2.ConfigurationMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.LogFactoryImpl;
 import org.openqa.selenium.Capabilities;
@@ -477,13 +477,8 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			// individual capability property for all driver
 			Configuration config = ConfigurationManager.getBundle()
 					.subset(ApplicationProperties.DRIVER_CAPABILITY_PREFIX.key);
-			if (config != null) {
-				java.util.Iterator<String> keys = config.getKeys();
-				while (keys.hasNext()) {
-					String k = keys.next();
-					capabilities.put(k, config.getProperty(k));
-				}
-			}
+			Map<?, ?> configMap = new ConfigurationMap(config);
+			configMap.forEach((k, v) -> capabilities.put(String.valueOf(k), v));
 
 			// #332 add default capabilities for standard driver
 			if (!name().equalsIgnoreCase(other.name())) {
@@ -514,13 +509,9 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			// individual capability property with driver name prefix
 			String driverCapKey = String.format(ApplicationProperties.DRIVER_CAPABILITY_PREFIX_FORMAT.key, browserName);
 			config = ConfigurationManager.getBundle().subset(driverCapKey);
-			if (config != null) {
-				java.util.Iterator<String> keys = config.getKeys();
-				while (keys.hasNext()) {
-					String k = keys.next();
-					capabilities.put(k, config.getProperty(k));
-				}
-			}
+			Map<?, ?> configMap2 = new ConfigurationMap(config);
+			configMap2.forEach((k, v) -> capabilities.put(String.valueOf(k), v));
+//			capabilities.putAll(new ConfigurationMap(config));
 
 			// ======== Patch for Appium 2.0 and Selenium 4 vendor specific prefix ========
 
@@ -554,7 +545,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			for (String key : capabilities.keySet()) {
 				Object value = capabilities.get(key);
 				if (value instanceof String) {
-					capabilities.put(key, ConfigurationManager.getBundle().interpolate((String)value));
+					capabilities.put(key, String.valueOf(ConfigurationManager.getBundle().getInterpolator().interpolate(value)));
 				}
 			}
 
@@ -899,4 +890,3 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 	}
 
 }
-

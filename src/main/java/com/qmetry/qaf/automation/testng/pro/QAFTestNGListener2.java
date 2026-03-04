@@ -31,8 +31,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-//import org.apache.commons.configuration.ConfigurationConverter;
+import org.apache.commons.configuration2.ConfigurationConverter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.LogFactoryImpl;
 import org.testng.IInvokedMethod;
@@ -153,8 +154,8 @@ public class QAFTestNGListener2 extends QAFTestNGListener
 							testAnnotation.getDescription(), linkRelPath);
 					testAnnotation.setDescription(desc);
 				}
-				testAnnotation.setDescription(getBundle().interpolate(testAnnotation.getDescription()));
-
+				testAnnotation.setDescription(String.valueOf(getBundle().getInterpolator().interpolate(testAnnotation.getDescription())));
+				
 				testAnnotation.setRetryAnalyzer((Class<? extends IRetryAnalyzer>)Class
 						.forName(ApplicationProperties.RETRY_ANALYZER.getStringVal(RetryAnalyzer.class.getName())));
 
@@ -233,16 +234,14 @@ public class QAFTestNGListener2 extends QAFTestNGListener
 				
 				Map<String, Object> runPrams = new HashMap<String, Object>(
 						tr.getTestContext().getCurrentXmlTest().getAllParameters());
-				// Patch for commons-configuration2: convert subset to map manually
-				Map<String, Object> envMap = new java.util.HashMap<>();
-				org.apache.commons.configuration2.Configuration envConfig = getBundle().subset("env");
-				if (envConfig != null) {
-					java.util.Iterator<String> keys = envConfig.getKeys();
-					while (keys.hasNext()) {
-						String k = keys.next();
-						envMap.put(k, envConfig.getProperty(k));
-					}
-				}
+//				ConfigurationConverter.append(getBundle().subset("env"))
+				Map<String, Object> envMap = ConfigurationConverter.getMap(getBundle().subset("env"))
+					    .entrySet()
+					    .stream()
+					    .collect(Collectors.toMap(
+					        e -> String.valueOf(e.getKey()), 
+					        Map.Entry::getValue
+					    ));
 				runPrams.putAll(envMap);
 				executionInfo.put("env", runPrams);
 				int retryCount = getBundle().getInt(RetryAnalyzer.RETRY_INVOCATION_COUNT, 0);

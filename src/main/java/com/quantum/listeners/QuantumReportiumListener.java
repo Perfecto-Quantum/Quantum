@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.lang3.text.StrSubstitutor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.LogFactoryImpl;
+import org.apache.commons.text.StringSubstitutor;
 import org.openqa.selenium.WebDriver;
 import org.testng.IInvokedMethod;
 import org.testng.ISuite;
@@ -205,14 +205,15 @@ implements QAFTestStepListener, ITestListener, ISuiteListener {
 
 			getBundle().setProperty("Suite test name", suiteTestName);
 
-			List<String> stepListeners = (List<String>)getBundle().getProperty(ApplicationProperties.TESTSTEP_LISTENERS.key);
+			List<String> stepListeners = getBundle().getList(String.class, ApplicationProperties.TESTSTEP_LISTENERS.key);
 			if (!stepListeners.contains(this.getClass().getName())) {
 				stepListeners.add(this.getClass().getName());
 				getBundle().setProperty(ApplicationProperties.TESTSTEP_LISTENERS.key, stepListeners);
 			}
 
 			if (getBundle().getBoolean("perfecto.default.driver.listener", true)) {
-				List<String> driverListeners = (List<String>)getBundle().getProperty(ApplicationProperties.WEBDRIVER_COMMAND_LISTENERS.key);
+				List<String> driverListeners = getBundle()
+						.getList(String.class, ApplicationProperties.WEBDRIVER_COMMAND_LISTENERS.key);
 				if (!driverListeners.contains(PerfectoDriverListener.class.getName())) {
 					driverListeners.add(PerfectoDriverListener.class.getName());
 					getBundle().setProperty(ApplicationProperties.WEBDRIVER_COMMAND_LISTENERS.key, driverListeners);
@@ -906,8 +907,8 @@ implements QAFTestStepListener, ITestListener, ISuiteListener {
 											: getBundle().containsKey(pstr) ? getBundle().getObject(pstr)
 													: getBundle().getObject(pname);
 						} else if (pstr.indexOf("$") >= 0) {
-							pstr = getBundle().interpolate(pstr);
-							actualArgs[i] = StrSubstitutor.replace(pstr, paramMap);
+							pstr = String.valueOf(getBundle().getInterpolator().interpolate(pstr));
+							actualArgs[i] = StringSubstitutor.replace(pstr, paramMap);
 						}
 						// continue;
 						ParamType ptype = ParamType.getType(pstr);
@@ -932,7 +933,7 @@ implements QAFTestStepListener, ITestListener, ISuiteListener {
 
 				}
 
-				description = StrSubstitutor.replace(description, paramMap);
+				description = StringSubstitutor.replace(description, paramMap);
 
 			}
 		}

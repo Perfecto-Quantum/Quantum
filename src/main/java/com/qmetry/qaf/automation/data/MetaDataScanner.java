@@ -21,6 +21,35 @@
  ******************************************************************************/
 package com.qmetry.qaf.automation.data;
 
+import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Method;
+import java.text.MessageFormat;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
+
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.ConfigurationConverter;
+import org.apache.commons.configuration2.ConfigurationUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.impl.LogFactoryImpl;
+import org.apache.commons.text.StringSubstitutor;
+import org.testng.ITestContext;
+import org.testng.ITestNGMethod;
+import org.testng.annotations.Test;
+import org.testng.xml.XmlTest;
+
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -31,23 +60,6 @@ import com.qmetry.qaf.automation.testng.dataprovider.QAFDataProvider.params;
 import com.qmetry.qaf.automation.util.ClassUtil;
 import com.qmetry.qaf.automation.util.JSONUtil;
 import com.qmetry.qaf.automation.util.StringUtil;
-import org.apache.commons.configuration2.Configuration;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.impl.LogFactoryImpl;
-import org.testng.ITestContext;
-import org.testng.ITestNGMethod;
-import org.testng.annotations.Test;
-import org.testng.xml.XmlTest;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Method;
-import java.text.MessageFormat;
-import java.text.ParseException;
-import java.util.*;
-import java.util.Map.Entry;
-
-import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 
 /**
  * Internal class for test case and test step meta data scanning.
@@ -60,7 +72,7 @@ public class MetaDataScanner {
 	/**
 	 * Scans all annotation except @Test, and generates map.
 	 * 
-	 * @param methodOrFileld
+	 * @param MethodOrFileld
 	 * @return
 	 * @throws Exception
 	 */
@@ -108,7 +120,7 @@ public class MetaDataScanner {
 	/**
 	 * Scans all the annotation on the method and prepares a map.
 	 * 
-	 * @param methodOrFileld
+	 * @param method
 	 * @return map containing all annotation parameter as key.
 	 */
 	public static Map<String, Object> getMetadata(AccessibleObject methodOrFileld) {
@@ -134,13 +146,17 @@ public class MetaDataScanner {
 		} else if (context.containsKey(parameter)) {
 			paramValue = context.get(parameter);
 		} else if (getBundle().containsKey(parameter)) {
-//			try {
-//				// unresolved value
-//				paramValue = (String) getBundle().configurationAt(parameter).getRoot().getValue();
-//			} catch (Exception e) {
+			try {
+				// unresolved value
+				paramValue = (String) getBundle().configurationAt(parameter)
+		                .getNodeModel().getNodeHandler().getRootNode()
+		               .getValue();
+			} catch (Exception e) {
 				paramValue = getBundle().getString(parameter, "");
-//			}
+			}
 		}
+		paramValue = StringSubstitutor.replace(paramValue, context);
+		paramValue = String.valueOf(getBundle().getInterpolator().interpolate(paramValue));
 		return paramValue;
 	}
 
@@ -174,7 +190,13 @@ public class MetaDataScanner {
 	@SuppressWarnings("unchecked")
 	public static Map<String, Object> getSubset(ITestNGMethod method, String parameter) {
 		if(null==method) {
-			return configurationToMap(getBundle().subset(parameter));
+			Configuration subset = getBundle().subset(parameter);
+			Map<String, Object> paramMap = new HashMap<>();
+
+			subset.getKeys().forEachRemaining(key -> {
+			    paramMap.put(key, subset.getProperty(key));
+			});
+			return paramMap;
 		}
 		return getSubset(method.getXmlTest(), parameter);
 	}
@@ -183,7 +205,11 @@ public class MetaDataScanner {
 	}
 	public static Map<String, Object> getSubset(XmlTest xmlTest, String parameter) {
 			@SuppressWarnings("unchecked")
-			Map<String, Object> subset = configurationToMap(getBundle().subset(parameter));
+			Configuration confSubSet = getBundle().subset(parameter);
+			Map<String, Object> subset = new HashMap<>();
+			confSubSet.getKeys().forEachRemaining(key -> {
+				subset.put(key, confSubSet.getProperty(key));
+			});
 
 			if (null != xmlTest) {
 				Map<String, String> ctx = xmlTest.getAllParameters();
@@ -464,16 +490,5 @@ public class MetaDataScanner {
 		public String toString() {
 			return new Gson().toJson(this);
 		}
-	}
-
-	// Utility to convert org.apache.commons.configuration2.Configuration to Map<String, Object>
-	private static Map<String, Object> configurationToMap(Configuration config) {
-	    Map<String, Object> map = new HashMap<>();
-	    Iterator<String> keys = config.getKeys();
-	    while (keys.hasNext()) {
-	        String key = keys.next();
-	        map.put(key, config.getProperty(key));
-	    }
-	    return map;
 	}
 }
