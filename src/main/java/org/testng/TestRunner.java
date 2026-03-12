@@ -352,7 +352,7 @@ public class TestRunner
 		// Methods
 		m_xmlMethodSelector.setXmlClasses(m_xmlTest.getXmlClasses());
 
-//    m_runInfo.addMethodSelector(m_xmlMethodSelector, 10);
+		m_runInfo.addMethodSelector(m_xmlMethodSelector, 10);
 
 		// Add user-specified method selectors (only class selectors, we can ignore
 		// script selectors here)

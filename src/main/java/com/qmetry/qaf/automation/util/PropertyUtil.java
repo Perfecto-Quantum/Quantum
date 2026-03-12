@@ -31,6 +31,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -43,12 +44,16 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.MapConfiguration;
-import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.commons.configuration.PropertyConverter;
-import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.MapConfiguration;
+import org.apache.commons.configuration2.PropertiesConfiguration;
+import org.apache.commons.configuration2.XMLConfiguration;
+import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
+import org.apache.commons.configuration2.convert.DisabledListDelimiterHandler;
+import org.apache.commons.configuration2.convert.ListDelimiterHandler;
+import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.configuration2.io.ConfigurationLogger;
+import org.apache.commons.configuration2.io.FileHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.LogFactoryImpl;
 
@@ -69,11 +74,14 @@ public class PropertyUtil extends XMLConfiguration {
 	 */
 	private static final long serialVersionUID = -8633909707831110230L;
 	private Log logger = LogFactoryImpl.getLog(PropertyUtil.class);
+	private ConfigurationLogger logger1 = new ConfigurationLogger(PropertyUtil.class);
 
 	public PropertyUtil() {
 		super();
-		setLogger(logger);
-		setDelimiterParsingDisabled(true);
+		setLogger(logger1);
+//		setDelimiterParsingDisabled(true);
+		setListDelimiterHandler(DisabledListDelimiterHandler.INSTANCE);
+		char delimiterChar = ';';
 		Iterator<Entry<Object, Object>> iterator = System.getProperties().entrySet().iterator();
 
 		while (iterator.hasNext()) {
@@ -82,21 +90,37 @@ public class PropertyUtil extends XMLConfiguration {
 			String skey = String.valueOf(entry.getKey());
 			String sval = String.valueOf(entry.getValue());
 			if (!StringMatcher.like("^(sun\\.|java\\.).*").match(skey)) {
-				Object[] vals = sval != null && sval.indexOf(getListDelimiter()) >= 0
-						? sval.split(getListDelimiter() + "") : new Object[] { sval };
+				Object[] vals = sval != null && sval.indexOf(delimiterChar) >= 0
+						? sval.split(delimiterChar + "") : new Object[] { sval };
 				for (Object val : vals) {
 					super.addPropertyDirect(skey, val);
 				}
 			}
 		}
 	}
+	
+	 
 
+//	@Override
+//	protected Object resolveContainerStore(String key) {
+//	    key=key.replace("<%", "${").replace("%>", "}");
+//		key = getInter.replace(key);
+//		return super.resolveContainerStore(key);
+//	}
+	
 	@Override
-	protected Object resolveContainerStore(String key) {
-	    key=key.replace("<%", "${").replace("%>", "}");
-		key = getSubstitutor().replace(key);
-		return super.resolveContainerStore(key);
+	protected Object getPropertyInternal(String key) {
+	    // 1. Transform your custom tags into standard ${} syntax
+	    String transformedKey = key.replace("<%", "${").replace("%>", "}");
+	    
+	    // 2. Use the modern Interpolator to resolve the key
+	    // ConfigurationInterpolator handles the logic previously done by StrSubstitutor
+	    Object resolvedKey = getInterpolator().interpolate(transformedKey);
+	    
+	    // 3. Call the super method with the resolved string
+	    return super.getPropertyInternal(resolvedKey.toString());
 	}
+	
 	@Override
 	protected void addPropertyDirect(String key, Object value) {
 		if (!System.getProperties().containsKey(key)) {
@@ -158,7 +182,7 @@ public class PropertyUtil extends XMLConfiguration {
 					HttpsURLConnection.setDefaultHostnameVerifier((HostnameVerifier) getObject("default.hostname.verifier"));
 				}
 			}
-		}else if(ApplicationProperties.PROXY_SERVER_KEY.key.equalsIgnoreCase(key) && StringUtil.isNotBlank(value.toString())){
+		}else if(ApplicationProperties.PROXY_SERVER_KEY.key.equalsIgnoreCase(key) && !StringUtil.isNullOrEmpty(value.toString())){
 			ProxySelector.setDefault(UriProxySelector.getInstance());
 		}
 	}
@@ -189,7 +213,7 @@ public class PropertyUtil extends XMLConfiguration {
 	public boolean load(String... files) {
 		boolean r = true;
 		for (String file : files) {
-			file = getSubstitutor().replace(file);
+			file = (String)getInterpolator().interpolate(file);
 			loadFile(new File(file));
 		}
 		return r;
@@ -218,7 +242,9 @@ public class PropertyUtil extends XMLConfiguration {
 			
 			if (fileName.endsWith("xml") || fileName.contains(".xml.")) {
 //				load(new FileInputStream(file));
-				load(fileInputStream);
+				//load(fileInputStream);
+				FileHandler handler = new FileHandler(this);
+				handler.load(fileInputStream);
 			} else if(fileName.endsWith(".wscj") || fileName.contains(".locj")) {
 				@SuppressWarnings("unchecked")
 				Map<String,Object> props = JSONUtil.getJsonObjectFromFile(file.getPath(), Map.class);
@@ -246,8 +272,12 @@ public class PropertyUtil extends XMLConfiguration {
 
 	private void loadProperties(InputStream in) throws ConfigurationException {
 		PropertiesConfiguration propertiesConfiguration = new PropertiesConfiguration();
-		propertiesConfiguration.setEncoding(getString(ApplicationProperties.LOCALE_CHAR_ENCODING.key, "UTF-8"));
-		propertiesConfiguration.load(in);
+		FileHandler handler = new FileHandler(propertiesConfiguration);
+		handler.setEncoding(getString(ApplicationProperties.LOCALE_CHAR_ENCODING.key, "UTF-8"));
+		handler.load(in);		
+		
+//		propertiesConfiguration.setEncoding(getString(ApplicationProperties.LOCALE_CHAR_ENCODING.key, "UTF-8"));
+//		propertiesConfiguration.load(in);
 		copy(propertiesConfiguration);
 		propertiesConfiguration.clear();
 	}
@@ -262,10 +292,13 @@ public class PropertyUtil extends XMLConfiguration {
 		boolean success = false;
 		InputStream in = null;
 		try {
-			propertyFile = getSubstitutor().replace(propertyFile);
+			propertyFile = (String)getInterpolator().interpolate(propertyFile);
 			in = cls.getResourceAsStream(propertyFile);
 			if (propertyFile.endsWith("xml") || propertyFile.contains(".xml.")) {
-				load(in);
+				
+				FileHandler handler = new FileHandler(this);
+				handler.load(in);
+				//load(in);
 			}else {
 				loadProperties(in);
 			}
@@ -326,7 +359,9 @@ public class PropertyUtil extends XMLConfiguration {
 
 	public void storePropertyFile(File f) {
 		try {
-			save(f);
+			FileHandler handler = new FileHandler(this);
+			handler.save(f);
+			//save(f);
 		} catch (ConfigurationException e) {
 			logger.error(e.getMessage());
 		}
@@ -337,20 +372,29 @@ public class PropertyUtil extends XMLConfiguration {
 	 * this will overwrite existing value if any
 	 */
 	@Override
-	public void addProperty(String key, Object value) {
+	public void addPropertyInternal(String key, Object value) {
+		if (value instanceof Collection && ((Collection<?>) value).isEmpty()) {
+	        value = null;
+	    }
 		clearProperty(key);
-		super.addProperty(key, value);
+		super.addPropertyInternal(key, value);
 	}
 
 	@Override
-	public void setProperty(String key, Object value) {
+	public void setPropertyInternal(String key, Object value) {
 		// allow List Delimiter for string value
 		if (null != value && value instanceof String) {
 			if (value.toString().indexOf(getListDelimiter()) > 0) {
-				value = PropertyConverter.split(value.toString(), getListDelimiter());
+				DefaultListDelimiterHandler handler = new DefaultListDelimiterHandler(getListDelimiter());
+				value = handler.split(value.toString(), true);
+//				value = PropertyConverter.split(value.toString(), getListDelimiter());
 			}
+			
 		}
-		super.setProperty(key, value);
+		if (value instanceof Collection && ((Collection<?>) value).isEmpty()) {
+	        value = ""; 
+	    }
+		super.setPropertyInternal(key, value);
 	}
 
 	/**
@@ -371,9 +415,9 @@ public class PropertyUtil extends XMLConfiguration {
 
 	// clear property if it is not system property
 	@Override
-	public void clearProperty(String key) {
+	public void clearPropertyDirect(String key) {
 		if (!System.getProperties().containsKey(key)) {
-			super.clearProperty(key);
+			super.clearPropertyDirect(key);
 		} else {
 			logger.trace("clear system property ignored:" + key);
 		}
@@ -382,7 +426,7 @@ public class PropertyUtil extends XMLConfiguration {
 	@SuppressWarnings("deprecation")
 	public PasswordDecryptor getPasswordDecryptor() {
 		String implName = getString(ApplicationProperties.PASSWORD_DECRYPTOR_IMPL.key);
-		if (StringUtil.isBlank(implName)) {
+		if (StringUtil.isNullOrEmpty(implName)) {
 			return new Base64PasswordDecryptor();
 		} else {
 			try {
@@ -433,7 +477,7 @@ public class PropertyUtil extends XMLConfiguration {
 	public void addBundle( String fileOrDir) {
 		String localResources = getString("local.reasources",
 				getString("env.local.resources", "resources"));
-		fileOrDir = getSubstitutor().replace(fileOrDir);
+		fileOrDir = (String)getInterpolator().interpolate(fileOrDir);
 		File resourceFile = new File(fileOrDir);
 		String[] locals = getStringArray(ApplicationProperties.LOAD_LOCALES.key);
 		/**
@@ -494,7 +538,7 @@ public class PropertyUtil extends XMLConfiguration {
 				}
 				// add locals if any
 				if (null != locals && locals.length > 0
-						&& (locals.length == 1 || StringUtil.isBlank(getString(
+						&& (locals.length == 1 || StringUtil.isNullOrEmpty(getString(
 								ApplicationProperties.DEFAULT_LOCALE.key, "")))) {
 					setProperty(ApplicationProperties.DEFAULT_LOCALE.key, locals[0]);
 				}
@@ -522,8 +566,10 @@ public class PropertyUtil extends XMLConfiguration {
 
 		if (resourceFile.exists()) {
 			PropertyUtil p1 = new PropertyUtil();
-			p1.setEncoding(
-					getString(ApplicationProperties.LOCALE_CHAR_ENCODING.key, "UTF-8"));
+			FileHandler handler = new FileHandler(p1);
+			handler.setEncoding(getString(ApplicationProperties.LOCALE_CHAR_ENCODING.key, "UTF-8"));
+//			p1.setEncoding(
+//					getString(ApplicationProperties.LOCALE_CHAR_ENCODING.key, "UTF-8"));
 			if (resourceFile.isDirectory()) {
 				File[] propFiles = FileUtil.listFilesAsArray(resourceFile, "." + local,
 						StringComparator.Suffix, loadSubDirs);
@@ -553,5 +599,26 @@ public class PropertyUtil extends XMLConfiguration {
 		} else {
 			logger.error(resourceFile.getAbsolutePath() + " not exist!");
 		}
+	}
+	
+	public  char getListDelimiter() {
+	    ListDelimiterHandler handler = getListDelimiterHandler();
+	    
+	    if (handler instanceof DefaultListDelimiterHandler) {
+	        return ((DefaultListDelimiterHandler) handler).getDelimiter();
+	    }
+	    
+	    // Return a default (like 0 or ',') if no character-based handler is set
+	    return ';'; 
+	}
+	
+	public org.apache.commons.configuration2.HierarchicalConfiguration<org.apache.commons.configuration2.tree.ImmutableNode> configurationAt(String key) {
+	    // In 2.x, configurationAt returns a HierarchicalConfiguration
+	    // which is the functional successor to SubnodeConfiguration
+	    return super.configurationAt(key);
+	}
+
+	public Configuration subset(String prefix) {
+		return super.subset(prefix);
 	}
 }

@@ -42,13 +42,17 @@ import java.util.jar.Manifest;
 
 import javax.script.ScriptException;
 
-import org.apache.commons.configuration.AbstractConfiguration;
-import org.apache.commons.configuration.event.ConfigurationEvent;
-import org.apache.commons.configuration.event.ConfigurationListener;
-import org.apache.commons.configuration.interpol.ConfigurationInterpolator;
-import org.apache.commons.lang.text.StrLookup;
+import org.apache.commons.configuration2.AbstractConfiguration;
+import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
+import org.apache.commons.configuration2.convert.ListDelimiterHandler;
+import org.apache.commons.configuration2.event.ConfigurationEvent;
+import org.apache.commons.configuration2.event.EventListener;
+import org.apache.commons.configuration2.interpol.ConfigurationInterpolator;
+import org.apache.commons.configuration2.io.FileHandler;
+import org.apache.commons.configuration2.interpol.Lookup;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.LogFactoryImpl;
+import org.apache.commons.text.lookup.StringLookup;
 import org.hamcrest.Matchers;
 
 import com.qmetry.qaf.automation.keys.ApplicationProperties;
@@ -80,15 +84,67 @@ import com.qmetry.qaf.automation.util.StringUtil;
 public class ConfigurationManager {
 	// early initialization
 	static final Log log = LogFactoryImpl.getLog(ConfigurationManager.class);
+	
+	private static InheritableThreadLocal<PropertyUtil> LocalProps =
+			new InheritableThreadLocal<PropertyUtil>() {
+				@Override
+				protected PropertyUtil initialValue() {
+					
+					PropertyUtil p = new PropertyUtil(
+							System.getProperty("application.properties.file",
+									"resources/application.properties"));
+					
+					p.setProperty("isfw.build.info", getBuildInfo());
+					
+					//p.setEncoding(p.getString(ApplicationProperties.LOCALE_CHAR_ENCODING.key, "UTF-8"));
+					String encoding = p.getString(ApplicationProperties.LOCALE_CHAR_ENCODING.key, "UTF-8");
+
+					// 2. Apply it to a FileHandler instead of the configuration object
+					FileHandler handler = new FileHandler(p);
+					handler.setEncoding(encoding);
+					p.setProperty("execution.start.ts", System.currentTimeMillis());
+					p.setListDelimiterHandler(new DefaultListDelimiterHandler(';'));
+
+					File prjDir = new File(".").getAbsoluteFile().getParentFile();
+					p.setProperty("project.path", prjDir.getAbsolutePath());
+					if(!p.containsKey("project.name"))
+					p.setProperty("project.name", prjDir.getName());
+
+					log.debug("ISFW build info: " + p.getProperty("isfw.build.info"));
+					String[] resources = p.getStringArray("env.resources", "resources");
+					for (String resource : resources) {
+						p.addBundle(resource);
+					}
+					//p.setProperty("execute.initialValuelisteners", true);
+					executeOnLoadListeners(p);
+					
+					EventListener<ConfigurationEvent> cl = new PropertyConfigurationListener();
+					p.addEventListener(ConfigurationEvent.ANY,cl);
+					//.addConfigurationListener(cl);
+					
+					return p;
+				}
+
+				@Override
+				protected PropertyUtil childValue(PropertyUtil parentValue) {
+					PropertyUtil cp = new PropertyUtil(parentValue);
+					EventListener<ConfigurationEvent> cl = new PropertyConfigurationListener();
+					cp.addEventListener(ConfigurationEvent.ANY,cl);
+					
+					return cp;
+				}
+
+			};
+			private static final ServiceLoader<QAFConfigurationListener> CONFIG_LISTENERS = ServiceLoader
+					.load(QAFConfigurationListener.class);
 	private static final ConfigurationManager INSTANCE = new ConfigurationManager();
-	private static final ServiceLoader<QAFConfigurationListener> CONFIG_LISTENERS = ServiceLoader
-			.load(QAFConfigurationListener.class);
+	
 
 	/**
 	 * Private constructor, prevents instantiation from other classes
 	 */
 	private ConfigurationManager() {
-		AbstractConfiguration.setDefaultListDelimiter(';');
+//		config.setListDelimiterHandler(new DefaultListDelimiterHandler('/'));
 		registerLookups();
 		setHostName();
 	}
@@ -127,72 +183,73 @@ public class ConfigurationManager {
 	}
 
 	private void registerLookups(){
-		ConfigurationInterpolator.registerGlobalLookup("rnd", new StrLookup() {
-			public String lookup(String var) {
-				var = var.replace("<%", "${").replace("%>", "}");
-				var = getBundle().getSubstitutor().replace(var);
-				return StringUtil.getRandomString(var);
-			}
-		});
-		ConfigurationInterpolator.registerGlobalLookup("expr", new StrLookup() {
-			public String lookup(String var) {
-				try {
-					var = var.replace("<%", "${").replace("%>", "}");
-					var = getBundle().getSubstitutor().replace(var);
-					Object res = StringUtil.eval(var);
-					return String.valueOf(res);
-				} catch (ScriptException e) {
-					throw new RuntimeException("Unable to evaluate expression: " + var, e);
-				}
-			}
-		});
+		PropertyUtil config =  getBundle();
+		Lookup rndLookup = new Lookup() {
+			
+		    @Override
+		    public String lookup(String var) {
+		        if (var == null) return null;
+
+		        // Perform your character replacements
+		        String processedVar = var.replace("<%", "${").replace("%>", "}");
+		        
+		        // Use the configuration's own interpolator instead of getSubstitutor()
+		        // 'config' is your Configuration object (e.g., XMLConfiguration)
+		        String interpolated = (String) getBundle().getInterpolator().interpolate(processedVar);
+		        
+		        return StringUtil.getRandomString(interpolated);
+		    }
+		};
+
+		// 2. Register the lookup with the configuration's interpolator
+		config.getInterpolator().registerLookup("rnd", rndLookup);
+		
+		
+		
+		
+		
+//		ConfigurationInterpolator.registerGlobalLookup("expr", new StringLookup() {
+//			public String lookup(String var) {
+//				try {
+//					var = var.replace("<%", "${").replace("%>", "}");
+//					var = getBundle().getSubstitutor().replace(var);
+//					Object res = StringUtil.eval(var);
+//					return String.valueOf(res);
+//				} catch (ScriptException e) {
+//					throw new RuntimeException("Unable to evaluate expression: " + var, e);
+//				}
+//			}
+//		});
+		
+		Lookup exprLookup = new Lookup() {
+		    @Override
+		    public Object lookup(String var) {
+		        try {
+		            if (var == null) return null;
+
+		            // Replace custom markers
+		            String processedVar = var.replace("<%", "${").replace("%>", "}");
+		            
+		            // 2. Replacement for getSubstitutor().replace()
+		            // Use the configuration's own interpolator to resolve nested variables
+		            Object interpolated = getBundle().getInterpolator().interpolate(processedVar);
+		            String finalVar = String.valueOf(interpolated);
+
+		            // 3. Evaluate the expression
+		            Object res = StringUtil.eval(finalVar);
+		            return String.valueOf(res);
+		        } catch (ScriptException e) {
+		            throw new RuntimeException("Unable to evaluate expression: " + var, e);
+		        }
+		    }
+		};
+
+		// 4. Register it (2.x prefers instance-level registration)
+		getBundle().getInterpolator().registerLookup("expr", exprLookup);
 	}
 	public static ConfigurationManager getInstance() {
 		return INSTANCE;
 	}
-
-	private static InheritableThreadLocal<PropertyUtil> LocalProps =
-			new InheritableThreadLocal<PropertyUtil>() {
-				@Override
-				protected PropertyUtil initialValue() {
-					
-					PropertyUtil p = new PropertyUtil(
-							System.getProperty("application.properties.file",
-									"resources/application.properties"));
-					
-					p.setProperty("isfw.build.info", getBuildInfo());
-					p.setEncoding(p.getString(ApplicationProperties.LOCALE_CHAR_ENCODING.key, "UTF-8"));
-					p.setProperty("execution.start.ts", System.currentTimeMillis());
-
-					File prjDir = new File(".").getAbsoluteFile().getParentFile();
-					p.setProperty("project.path", prjDir.getAbsolutePath());
-					if(!p.containsKey("project.name"))
-					p.setProperty("project.name", prjDir.getName());
-
-					log.debug("ISFW build info: " + p.getProperty("isfw.build.info"));
-					String[] resources = p.getStringArray("env.resources", "resources");
-					for (String resource : resources) {
-						p.addBundle(resource);
-					}
-					//p.setProperty("execute.initialValuelisteners", true);
-					executeOnLoadListeners(p);
-					
-					ConfigurationListener cl = new PropertyConfigurationListener();
-					p.addConfigurationListener(cl);
-					
-					return p;
-				}
-
-				@Override
-				protected PropertyUtil childValue(PropertyUtil parentValue) {
-					PropertyUtil cp = new PropertyUtil(parentValue);
-					ConfigurationListener cl = new PropertyConfigurationListener();
-					cp.addConfigurationListener(cl);
-					
-					return cp;
-				}
-
-			};
 
 	/**
 	 * To add local resources.
@@ -320,22 +377,22 @@ public class ConfigurationManager {
 	}
 	
 
-	private static class PropertyConfigurationListener implements ConfigurationListener {
+	private static class PropertyConfigurationListener implements EventListener<ConfigurationEvent> {
 		String oldValue;
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public void configurationChanged(ConfigurationEvent event) {
+		public void onEvent(ConfigurationEvent event) {
 
-			if ((event.getType() == AbstractConfiguration.EVENT_CLEAR_PROPERTY
-					|| event.getType() == AbstractConfiguration.EVENT_SET_PROPERTY)
+			if ((ConfigurationEvent.CLEAR_PROPERTY.equals(event.getEventType())
+					|| ConfigurationEvent.SET_PROPERTY.equals(event.getEventType()))
 					&& event.isBeforeUpdate()) {
 				oldValue = String.format("%s",
 						getBundle().getObject(event.getPropertyName()));
 			}
 
-			if ((event.getType() == AbstractConfiguration.EVENT_ADD_PROPERTY
-					|| event.getType() == AbstractConfiguration.EVENT_SET_PROPERTY)
+			if ((ConfigurationEvent.ADD_PROPERTY.equals(event.getEventType())
+					|| ConfigurationEvent.SET_PROPERTY.equals(event.getEventType()))
 					&& !event.isBeforeUpdate()) {
 				String key = event.getPropertyName();
 				Object value = event.getPropertyValue();
@@ -365,9 +422,16 @@ public class ConfigurationManager {
 						bundles = bundlesArray.toArray(new String[bundlesArray.size()]);
 					} else {
 						String resourcesBundle = (String) value;
-						if (StringUtil.isNotBlank(resourcesBundle))
+						if (!StringUtil.isNullOrEmpty(resourcesBundle)) {
+							ListDelimiterHandler handler = getBundle().getListDelimiterHandler();
+							char delimiter = ';';
+							if (handler instanceof DefaultListDelimiterHandler) {
+							     delimiter = ((DefaultListDelimiterHandler) handler).getDelimiter();
+							    // Use your delimiter here
+							}
 							bundles = resourcesBundle.split(String
-									.valueOf(PropertyUtil.getDefaultListDelimiter()));
+									.valueOf(delimiter));
+						}
 					}
 					if (null != bundles && bundles.length > 0) {
 						for (String res : bundles) {
@@ -382,7 +446,7 @@ public class ConfigurationManager {
 					String[] resources =
 							getBundle().getStringArray("env.resources", "resources");
 					for (String resource : resources) {
-						String fileOrDir = getBundle().getSubstitutor().replace(resource);
+						String fileOrDir = (String)getBundle().getInterpolator().interpolate(resource);
 						getBundle().addLocal((String) event.getPropertyValue(),
 								fileOrDir);
 					}
@@ -412,7 +476,7 @@ public class ConfigurationManager {
 								}
 							} else {
 								String resourcesBundle = (String) value;
-								if (StringUtil.isNotBlank(resourcesBundle)) {
+								if (!StringUtil.isNullOrEmpty(resourcesBundle)) {
 									factory.process(
 											resourcesBundle.replaceAll("\\.", "/"));
 								}
@@ -423,6 +487,7 @@ public class ConfigurationManager {
 			}
 
 		}
+
 	}
 
 }
