@@ -67,7 +67,7 @@ public class VendorPrefixPatchPerfecto implements VendorPrefixPatch {
 		// Security Token for multiple device scenario
 		if(!perfectoCaps.containsKey("perfecto:securityToken")) {
 
-			String securityToken = ConfigurationManager.getBundle().getString("perfecto.capabilities.securityToken", "");
+			String securityToken = ConfigurationUtils.getSecurityToken();
 			
 			perfectoCaps.addProperty("perfecto:securityToken", securityToken);
 		}

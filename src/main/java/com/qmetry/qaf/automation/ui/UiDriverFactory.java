@@ -51,6 +51,7 @@ import com.qmetry.qaf.automation.ui.selenium.webdriver.SeleniumDriverFactory;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 import com.qmetry.qaf.automation.ui.webdriver.QAFWebDriverCommandListener;
 import com.qmetry.qaf.automation.util.StringUtil;
+import com.quantum.utils.ConfigurationUtils;
 import com.quantum.utils.QuantumPatch;
 
 import io.appium.java_client.remote.AppiumCommandExecutor;
@@ -231,11 +232,11 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 		DesiredCapabilities desiredCapabilities = browser.getDesiredCapabilities();
 
 		Map<String, Object> desiredCapAsMap = desiredCapabilities.asMap();
-		
+
 		logger.debug("Desired Capabilities : " + desiredCapAsMap);
 
 		logger.debug("Browser Name : " + browser.browserName);
-		
+
 		ConfigurationManager.getBundle().setProperty("driver.desiredCapabilities", desiredCapAsMap);
 
 		QAFExtendedWebDriver driver = browser.getRemoteWebDriver(reporter, seleniumGridUrl, desiredCapabilities);
@@ -300,7 +301,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 			IBeforeLocalDriverInit initClass = (IBeforeLocalDriverInit) Class.forName(beforeLocalDriverInitClass)
 					.getDeclaredConstructor().newInstance();
-			
+
 			AbstractDriverOptions<?> driverOptions = null;
 
 			if (className.contains("CHROMEDRIVER")) {
@@ -314,13 +315,13 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			if (className.contains("EDGEDRIVER")) {
 				constructor = of.getConstructor(EdgeOptions.class);
 			}
-			
+
 			if(className.contains("SAFARIDRIVER")) {
 				constructor = of.getConstructor(SafariOptions.class);
 			}
-			
+
 			initClass.setUpBrowserExec(of);
-			
+
 			driverOptions = initClass.getDriverOptions(of, capabilities);
 
 			return constructor.newInstance(driverOptions);
@@ -345,18 +346,18 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 		chrome(new ChromeOptions(), ChromeDriver.class), edge(new EdgeOptions(), EdgeDriver.class),
 		firefox(new FirefoxOptions(), FirefoxDriver.class),
-//		iexplorer(new InternetExplorerOptions(), InternetExplorerDriver.class),
+		//		iexplorer(new InternetExplorerOptions(), InternetExplorerDriver.class),
 		safari(new SafariOptions(), "org.openqa.selenium.safari.SafariDriver"),
-//		opera(new OperaOptions(), "com.opera.core.systems.OperaDriver"),
+		//		opera(new OperaOptions(), "com.opera.core.systems.OperaDriver"),
 
 		android(ANDROID_BASE_CAPABILITIES, "io.appium.java_client.android.AndroidDriver"),
 		iOS(IOS_BASE_CAPABILITIES, "io.appium.java_client.ios.IOSDriver"),
 
-//				new DesiredCapabilities("android", "", Platform.ANDROID), 
-//				"io.appium.java_client.android.AndroidDriver"),//"org.openqa.selenium.android.AndroidDriver"),
-//		iphone(new DesiredCapabilities("iPhone", "", Platform.MAC),
-//				"io.appium.java_client.ios.IOSDriver"),//"org.openqa.selenium.iphone.IPhoneDriver"),
-//		ipad(new DesiredCapabilities("iPad", "", Platform.MAC),"io.appium.java_client.ios.IOSDriver"), //"org.openqa.selenium.iphone.IPhoneDriver"),
+		//				new DesiredCapabilities("android", "", Platform.ANDROID), 
+		//				"io.appium.java_client.android.AndroidDriver"),//"org.openqa.selenium.android.AndroidDriver"),
+		//		iphone(new DesiredCapabilities("iPhone", "", Platform.MAC),
+		//				"io.appium.java_client.ios.IOSDriver"),//"org.openqa.selenium.iphone.IPhoneDriver"),
+		//		ipad(new DesiredCapabilities("iPad", "", Platform.MAC),"io.appium.java_client.ios.IOSDriver"), //"org.openqa.selenium.iphone.IPhoneDriver"),
 
 		perfecto(new DesiredCapabilities()),
 
@@ -372,7 +373,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 		// Replaced with getDriverCls and getDriverCls method call to fix Parallel
 		// execution issues.
-//		private Class<? extends WebDriver> driverCls = null;
+		//		private Class<? extends WebDriver> driverCls = null;
 
 		@SuppressWarnings("unchecked")
 		private Class<? extends WebDriver> getDriverCls() {
@@ -387,8 +388,8 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 		private Browsers(Capabilities desiredCapabilities) {
 			this.desiredCapabilities = new DesiredCapabilities(desiredCapabilities.asMap());
-//			this.desiredCapabilities.setCapability(CapabilityType.SUPPORTS_JAVASCRIPT, true);
-//			this.desiredCapabilities.setCapability(CapabilityType.TAKES_SCREENSHOT, true);
+			//			this.desiredCapabilities.setCapability(CapabilityType.SUPPORTS_JAVASCRIPT, true);
+			//			this.desiredCapabilities.setCapability(CapabilityType.TAKES_SCREENSHOT, true);
 			// this.desiredCapabilities.setCapability(CapabilityType.SUPPORTS_FINDING_BY_CSS,
 			// true);
 
@@ -418,11 +419,11 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 		}
 
 		private String getPlatformName(Map<String, Object> capabilities, Configuration config) {
-			
-//			String driverName = ConfigurationManager.getBundle().getString("driver_name", "perfecto");
-			
-//			driverName = driverName.replace("Driver", "").replace("driver", "").replace("Remote", "").replace("remote", "");
-			
+
+			//			String driverName = ConfigurationManager.getBundle().getString("driver_name", "perfecto");
+
+			//			driverName = driverName.replace("Driver", "").replace("driver", "").replace("Remote", "").replace("remote", "");
+
 			Object platformObject = capabilities.get("platformName");
 
 			String platformName = null;
@@ -458,12 +459,13 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 				platformName = (null == platformName ? "WEB-PLATFORM" : platformName.toUpperCase());
 			}
 
+
 			return platformName;
 		}
 
 		@SuppressWarnings("unchecked")
 		private DesiredCapabilities getDesiredCapabilities() {
-			
+
 			Map<String, Object> capabilities = new HashMap<String, Object>(desiredCapabilities.asMap());
 			Gson gson = new GsonBuilder().create();
 
@@ -493,10 +495,23 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 					Map.class);
 			capabilities.putAll(extraCapabilities);
 
+			//Adding capapbilities with perfecto.capabilities prefix if driver name is not perfectoDriver
+			if(!"perfecto".equals(browserName)) {
+				String driverCapKey = String.format(ApplicationProperties.DRIVER_CAPABILITY_PREFIX_FORMAT.key, "perfecto");
+				Configuration driverCapConfig = ConfigurationManager.getBundle().subset(driverCapKey);
+				driverCapConfig.getKeys().forEachRemaining(key -> {
+					config.addProperty(String.valueOf(key), driverCapConfig.getProperty(String.valueOf(key)));
+				});
+				capabilities.putAll(new ConfigurationMap(driverCapConfig));
+			}
+
 			// individual capability property with driver name prefix
 			String driverCapKey = String.format(ApplicationProperties.DRIVER_CAPABILITY_PREFIX_FORMAT.key, browserName);
-			config = ConfigurationManager.getBundle().subset(driverCapKey);
-			capabilities.putAll(new ConfigurationMap(config));
+			Configuration driverCapConfig = ConfigurationManager.getBundle().subset(driverCapKey);
+			driverCapConfig.getKeys().forEachRemaining(key -> {
+				config.setProperty(String.valueOf(key), driverCapConfig.getProperty(String.valueOf(key)));
+			});
+			capabilities.putAll(new ConfigurationMap(driverCapConfig));
 
 			// ======== Patch for Appium 2.0 and Selenium 4 vendor specific prefix ========
 
@@ -535,36 +550,36 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 				}
 			}
 
-//			if(ConfigurationUtils.isPerfectoExecution()) {
-//				String quantumVersion = ConfigurationUtils.getQuantumVersion();
-//
-//				if (null != quantumVersion) {
-//					
-//					if(capabilities.containsKey("perfecto:options")) {
-//						((Map<String,Object>)capabilities.get("perfecto:options")).put("quantumVersion", quantumVersion);
-//					}else {
-//						capabilities.put("perfecto:quantumVersion", quantumVersion);
-//					}
-//					
-//				}
-//			}
+			//			if(ConfigurationUtils.isPerfectoExecution()) {
+			//				String quantumVersion = ConfigurationUtils.getQuantumVersion();
+			//
+			//				if (null != quantumVersion) {
+			//					
+			//					if(capabilities.containsKey("perfecto:options")) {
+			//						((Map<String,Object>)capabilities.get("perfecto:options")).put("quantumVersion", quantumVersion);
+			//					}else {
+			//						capabilities.put("perfecto:quantumVersion", quantumVersion);
+			//					}
+			//					
+			//				}
+			//			}
 
 			return new DesiredCapabilities(capabilities);
 		}
 
 		private static Browsers getBrowser(String name) {
 			for (Browsers browser : Browsers.values()) {
-				
+
 				if(name.startsWith(browser.name())) {
-//				if (name.contains(browser.name())) {
+					//				if (name.contains(browser.name())) {
 					browser.setBrowserName(name);
 					return browser;
 				}
 			}
 			Browsers b = Browsers.other;
-			
+
 			name = name.replace("Driver", "").replace("driver", "").replace("Remote", "").replace("remote", "");
-			
+
 			b.setBrowserName(name);
 			return b;
 		}
@@ -758,7 +773,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			try {
 				if (StringUtil.isNotBlank(ApplicationProperties.WEBDRIVER_REMOTE_SESSION.getStringVal())
 						|| desiredCapabilities.asMap()
-								.containsKey(ApplicationProperties.WEBDRIVER_REMOTE_SESSION.key)) {
+						.containsKey(ApplicationProperties.WEBDRIVER_REMOTE_SESSION.key)) {
 
 					Constructor<?> constructor = Class
 							.forName("com.qmetry.qaf.automation.ui.webdriver.LiveIsExtendedWebDriver")
