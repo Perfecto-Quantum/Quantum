@@ -39,6 +39,7 @@ import org.xml.sax.InputSource;
 import com.google.common.base.Function;
 import com.qmetry.qaf.automation.core.ConfigurationManager;
 import com.qmetry.qaf.automation.ui.webdriver.QAFWebDriverCommandAdapter;
+import com.quantum.utils.ConfigurationUtils;
 
 public class DriverInitListener extends QAFWebDriverCommandAdapter {
 	
@@ -269,13 +270,15 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 
 			Map<String, String> credentials = new HashMap<>();
 			HashMap<String, String> perfectoCaps = (HashMap<String, String>) capabilities.get("perfecto:options");
-			if (perfectoCaps!=null && perfectoCaps.keySet().contains("securityToken")) {
-				credentials.put("securityToken", perfectoCaps.get("securityToken").toString());
-			}else {
-				if (capabilities.get("perfecto:securityToken") != null) {
-					credentials.put("securityToken", capabilities.get("perfecto:securityToken").toString());
-				}
-			}
+//			if (perfectoCaps!=null && perfectoCaps.keySet().contains("securityToken")) {
+//			credentials.put("securityToken", perfectoCaps.get("securityToken").toString());
+//		}else {
+//			if (capabilities.get("perfecto:securityToken") != null) {
+//				credentials.put("securityToken", capabilities.get("perfecto:securityToken").toString());
+//			}
+//		}
+		
+		credentials.put("securityToken", ConfigurationUtils.getSecurityToken());
 			
 			if (!ConfigurationManager.getBundle().getBoolean("device_not_available", false)) {
 				try {

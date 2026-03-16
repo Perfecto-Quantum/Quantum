@@ -2,6 +2,8 @@ package com.quantum.utils;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.json.JSONObject;
 import org.openqa.selenium.Capabilities;
@@ -130,14 +132,36 @@ public class ConfigurationUtils {
 	}
 
 	public static boolean isPerfectoExecution() {
-
-		String driverName = getBaseBundle().getString("driver.name", "").toLowerCase();
-
-		return driverName.startsWith("perfecto");
+		return getBaseBundle().getString("remote.server", "").contains("perfecto");
 	}
 	
 	public static String getQuantumVersion() {
 		return ConfigurationUtils.class.getPackage().getImplementationVersion();
 	}
+	
+	public static String getSecurityToken() {
+		String securityToken = "";
+		
+		securityToken = getBaseBundle().getString("perfecto.capabilities.securityToken", "");
+		
+		if (securityToken.isEmpty()) {
+			String driverName = TestBaseProvider.instance().get().getDriverName().replaceAll("Driver", "");
+			securityToken= getBaseBundle().getString(driverName+".capabilities.securityToken", "");
+		}
+		return securityToken;
+	}
+	
+	public static String getPlatformName() {
+		String platformName = "";
+		
+		platformName = getBaseBundle().getString("perfecto.capabilities.platformName", "");
+		
+		if (platformName.isEmpty()) {
+			String driverName = TestBaseProvider.instance().get().getDriverName().replaceAll("Driver", "");
+			platformName= getBaseBundle().getString(driverName+".capabilities.platformName", "");
+		}
+		return platformName;
+	}
+	
 
 }
