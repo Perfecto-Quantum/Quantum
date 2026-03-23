@@ -39,35 +39,36 @@ import org.xml.sax.InputSource;
 import com.google.common.base.Function;
 import com.qmetry.qaf.automation.core.ConfigurationManager;
 import com.qmetry.qaf.automation.ui.webdriver.QAFWebDriverCommandAdapter;
+import com.quantum.utils.ConfigurationUtils;
 
 public class DriverInitListener extends QAFWebDriverCommandAdapter {
-	
+
 	private static final Log logger = LogFactoryImpl.getLog(DriverInitListener.class);
 
 	private static String baseUrl = "%s.perfectomobile.com/services/handsets?operation=list&status=connected";
-//	private static String getOptionalParameters(Device deviceInformation) {
-//		
-//		StringBuilder url = new StringBuilder();
-//		
-//		Map<String,String> deviceProperties = deviceInformation.getDeviceAttributes();
-//		
-//		Set<Entry<String,String>> entrySets = deviceProperties.entrySet();
-//		
-//		Iterator<Entry<String,String>> iterEntrySet = entrySets.iterator();
-//		
-//		Entry<String,String> entrySet;
-//		
-//		while(iterEntrySet.hasNext()) {
-//			entrySet = iterEntrySet.next();
-//			url = url.append("&");
-//			url = url.append(entrySet.getKey());
-//			url = url.append("=");
-//			url = url.append(entrySet.getValue());
-//		}
-//		
-//		return url.toString();
-//		
-//	}
+	//	private static String getOptionalParameters(Device deviceInformation) {
+	//		
+	//		StringBuilder url = new StringBuilder();
+	//		
+	//		Map<String,String> deviceProperties = deviceInformation.getDeviceAttributes();
+	//		
+	//		Set<Entry<String,String>> entrySets = deviceProperties.entrySet();
+	//		
+	//		Iterator<Entry<String,String>> iterEntrySet = entrySets.iterator();
+	//		
+	//		Entry<String,String> entrySet;
+	//		
+	//		while(iterEntrySet.hasNext()) {
+	//			entrySet = iterEntrySet.next();
+	//			url = url.append("&");
+	//			url = url.append(entrySet.getKey());
+	//			url = url.append("=");
+	//			url = url.append(entrySet.getValue());
+	//		}
+	//		
+	//		return url.toString();
+	//		
+	//	}
 
 	private static String getOptionalParameters(Device deviceInformation) {
 
@@ -94,14 +95,14 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 			}
 
 		}
-	
+
 		logger.debug("URL Parameters : " + url);
-//
-//        try {
-//            return URLEncoder.encode(url.toString(), "UTF-8").replaceAll("\\++", "%20") ;
-//        } catch (UnsupportedEncodingException e) {
-//            return url.toString();
-//        }
+		//
+		//        try {
+		//            return URLEncoder.encode(url.toString(), "UTF-8").replaceAll("\\++", "%20") ;
+		//        } catch (UnsupportedEncodingException e) {
+		//            return url.toString();
+		//        }
 		return url.toString();
 
 	}
@@ -180,9 +181,9 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 
 		Wait wait = new FluentWait<String>(availableDevicesUrl).withTimeout(Duration.ofSeconds(deviceAvailableTimeout))
 				.pollingEvery(Duration.ofSeconds(deviceAvailableCheckPollTime)).ignoring(Exception.class);
-//		FluentWait<String> deviceWait = new FluentWait<String>(availableDevicesUrl);
-//		deviceWait.withTimeout(deviceAvailableTimeout, TimeUnit.SECONDS);
-//		deviceWait.pollingEvery(deviceAvailableCheckPollTime, TimeUnit.SECONDS);
+		//		FluentWait<String> deviceWait = new FluentWait<String>(availableDevicesUrl);
+		//		deviceWait.withTimeout(deviceAvailableTimeout, TimeUnit.SECONDS);
+		//		deviceWait.pollingEvery(deviceAvailableCheckPollTime, TimeUnit.SECONDS);
 		try {
 			return (boolean) wait.until(new Function<String, Boolean>() {
 
@@ -225,7 +226,7 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 							throw new Exception("Device Not Available");
 						}
 					} catch (Exception e) {
-//						throw new Exception("Device Not Available");
+						//						throw new Exception("Device Not Available");
 						return false;
 					}
 				}
@@ -241,9 +242,9 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 	public void beforeInitialize(Capabilities desiredCapabilities) {
 		boolean skipDriverInitList = false;
 		Iterator<String> it = ConfigurationManager.getBundle().getKeys();
-		
+
 		while (it.hasNext()) {
-			
+
 			String key = it.next();
 			if (key.contains("capabilities.deviceSessionId") || key.contains("additional.capabilities")) {
 				logger.debug("Value - " + ConfigurationManager.getBundle().getString(key));
@@ -253,7 +254,7 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 					skipDriverInitList = true;
 				}
 			}
-			
+
 			if(key.contains("capabilities.platformName")){
 				String value = ConfigurationManager.getBundle().getString(key);
 				if(value.equalsIgnoreCase("windows") || value.equalsIgnoreCase("mac")) {
@@ -262,21 +263,14 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 				}
 			}
 		}
-		
+
 		if (!skipDriverInitList) {
-//			Device device = new Device();
+			//			Device device = new Device();
 			Map<String, ?> capabilities = desiredCapabilities.asMap();
 
 			Map<String, String> credentials = new HashMap<>();
-			HashMap<String, String> perfectoCaps = (HashMap<String, String>) capabilities.get("perfecto:options");
-			if (perfectoCaps!=null && perfectoCaps.keySet().contains("securityToken")) {
-				credentials.put("securityToken", perfectoCaps.get("securityToken").toString());
-			}else {
-				if (capabilities.get("perfecto:securityToken") != null) {
-					credentials.put("securityToken", capabilities.get("perfecto:securityToken").toString());
-				}
-			}
-			
+			credentials.put("securityToken", ConfigurationUtils.getSecurityToken());
+
 			if (!ConfigurationManager.getBundle().getBoolean("device_not_available", false)) {
 				try {
 					boolean deviceAvailableFlag = waitForDeviceAvailable(getDeviceFromCapabilities(capabilities), credentials);
@@ -332,33 +326,33 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 			return deviceAttributes.toString();
 		}
 	}
-	
+
 	private Device getDeviceFromCapabilities(Map<String, ?> caps) {
 		Device device = new Device();
-//		Map<String, ?> caps = capabilities.asMap();
-		
+		//		Map<String, ?> caps = capabilities.asMap();
+
 		if(caps.keySet().contains("perfecto:options")) {
 			HashMap<String, String> perfectoCaps = (HashMap<String, String>) caps.get("perfecto:options");
 			if(perfectoCaps.keySet().contains("model")) {
 				device.addAttribute("model", perfectoCaps.get("model").toString());
 			}
-			
+
 			if(perfectoCaps.keySet().contains("deviceId")) {
 				device.addAttribute("deviceId", perfectoCaps.get("deviceId").toString());
 			}
-			
+
 			if(perfectoCaps.keySet().contains("deviceName")) {
 				device.addAttribute("deviceId", perfectoCaps.get("deviceName").toString());
 			}
-			
+
 			if(perfectoCaps.keySet().contains("os")) {
 				device.addAttribute("perfecto:os", perfectoCaps.get("os").toString());
 			}
-			
+
 			if(perfectoCaps.keySet().contains("osVersion")) {
 				device.addAttribute("osVersion", perfectoCaps.get("osVersion").toString());
 			}
-			
+
 			if(perfectoCaps.keySet().contains("manufacturer")) {
 				device.addAttribute("manufacturer", perfectoCaps.get("manufacturer").toString());
 			}
@@ -383,12 +377,12 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 			if (caps.get("perfecto:osVersion") != null) {
 				device.addAttribute("osVersion", caps.get("perfecto:osVersion").toString());
 			}
-			
+
 			if (caps.get("perfecto:manufacturer") != null) {
 				device.addAttribute("manufacturer", caps.get("perfecto:manufacturer").toString());
 			}
 		}
-		
+
 		return device;
 	}
 }

@@ -34,7 +34,7 @@ public class RepositoryUtils {
 
 		this.cloudName = (ConfigurationManager.getBundle().getString("remote.server").split("\\.")[0])
 				.replace("http://", "").replace("https://", "");
-		this.securityToken = ConfigurationManager.getBundle().getString("perfecto.capabilities.securityToken");
+		this.securityToken = ConfigurationUtils.getSecurityToken();
 	}
 	
 	private boolean isProxyHostProvided() {
