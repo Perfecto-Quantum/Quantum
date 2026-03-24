@@ -138,7 +138,8 @@ public class QAFInetrceptableDataProvider {
 	private static void replaceParameter(Map<String, Object> metadata, ITestContext c) {
 		Map<String, String> testNGParam = c.getCurrentXmlTest().getAllParameters();
 
-		Pattern pattern = Pattern.compile("^\\$\\{(.+)\\}$");
+		//Pattern pattern = Pattern.compile("^\\$\\{(.+)\\}$");
+		Pattern pattern = Pattern.compile("^\\$\\{([^}]+)\\}");
 
 		String dataSheetName = (String) metadata.get("sheetname");
 
@@ -155,7 +156,9 @@ public class QAFInetrceptableDataProvider {
 				String testNGValue = testNGParam.get(paramName);
 
 				if (null != testNGValue) {
-					metadata.put("datafile", testNGValue);
+					String fixedPattern = "\\$\\{[^}]+\\}";
+					String result = dataFileName.replaceFirst(fixedPattern, testNGValue);
+					metadata.put("datafile", result);
 				} else {
 					String bundleValue = (String) getBundle().getProperty(paramName);
 					if (null != bundleValue) {
@@ -220,6 +223,8 @@ public class QAFInetrceptableDataProvider {
 		List<Object[]> dataList = null;
 
 		Map<String, Object> metadata = scenario.getMetaData();
+		
+		replaceParameter(metadata, c);
 
 		String dataProvider = (String) metadata.get(params.DATAPROVIDER.name());
 		boolean hasCustomDataProvider = null != dataProvider && !dataProvider.startsWith(QAFDataProvider.NAME);
@@ -234,7 +239,21 @@ public class QAFInetrceptableDataProvider {
 			dataList = ListUtils.toList(testData);
 		}
 
-		return dataList;
+List<Object[]> finalDataList = dataList;
+		
+		if(metadata.containsKey(params.FILTER.name()) && StringUtil.isNotBlank((String) metadata.get(params.FILTER.name()))) {
+			
+			String filterExpression = (String) metadata.get(params.FILTER.name());
+			
+			finalDataList = applyFilter(dataList, filterExpression);
+			
+		}else {
+			finalDataList = dataList;
+		}
+		
+		logger.debug("No of Tests iteration using Data Provider - " + finalDataList.size());
+
+		return finalDataList;
 
 	}
 
