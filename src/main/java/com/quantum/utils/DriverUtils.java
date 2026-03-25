@@ -159,9 +159,7 @@ public class DriverUtils {
 	 * @return boolean value.
 	 */
 	public static boolean isAndroid() {
-		WebDriver driver = getDriver().getUnderLayingDriver();
-		return driver instanceof AndroidDriver;
-//		return Platform.ANDROID.name().equalsIgnoreCase(getOS());
+		return Platform.ANDROID.name().equalsIgnoreCase(getOS());
 	}
 
 	/**
@@ -170,10 +168,7 @@ public class DriverUtils {
 	 * @return boolean value.
 	 */
 	public static boolean isIOS() {
-		
-		WebDriver driver = getDriver().getUnderLayingDriver();
-		return driver instanceof IOSDriver;
-//		return Platform.IOS.name().equalsIgnoreCase(getOS());
+		return Platform.IOS.name().equalsIgnoreCase(getOS());
 	}
 
 	/**
@@ -218,38 +213,10 @@ public class DriverUtils {
 
 	private static String getOS() {
 
-		WebDriver driver = DriverUtils.getDriver().getUnderLayingDriver();
+		QAFExtendedWebDriver driver = DriverUtils.getDriver();
 		
 		if (null!=driver) {
-			
-			String className = driver.getClass().getName();
-			
-//			if((driver instanceof AppiumDriver)) {
-			
-			if(className.startsWith("io.appium")) {
-				
-				driver = DriverUtils.getAppiumDriver();
-				
-				if(null != driver ) {
-					if(driver instanceof AndroidDriver) {
-						return Platform.ANDROID.name();
-					}else {
-						if(driver instanceof IOSDriver) {
-							return Platform.IOS.name();
-						}
-					}
-				}
-				
-				return "";
-				
-				
-			}else {
-				QAFExtendedWebDriver qafDriver = DriverUtils.getDriver();
-				Capabilities cap = qafDriver.getCapabilities();
-				String platformName = cap.getPlatformName().name();
-				return platformName;
-			}
-
+			return driver.getCapabilities().getPlatformName().name();
 		} else {
 			
 			
