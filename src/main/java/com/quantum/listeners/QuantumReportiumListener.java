@@ -228,14 +228,22 @@ implements QAFTestStepListener, ITestListener, ISuiteListener {
 
 	@Override
 	public void onTestStart(ITestResult testResult) {
+		
+		String methodName = testResult.getMethod().getMethodName();
 
-		String testName = testResult.getTestName();
-
-		testName = testName + getDataDrivenText(testResult);
+		String testName = "Quantum test";
+		
+		if("scenario".equalsIgnoreCase(methodName)) {
+			testName = testResult.getTestName();
+			testName = testName + getDataDrivenText(testResult);
+		}else {
+			testName = testResult.getMethod().getMethodName();
+			testName = testName + getDataDrivenText(testResult);
+		}
 
 		if (isExecutingOnPerfecto()) {
 
-			getBundle().setProperty("ScenarioExecution", testResult.getMethod().getMethodName());
+			getBundle().setProperty("ScenarioExecution", methodName);
 
 			// compile actual groups
 			String[] groups = TestNode.getScenarioGroups(testResult);
