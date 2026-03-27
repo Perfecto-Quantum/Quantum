@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.perfecto</groupId>
 	<artifactId>quantum</artifactId>
-	<version>3.2.1</version>
+	<version>3.2.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<description>Quantum is QAF based open source project powered by Perforce</description>
 	<url>
@@ -92,6 +92,13 @@
 	<!--					<url>https://repo1.perfectomobile.com/repositories/maven</url>-->
 	<!--				</repository>-->
 	<!--	</distributionManagement>-->
+	
+	<distributionManagement>
+	  <snapshotRepository>
+	    <id>central</id>
+	    <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+	  </snapshotRepository>
+	</distributionManagement>
 
 	<build>
 		<resources>
