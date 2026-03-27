@@ -350,9 +350,14 @@ public class TestRunner
 		m_xmlMethodSelector.setOverrideIncludedMethods(m_configuration.getOverrideIncludedMethods());
 
 		// Methods
-		m_xmlMethodSelector.setXmlClasses(m_xmlTest.getXmlClasses());
-
-//    m_runInfo.addMethodSelector(m_xmlMethodSelector, 10);
+		List<XmlClass> xmlClasses = m_xmlTest.getXmlClasses();
+		m_xmlMethodSelector.setXmlClasses(xmlClasses);
+		for (XmlClass xmlClass : xmlClasses) {
+			if(!(xmlClass).getName().equals("com.qmetry.qaf.automation.step.client.gherkin.GherkinScenarioFactory") || xmlClass.getName().equals("com.qmetry.qaf.automation.step.client.text.BDDTestFactory2")){
+				m_runInfo.addMethodSelector(m_xmlMethodSelector, 10);
+			}
+			
+		}
 
 		// Add user-specified method selectors (only class selectors, we can ignore
 		// script selectors here)
