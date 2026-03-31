@@ -43,7 +43,7 @@
 	</licenses>
 
 	<properties>
-		<io.netty.version>4.1.125.Final</io.netty.version>
+		<io.netty.version>4.2.10.Final</io.netty.version>
 		<jvm.version>11</jvm.version>
 		<selenium.version>4.13.0</selenium.version>
 		<selenium-http.version>4.13.0</selenium-http.version>
