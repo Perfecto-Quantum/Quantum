@@ -1226,9 +1226,9 @@ AppiumDriver appiumDriver = AppiumUtils.getAppiumDriver();
 		
 		
 		Map<String, Object> capabilities = DriverUtils.getDriver().getCapabilities().asMap();
-		
+
 		Optional<Entry<String, Object>> browserEntry = capabilities.entrySet().stream().filter(entry -> {return entry.getKey().contains("browserName");}).findFirst();
-		
+
 		String browserName = (!browserEntry.isPresent() ? "" : (String)browserEntry.get().getValue());
 
 		boolean isIOS = DriverUtils.isIOS();
@@ -1239,13 +1239,13 @@ AppiumDriver appiumDriver = AppiumUtils.getAppiumDriver();
 			logger.error(
 					"Accessibility testing is not supported for Safari browser on iPhone/iPad. Skipping Accessibility check.");
 		} else {
-			
+
 			if (isAndroid || isIOS) {
 				Map<String, Object> params = new HashMap<>();
 				params.put("tag", tagName);
 				getQAFDriver().executeScript("mobile:checkAccessibility:audit", params);
 			} else {
-				startAxe();
+				startAxe(tagName);
 			}
 		}
 	}
@@ -1366,66 +1366,71 @@ AppiumDriver appiumDriver = AppiumUtils.getAppiumDriver();
 	/**
 	 * Utility method to start Axe tool on Perfecto Browsers for Accessibility testing.
 	 */
-	private static void startAxe() {
+	private static void startAxe(String tagName) {
 		AxeHelper axe = new AxeHelper(DeviceUtils.getQAFDriver());
 		axe.runAxe();
-		axe.startHighlighter("violations");
-		StringBuilder errors = new StringBuilder();
+		boolean violationsFound = axe.startHighlighter("violations");
 		int errorCount = 0;
-		
-		Map<String, ?> violation;
-		
-		String impact;
-		String summary;
-		String html;
-		String selector;
+		if(violationsFound) {
+			StringBuilder errors = new StringBuilder();
 
-		String message;
-		
-		while (true) {
-			violation = axe.nextHighlight();
-			logger.debug("violation: " + violation);
-			if (violation == null) {
-				break;
+			Map<String, ?> violation;
+
+			String impact;
+			String summary;
+			String html;
+			String selector;
+
+			String message;
+
+			while (true) {
+				violation = axe.nextHighlight();
+				logger.debug("violation: " + violation);
+				if (violation == null) {
+					break;
+				}
+
+				errorCount++;
+				String ruleId = (String) violation.get("issue");
+				@SuppressWarnings("unchecked")
+				Map<String, String> node = (Map<String, String>) violation.get("node");
+
+				impact = node.get("impact");
+				summary = node.get("failureSummary");
+				html = node.get("html");
+				selector = (String) violation.get("target");
+
+				message = String.format("%s - %s%n %s%n Selector:\t%s%n HTML:\t\t%s%n%n", impact, ruleId,
+						summary, selector, html);
+
+				DriverUtils.getDriver().getScreenshotAs(OutputType.BASE64);
+				ReportUtils.getReportClient().reportiumAssert(message, false);
+				errors.append(message);
 			}
 
-			errorCount++;
-			String ruleId = (String) violation.get("issue");
-			@SuppressWarnings("unchecked")
-			Map<String, String> node = (Map<String, String>) violation.get("node");
 
-			impact = node.get("impact");
-			summary = node.get("failureSummary");
-			html = node.get("html");
-			selector = (String) violation.get("target");
+			if (errorCount > 0) {
+				final Capabilities capabilities = DriverUtils.getDriver().getCapabilities();
+				final String platform = String.valueOf(capabilities.getCapability("platformName"));
+				final String version = String.valueOf(capabilities.getCapability("platformVersion"));
+				final String browserName = String.valueOf(capabilities.getCapability("browserName"));
+				final String browserVersion = String.valueOf(capabilities.getCapability("browserVersion"));
+				String browserVersionFormatted;
 
-			message = String.format("%s - %s%n %s%n Selector:\t%s%n HTML:\t\t%s%n%n", impact, ruleId,
-					summary, selector, html);
+				if ("null".equals(browserName)) {
+					browserVersionFormatted = "default browser";
+				} else {
+					browserVersionFormatted = browserName + "-" + browserVersion;
+				}
+				message = String.format("%n%s-%s %s : %d violations on %s%nReport Link: %s%n", platform, version,
+						browserVersionFormatted, errorCount, "https://www.google.com/",
+						ReportUtils.getReportClient().getReportUrl());
 
-			DriverUtils.getDriver().getScreenshotAs(OutputType.BASE64);
-			ReportUtils.getReportClient().reportiumAssert(message, false);
-			errors.append(message);
-		}
-
-		if (errorCount > 0) {
-			final Capabilities capabilities = DriverUtils.getDriver().getCapabilities();
-			final String platform = String.valueOf(capabilities.getCapability("platformName"));
-			final String version = String.valueOf(capabilities.getCapability("platformVersion"));
-			final String browserName = String.valueOf(capabilities.getCapability("browserName"));
-			final String browserVersion = String.valueOf(capabilities.getCapability("browserVersion"));
-			String browserVersionFormatted;
-			
-			if ("null".equals(browserName)) {
-				browserVersionFormatted = "default browser";
-			} else {
-				browserVersionFormatted = browserName + "-" + browserVersion;
+				message = String.format("%s%n%s%n", message, errors);
+				//			throw new AccessibilityException(message);
 			}
-			message = String.format("%n%s-%s %s : %d violations on %s%nReport Link: %s%n", platform, version,
-					browserVersionFormatted, errorCount, "https://www.google.com/",
-					ReportUtils.getReportClient().getReportUrl());
-			
-			message = String.format("%s%n%s%n", message, errors);
-//			throw new AccessibilityException(message);
+		}else {
+			ReportUtils.logAssert(tagName+" : No violations found.", true);
 		}
 	}
 
