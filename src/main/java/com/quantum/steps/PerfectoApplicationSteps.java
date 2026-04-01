@@ -818,5 +818,44 @@ public class PerfectoApplicationSteps {
 	public static void performAIUserActionWithReasoningAndReturnData(String prompt) {
 		ReportUtils.logVerify("AI user-action status ", Utils.aiUserAction(prompt, true));
 	}
+	
+	/**
+	 * Installs a single application on the device, with sensor, secured screen instrumentation and
+	 * re-sign the application.
+	 * <p>
+	 * To use, specify the local path to the application or the application
+	 * repository key. If the application repository key is specified, the
+	 * application must first be uploaded to the Perfecto Lab repository.
+	 * <p>
+	 * To do this, log in to the Perfecto Lab interface and use the Repository
+	 * manager. Supported file formats include APK files for Android and IPA for
+	 * iOS.
+	 *
+	 * @param application the local or repository path, including directory and file
+	 *                    name, where to locate the application
+	 */
+	@Then("^I install application \"(.*?)\" with sensor secured screen instrumentation and re-sign it$")
+	public static void installAppWithSecuredScreenInstrumentationAndSensorInstrumentation(String application) {
+		DeviceUtils.installApp(application, "noinstrument", "sensor", "secured_screen_removal", "true");
+	}
+
+	/**
+	 * Installs a single application on the device, with secured screen instrumentation.
+	 * <p>
+	 * To use, specify the local path to the application or the application
+	 * repository key. If the application repository key is specified, the
+	 * application must first be uploaded to the Perfecto Lab repository.
+	 * <p>
+	 * To do this, log in to the Perfecto Lab interface and use the Repository
+	 * manager. Supported file formats include APK files for Android and IPA for
+	 * iOS.
+	 *
+	 * @param application the local or repository path, including directory and file
+	 *                    name, where to locate the application
+	 */
+	@Then("^I install application \"(.*?)\" with secured screen instrumentation")
+	public static void installAppWithSecuredInstrumentation(String application) {
+		DeviceUtils.installApp(application, "noinstrument", "nosensor", "secured_screen_removal", "false");
+	}
 
 }
