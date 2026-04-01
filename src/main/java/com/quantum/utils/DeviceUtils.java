@@ -1474,4 +1474,35 @@ AppiumDriver appiumDriver = AppiumUtils.getAppiumDriver();
 		Map<String, Object> params = new HashMap<>();
 		getQAFDriver().executeScript("mobile:vitals:stop", params);
 	}
+	
+	/**
+	 *
+	 * @param repoKey          - The full repository path, including directory and
+	 *                         file name, where to locate the application.
+	 * @param instrument       - Perform instrumentation.. Possible values
+	 *                         :noinstrument (default) | instrument.
+	 * @param sensorInstrument - Enable device sensor. Possible values: nosensor
+	 *                         (default)| sensor.
+	 * @param securedScreenInstrument - Removes SECURE_FLAG on android apps and 
+	 * 									secured screens will be visible in this app.
+	 * 							Possible values: no_secured_screen_removal (default) | secured_screen_removal.            
+	 * @param resignEnable     - Re-sign the app with a Perfecto code-signing
+	 *                         certificate that has the cloud device provisioned.
+	 *                         Possible values false (default) | true.
+	 */
+	public static void installApp(String repoKey, String instrument, String sensorInstrument, String securedScreenInstrument, String resignEnable) {
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("file", getBundle().getString("repoKey", repoKey));
+		if (!instrument.isEmpty())
+			params.put("instrument", instrument);
+		if (!sensorInstrument.isEmpty())
+			params.put("sensorInstrument", sensorInstrument);
+		if (!resignEnable.isEmpty())
+			params.put("resign", resignEnable);
+		if (DriverUtils.isAndroid() && !securedScreenInstrument.isEmpty())
+			params.put("securedScreenInstrument", securedScreenInstrument);
+
+		String resultStr = (String) getQAFDriver().executeScript("mobile:application:install", params);
+		logger.debug("Install App : " + resultStr);
+	}
 }
