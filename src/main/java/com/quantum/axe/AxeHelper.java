@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
+import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -32,7 +33,7 @@ public class AxeHelper {
 	 */
 	// https://cdnjs.cloudflare.com/ajax/libs/axe-core/2.3.1/axe.min.js
 
-	public static final String AXE_DEFAULT = "https://cdnjs.cloudflare.com/ajax/libs/axe-core/3.5.3/axe.min.js";
+	public static final String AXE_DEFAULT = "https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.3/axe.min.js";
 	/**
 	 * The RWD for command dispatch.
 	 */
@@ -248,13 +249,20 @@ public class AxeHelper {
 
 		final String toExecute = String.format(startHighlighterScript, type);
 
-		driver.executeScript(toExecute, Collections.EMPTY_MAP);
+		try {
+			driver.executeScript(toExecute, Collections.EMPTY_MAP);
+		} catch (JavascriptException e) {
+			if(e.getMessage().contains("Invalid state - no current issue to work from")) {
+				return false;
+			}
+			throw new AxeHelperException("Error starting highlighter: " + e.getMessage(), e);
+		}
 //    log.info("Axe start highlighter returned: {}", result);
 
 		return true;
 	}
 
-	public Map<String, String> nextHighlight() {
+	public Map<String, Object> nextHighlight() {
 		final Object result = driver.executeScript("return document.perfectoViolationHighlighter.highlightNext();",
 				Collections.EMPTY_MAP);
 		if (result == null) {
@@ -263,7 +271,7 @@ public class AxeHelper {
 
 //    log.trace("Highlight result: {}", result);
 		try {
-			return jsonObjectMapper.readValue(String.valueOf(result), new TypeReference<HashMap<String, String>>() {
+			return jsonObjectMapper.readValue(String.valueOf(result), new TypeReference<HashMap<String, Object>>() {
 			});
 		} catch (final Exception e) {
 //      log.error("Internal error - ", e);
