@@ -30,6 +30,7 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.http.ClientConfig;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
 import org.testng.SkipException;
@@ -288,6 +289,9 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 							ConfigurationManager.getBundle().setProperty("device_not_available", true);
 							((DesiredCapabilities) desiredCapabilities).setCapability("perfecto:scriptName",
 									getBundle().getString("ScenarioExecution", "FromListener"));
+							if(desiredCapabilities.asMap().keySet().contains("perfecto:openDeviceTimeout")) {
+								((DesiredCapabilities) desiredCapabilities).setCapability("perfecto:openDeviceTimeout", 0);
+							}
 							getBundle().setProperty("ScenarioExecution", "FromListener");
 							WebDriver driver = new RemoteWebDriver(
 									new URL(ConfigurationManager.getBundle().getString("remote.server")),
@@ -345,16 +349,32 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 				device.addAttribute("deviceId", perfectoCaps.get("deviceName").toString());
 			}
 
-			if(perfectoCaps.keySet().contains("os")) {
-				device.addAttribute("perfecto:os", perfectoCaps.get("os").toString());
+			if(perfectoCaps.keySet().contains("platformName")) {
+				device.addAttribute("os", perfectoCaps.get("platformName").toString());
 			}
 
-			if(perfectoCaps.keySet().contains("osVersion")) {
-				device.addAttribute("osVersion", perfectoCaps.get("osVersion").toString());
+			if(perfectoCaps.keySet().contains("platformVersion")) {
+				device.addAttribute("osVersion", perfectoCaps.get("platformVersion").toString());
 			}
 
 			if(perfectoCaps.keySet().contains("manufacturer")) {
 				device.addAttribute("manufacturer", perfectoCaps.get("manufacturer").toString());
+			}
+
+			if(perfectoCaps.keySet().contains("phoneNumber")) {
+				device.addAttribute("phoneNumber", perfectoCaps.get("phoneNumber").toString());
+			}
+
+			if(perfectoCaps.keySet().contains("resolution")) {
+				device.addAttribute("resolution", perfectoCaps.get("resolution").toString());
+			}
+
+			if(perfectoCaps.keySet().contains("location")) {
+				device.addAttribute("location", perfectoCaps.get("location").toString());
+			}
+
+			if(perfectoCaps.keySet().contains("description")) {
+				device.addAttribute("description", perfectoCaps.get("description").toString());
 			}
 		}else {
 
@@ -370,17 +390,34 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 				device.addAttribute("deviceId", caps.get("perfecto:deviceName").toString());
 			}
 
-			if (caps.get("perfecto:os") != null) {
-				device.addAttribute("perfecto:os", caps.get("perfecto:os").toString());
+			if (caps.get("perfecto:platformName") != null) {
+				device.addAttribute("os", caps.get("perfecto:platformName").toString());
 			}
 
-			if (caps.get("perfecto:osVersion") != null) {
-				device.addAttribute("osVersion", caps.get("perfecto:osVersion").toString());
+			if (caps.get("perfecto:platformVersion") != null) {
+				device.addAttribute("osVersion", caps.get("perfecto:platformVersion").toString());
 			}
 
 			if (caps.get("perfecto:manufacturer") != null) {
 				device.addAttribute("manufacturer", caps.get("perfecto:manufacturer").toString());
 			}
+
+			if (caps.get("perfecto:phoneNumber") != null) {
+				device.addAttribute("phoneNumber", caps.get("perfecto:phoneNumber").toString());
+			}
+
+			if (caps.get("perfecto:resolution") != null) {
+				device.addAttribute("resolution", caps.get("perfecto:resolution").toString());
+			}
+
+			if (caps.get("perfecto:location") != null) {
+				device.addAttribute("location", caps.get("perfecto:location").toString());
+			}
+
+			if (caps.get("perfecto:description") != null) {
+				device.addAttribute("description", caps.get("perfecto:description").toString());
+			}
+
 		}
 
 		return device;
