@@ -479,6 +479,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 					.subset(ApplicationProperties.DRIVER_CAPABILITY_PREFIX.key);
 			Map<?, ?> configMap = new ConfigurationMap(config);
 			configMap.forEach((k, v) -> capabilities.put(String.valueOf(k), v));
+//			capabilities.putAll(new ConfigurationMap(config));
 
 			// #332 add default capabilities for standard driver
 			if (!name().equalsIgnoreCase(other.name())) {
@@ -503,15 +504,20 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 				driverCapConfig.getKeys().forEachRemaining(key -> {
 					config.addProperty(String.valueOf(key), driverCapConfig.getProperty(String.valueOf(key)));
 				});
-				capabilities.putAll(new ConfigurationMap(driverCapConfig));
+//				capabilities.putAll(new ConfigurationMap(driverCapConfig));
+				Map<?, ?> configMap2 = new ConfigurationMap(config);
+				configMap2.forEach((k, v) -> capabilities.put(String.valueOf(k), v));
 			}
 
 			// individual capability property with driver name prefix
 			String driverCapKey = String.format(ApplicationProperties.DRIVER_CAPABILITY_PREFIX_FORMAT.key, browserName);
-			config = ConfigurationManager.getBundle().subset(driverCapKey);
+			Configuration driverCapConfig = ConfigurationManager.getBundle().subset(driverCapKey);
+			driverCapConfig.getKeys().forEachRemaining(key -> {
+				config.setProperty(String.valueOf(key), driverCapConfig.getProperty(String.valueOf(key)));
+			});
 			Map<?, ?> configMap2 = new ConfigurationMap(config);
 			configMap2.forEach((k, v) -> capabilities.put(String.valueOf(k), v));
-//			capabilities.putAll(new ConfigurationMap(config));
+//			capabilities.putAll(new ConfigurationMap(driverCapConfig));
 
 			// ======== Patch for Appium 2.0 and Selenium 4 vendor specific prefix ========
 
@@ -545,7 +551,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			for (String key : capabilities.keySet()) {
 				Object value = capabilities.get(key);
 				if (value instanceof String) {
-					capabilities.put(key, String.valueOf(ConfigurationManager.getBundle().getInterpolator().interpolate(value)));
+					capabilities.put(key, ConfigurationManager.getBundle().getInterpolator().interpolate(value));
 				}
 			}
 

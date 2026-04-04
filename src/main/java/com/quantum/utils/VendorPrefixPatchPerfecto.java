@@ -68,7 +68,7 @@ public class VendorPrefixPatchPerfecto implements VendorPrefixPatch {
 		// Security Token for multiple device scenario
 		if(!perfectoCaps.containsKey("perfecto:securityToken")) {
 			String securityToken = ConfigurationUtils.getSecurityToken();
-			perfectoCaps.addProperty(securityToken, propValueStr);("perfecto:securityToken", securityToken);
+			perfectoCaps.addProperty("perfecto:securityToken", securityToken);
 		}
 		
 		// By default Appium Version is set to latest version if explicitly not mentioned
