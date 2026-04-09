@@ -350,7 +350,14 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 			}
 
 			if(perfectoCaps.keySet().contains("platformName")) {
-				device.addAttribute("os", perfectoCaps.get("platformName").toString());
+				String platformName = perfectoCaps.get("platformName").toString();
+				String os = "";
+				if(platformName.equalsIgnoreCase("android")) {
+					os = "Android";
+				}else {
+					os = "iOS";
+				}
+				device.addAttribute("os", os);
 			}
 
 			if(perfectoCaps.keySet().contains("platformVersion")) {
@@ -391,7 +398,14 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 			}
 
 			if (caps.get("perfecto:platformName") != null) {
-				device.addAttribute("os", caps.get("perfecto:platformName").toString());
+				String platformName = caps.get("perfecto:platformName").toString();
+				String os = "";
+				if(platformName.equalsIgnoreCase("android")) {
+					os = "Android";
+				}else {
+					os = "iOS";
+				}
+				device.addAttribute("os", os);
 			}
 
 			if (caps.get("perfecto:platformVersion") != null) {
