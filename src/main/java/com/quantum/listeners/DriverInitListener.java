@@ -250,7 +250,7 @@ public class DriverInitListener extends QAFWebDriverCommandAdapter {
 			if (key.contains("capabilities.deviceSessionId") || key.contains("additional.capabilities")) {
 				logger.debug("Value - " + ConfigurationManager.getBundle().getString(key));
 				if (ConfigurationManager.getBundle().getString(key).contains("-")
-						|| ConfigurationManager.getBundle().getString(key).contains("'useVirtualDevice':true")) {
+						|| ConfigurationManager.getBundle().getString(key).contains("useVirtualDevice':true")) {
 					logger.debug("Executing on VD or Shared Session, therefore skipping DriverInitListener");
 					skipDriverInitList = true;
 				}
