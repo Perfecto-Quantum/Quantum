@@ -9,6 +9,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Proxy;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
@@ -33,9 +35,9 @@ import org.openqa.selenium.remote.CommandExecutor;
 import org.openqa.selenium.remote.CommandPayload;
 import org.openqa.selenium.remote.DriverCommand;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.remote.Response;
 import org.openqa.selenium.remote.ScreenshotException;
-import org.openqa.selenium.remote.internal.WebElementToJsonConverter;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import com.google.common.collect.ImmutableMap;
@@ -381,11 +383,19 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 	}
 
 	public <T> T extractScreenShot(WebDriverException e, OutputType<T> target) {
-		if (e.getCause() instanceof ScreenshotException) {
-			String base64Str = ((ScreenshotException) e.getCause()).getBase64EncodedScreenshot();
-			return target.convertFromBase64Png(base64Str);
-		}
-		return null;
+	    // In Selenium 4.41.0, the response is often wrapped in a data map 
+	    // accessible via the exception's internal response if it's a RemoteWebDriver issue
+	    if (e.getAdditionalInformation() != null && e.getAdditionalInformation().contains("screenshot")) {
+	        // You may need to parse the message or supplemental data
+	        // However, the cleanest way in 4.41.0 is to use the driver directly:
+	    }
+	    
+	    // Recommended approach for 4.41.0: Use the driver if it's still alive
+	    if (this instanceof TakesScreenshot) {
+	        return ((TakesScreenshot) this).getScreenshotAs(target);
+	    }
+	    
+	    return null;
 	}
 
 	public Alert getAlert() {
@@ -721,7 +731,18 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 		// Escape the quote marks
 		script = script.replaceAll("\"", "\\\"");
 
-		List<Object> convertedArgs = Stream.of(args).map(new WebElementToJsonConverter()).collect(Collectors.toList());
+		//List<Object> convertedArgs = Stream.of(args).map(new WebElementToJsonConverter()).collect(Collectors.toList());
+		List<Object> convertedArgs = Stream.of(args)
+			    .<Object>map(arg -> {
+			        if (arg instanceof RemoteWebElement) {
+			            return Collections.singletonMap(
+			                "element-6066-11e4-a52e-4f735466cecf", 
+			                ((RemoteWebElement) arg).getId()
+			            );
+			        }
+			        return arg;
+			    })
+			    .collect(Collectors.toList());
 		Map<String, ?> params = ImmutableMap.of("script", script, "args", Lists.newArrayList(convertedArgs));
 
 		return execute(DriverCommand.EXECUTE_SCRIPT, params).getValue();
@@ -737,7 +758,18 @@ public class QAFExtendedWebDriver extends RemoteWebDriver implements QAFWebDrive
 		// Escape the quote marks
 		script = script.replaceAll("\"", "\\\"");
 
-		List<Object> convertedArgs = Stream.of(args).map(new WebElementToJsonConverter()).collect(Collectors.toList());
+		//List<Object> convertedArgs = Stream.of(args).map(new WebElementToJsonConverter()).collect(Collectors.toList());
+		List<Object> convertedArgs = Stream.of(args)
+			    .<Object>map(arg -> {
+			        if (arg instanceof RemoteWebElement) {
+			            return Collections.singletonMap(
+			                "element-6066-11e4-a52e-4f735466cecf", 
+			                ((RemoteWebElement) arg).getId()
+			            );
+			        }
+			        return arg;
+			    })
+			    .collect(Collectors.toList());
 		Map<String, ?> params = ImmutableMap.of("script", script, "args", Lists.newArrayList(convertedArgs));
 
 		return execute(DriverCommand.EXECUTE_ASYNC_SCRIPT, params).getValue();

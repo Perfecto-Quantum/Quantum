@@ -43,10 +43,10 @@
 	</licenses>
 
 	<properties>
-		<io.netty.version>4.2.10.Final</io.netty.version>
+<!--		<io.netty.version>4.2.10.Final</io.netty.version>-->
 		<jvm.version>11</jvm.version>
-		<selenium.version>4.13.0</selenium.version>
-		<selenium-http.version>4.13.0</selenium-http.version>
+		<selenium.version>4.41.0</selenium.version>
+		<selenium-http.version>4.41.0</selenium-http.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<testng.version>7.7.1</testng.version>
@@ -60,7 +60,7 @@
 		<org.json.version>20240303</org.json.version>
 		<qaf.version>3.2.0</qaf.version>
 		<poi.version>5.4.1</poi.version>
-		<appium.client.version>8.6.0</appium.client.version>
+		<appium.client.version>10.1.0</appium.client.version>
 		<jsoup.version>1.15.4</jsoup.version>
 		<jackson.version>2.21.2</jackson.version>
 		<guava.jre.version>33.3.1-jre</guava.jre.version>
@@ -546,19 +546,19 @@
 		</dependency>
 
 
-		<!-- https://mvnrepository.com/artifact/io.netty/netty-codec-http -->
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-codec-http</artifactId>
-			<version>${io.netty.version}</version>
-		</dependency>
+<!--		 https://mvnrepository.com/artifact/io.netty/netty-codec-http -->
+<!--		<dependency>-->
+<!--			<groupId>io.netty</groupId>-->
+<!--			<artifactId>netty-codec-http</artifactId>-->
+<!--			<version>${io.netty.version}</version>-->
+<!--		</dependency>-->
 
-		<!-- https://mvnrepository.com/artifact/io.netty/netty-common -->
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-common</artifactId>
-			<version>${io.netty.version}</version>
-		</dependency>
+<!--		 https://mvnrepository.com/artifact/io.netty/netty-common -->
+<!--		<dependency>-->
+<!--			<groupId>io.netty</groupId>-->
+<!--			<artifactId>netty-common</artifactId>-->
+<!--			<version>${io.netty.version}</version>-->
+<!--		</dependency>-->
 
 		<dependency>
 			<groupId>io.appium</groupId>
@@ -638,11 +638,11 @@
 			</exclusions>
 		</dependency>
 
-		<dependency>
-			<groupId>org.seleniumhq.selenium</groupId>
-			<artifactId>selenium-http-jdk-client</artifactId>
-			<version>${selenium-http.version}</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.seleniumhq.selenium</groupId>-->
+<!--			<artifactId>selenium-http-jdk-client</artifactId>-->
+<!--			<version>${selenium-http.version}</version>-->
+<!--		</dependency>-->
 
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
