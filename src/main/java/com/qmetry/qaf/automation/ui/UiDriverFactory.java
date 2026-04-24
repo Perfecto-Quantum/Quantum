@@ -377,11 +377,13 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 		@SuppressWarnings("unchecked")
 		private Class<? extends WebDriver> getDriverCls() {
-			return (Class<? extends WebDriver>) ConfigurationManager.getBundle().getProperty("DriverCLS");
+			String driverName = this.browserName;
+			return (Class<? extends WebDriver>) ConfigurationManager.getBundle().getProperty(driverName+"DriverCLS");
 		}
 
 		private void setDriverCls(Class<? extends WebDriver> driverCls) {
-			ConfigurationManager.getBundle().setProperty("DriverCLS", driverCls);
+			String driverName = this.browserName;
+			ConfigurationManager.getBundle().setProperty(driverName+"DriverCLS", driverCls);
 		}
 
 		private String browserName = name();
@@ -530,7 +532,6 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 			Object driverclass = config.getString("driverClass", null);
 
-			// capabilities.get(ApplicationProperties.CAPABILITY_NAME_DRIVER_CLASS.key);
 			if (null == driverclass) {// backward compatibility only
 				driverclass = capabilities.get("driver.class");
 			}
