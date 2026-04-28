@@ -12,6 +12,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -513,8 +514,10 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			String driverCapKey = String.format(ApplicationProperties.DRIVER_CAPABILITY_PREFIX_FORMAT.key, browserName);
 			Configuration driverCapConfig = ConfigurationManager.getBundle().subset(driverCapKey);
 			driverCapConfig.getKeys().forEachRemaining(key -> {
-				config.setProperty(String.valueOf(key), driverCapConfig.getProperty(String.valueOf(key)));
+				config.setProperty(String.valueOf(key), driverCapConfig.getString(String.valueOf(key)));
 			});
+			
+
 			Map<?, ?> configMap2 = new ConfigurationMap(config);
 			configMap2.forEach((k, v) -> capabilities.put(String.valueOf(k), v));
 //			capabilities.putAll(new ConfigurationMap(driverCapConfig));
@@ -568,7 +571,6 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			//					
 			//				}
 			//			}
-			
 			return new DesiredCapabilities(capabilities);
 		}
 
