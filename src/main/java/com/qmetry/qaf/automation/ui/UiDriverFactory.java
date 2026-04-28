@@ -456,7 +456,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			platformName = (null == platformName ? null : platformName.toUpperCase());
 
 			if (null == platformName) {
-				platformName = (String) config.getProperty("driverClass");
+				platformName = (String) config.getString("driverClass");
 				platformName = (null == platformName ? "WEB-PLATFORM" : platformName.toUpperCase());
 			}
 
@@ -503,7 +503,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 				String driverCapKey = String.format(ApplicationProperties.DRIVER_CAPABILITY_PREFIX_FORMAT.key, "perfecto");
 				Configuration driverCapConfig = ConfigurationManager.getBundle().subset(driverCapKey);
 				driverCapConfig.getKeys().forEachRemaining(key -> {
-					config.addProperty(String.valueOf(key), driverCapConfig.getProperty(String.valueOf(key)));
+					config.addProperty(String.valueOf(key), driverCapConfig.getString(String.valueOf(key)));
 				});
 //				capabilities.putAll(new ConfigurationMap(driverCapConfig));
 				Map<?, ?> configMap2 = new ConfigurationMap(config);
