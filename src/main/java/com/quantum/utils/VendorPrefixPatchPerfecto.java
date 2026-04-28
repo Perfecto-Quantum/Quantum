@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.ConfigurationMap;
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.BaseHierarchicalConfiguration;
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.ConfigurationMap;
 
 import com.qmetry.qaf.automation.core.ConfigurationManager;
 
@@ -20,7 +20,8 @@ public class VendorPrefixPatchPerfecto implements VendorPrefixPatch {
 		@SuppressWarnings("unchecked")
 		Iterator<String> iter = config.getKeys();
 
-		Configuration perfectoCaps = new HierarchicalConfiguration();
+		Configuration perfectoCaps = new BaseHierarchicalConfiguration();
+
 		String capName;
 
 		List<String> ignoreList = Arrays
@@ -66,9 +67,7 @@ public class VendorPrefixPatchPerfecto implements VendorPrefixPatch {
 
 		// Security Token for multiple device scenario
 		if(!perfectoCaps.containsKey("perfecto:securityToken")) {
-
 			String securityToken = ConfigurationUtils.getSecurityToken();
-			
 			perfectoCaps.addProperty("perfecto:securityToken", securityToken);
 		}
 		

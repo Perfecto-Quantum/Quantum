@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.LogFactoryImpl;
 import org.apache.http.HttpHost;
@@ -158,7 +158,7 @@ public class ReportUtils {
 		try {
 			if (!status) {
 				TestBaseProvider.instance().get().addVerificationError(e);
-				getReportClient().reportiumAssert(message + "\n" + ExceptionUtils.getFullStackTrace(e), status);
+				getReportClient().reportiumAssert(message + "\n" + ExceptionUtils.getStackTrace(e), status);
 			} else {
 				getReportClient().reportiumAssert(message, status);
 			}
