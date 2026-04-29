@@ -15,7 +15,8 @@ public class AxeTestResultRule {
     public  String helpUrl;
 
     public  List<String> tags;
-
+    
+    public List<String> actIds; 
 
     @Override
     public String toString() {
@@ -32,6 +33,7 @@ public class AxeTestResultRule {
         result = prime * result + ((helpUrl == null) ? 0 : helpUrl.hashCode());
         result = prime * result + ((ruleId == null) ? 0 : ruleId.hashCode());
         result = prime * result + ((tags == null) ? 0 : tags.hashCode());
+        result = prime * result + ((actIds == null) ? 0 : actIds.hashCode());
         return result;
     }
 
@@ -81,6 +83,13 @@ public class AxeTestResultRule {
                 return false;
             }
         } else if (!tags.equals(other.tags)) {
+            return false;
+        }
+        if (actIds == null) {
+            if (other.actIds != null) {
+                return false;
+            }
+        } else if (!actIds.equals(other.actIds)) {
             return false;
         }
         return true;

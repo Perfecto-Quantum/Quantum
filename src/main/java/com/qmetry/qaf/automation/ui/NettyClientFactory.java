@@ -6,12 +6,12 @@ import java.time.Duration;
 import org.openqa.selenium.remote.http.ClientConfig;
 import org.openqa.selenium.remote.http.HttpClient;
 import org.openqa.selenium.remote.http.HttpClientName;
-import org.openqa.selenium.remote.http.netty.NettyClient;
+import org.openqa.selenium.remote.http.jdk.JdkHttpClient;
 
 
 @AutoService(HttpClient.Factory.class)
 @HttpClientName("quantum-netty-client-factory")
-public class NettyClientFactory extends NettyClient.Factory {
+public class NettyClientFactory extends JdkHttpClient.Factory {
 
   @Override
   public HttpClient createClient(ClientConfig config) {
