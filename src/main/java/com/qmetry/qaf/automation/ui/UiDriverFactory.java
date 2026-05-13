@@ -520,6 +520,10 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 			Map<?, ?> configMap2 = new ConfigurationMap(config);
 			configMap2.forEach((k, v) -> capabilities.put(String.valueOf(k), v));
+			String perfectoScreenShots = ConfigurationManager.getBundle().getString(ApplicationProperties.PERFECTO_SCREENSHOTS.key, "0");
+			config.addProperty("takesScreenshot","0".equals(perfectoScreenShots)?false:true);
+			String perfectoErrorScreenshots = ConfigurationManager.getBundle().getString(ApplicationProperties.PERFECTO_FAILURE_SCREENSHOTS.key, "1");
+			config.addProperty("screenshotOnError","1".equals(perfectoErrorScreenshots)?true:false);
 //			capabilities.putAll(new ConfigurationMap(driverCapConfig));
 
 			// ======== Patch for Appium 2.0 and Selenium 4 vendor specific prefix ========
