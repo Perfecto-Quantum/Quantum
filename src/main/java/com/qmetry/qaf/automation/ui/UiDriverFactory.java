@@ -817,6 +817,14 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			Collection<QAFWebDriverCommandListener> listners = UiDriverFactory.getDriverListeners();
 
 			UiDriverFactory.beforeInitialize(desiredCapabilities, listners);
+			
+			//Stop previous execution to avoid failures.
+			boolean releaseDevice = "1".equals(ConfigurationManager.getBundle().getString("release.device.before.run", "0"))								? true
+					: false;
+			if (releaseDevice) {
+				checkAndReleaseDevice(desiredCapabilities.asMap());
+			}
+			
 			try {
 				if (StringUtil.isNotBlank(ApplicationProperties.WEBDRIVER_REMOTE_SESSION.getStringVal())
 						|| desiredCapabilities.asMap()
@@ -937,16 +945,17 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 		}
 
 		private void checkAndReleaseDevice(Map<String, Object> caps) {
-			System.out.println(caps);
+			boolean isMobile = String.valueOf(caps.get("perfecto:platformName")).equalsIgnoreCase("android") || String.valueOf(caps.get("perfecto:platformName")).equalsIgnoreCase("ios");
 			String deviceName = caps.containsKey("perfecto:deviceName") ? String.valueOf(caps.get("perfecto:deviceName")) : "";
-			if(StringUtil.isNotBlank(deviceName)) {
-				logger.info("Releasing device: "+deviceName);
+			boolean isVirtualDevice = caps.containsKey("perfecto:useVirtualDevice") && String.valueOf(caps.get("perfecto:useVirtualDevice")).equalsIgnoreCase("true");
+			if(StringUtil.isNotBlank(deviceName) && isMobile && !isVirtualDevice) {
+				logger.debug("Trying to releasing device: "+deviceName);
 				String remoteServer = ConfigurationManager.getBundle().getString("remote.server");
 				String cloudName = remoteServer.substring(remoteServer.indexOf("https://"), remoteServer.indexOf(".perfectomobile"));				
 				String stopExecutionUrl = String.format("%s.app.perfectomobile.com/execution-manager/rest/v1/executions/stop", cloudName);	
 				String executionId = getExecutionId(deviceName);
 				if(executionId.isBlank()) {
-					logger.info("No active execution found for device: "+deviceName);
+					logger.debug("No active execution found for device: "+deviceName);
 					return;
 				}else {
 					org.apache.http.client.HttpClient httpClient = HttpClientBuilder.create().build();
@@ -975,15 +984,14 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 							while ((line = rd.readLine()) != null) {
 								result.append(line);
 							}
-							JSONObject sessions = new JSONObject(result.toString());
-							System.out.println(sessions);
+							logger.debug("Stopped execution of device: "+deviceName);
 
 						} else {
 						}
 
 
 					}	catch (Exception e) {
-						logger.info("Error while releasing device: "+deviceName+" with executionId: "+executionId+" Error: "+e.getMessage());
+						logger.debug("Error while releasing device: "+deviceName+" with executionId: "+executionId+" Error: "+e.getMessage());
 						return;
 					}
 				}
