@@ -1,6 +1,10 @@
 package com.qmetry.qaf.automation.ui;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
@@ -14,13 +18,26 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.ConfigurationMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.LogFactoryImpl;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
@@ -38,7 +55,12 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.http.ClientConfig;
 import org.openqa.selenium.remote.http.HttpClient;
 import org.openqa.selenium.safari.SafariOptions;
+import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.Wait;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 
+import com.google.common.base.Function;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.qmetry.qaf.automation.core.AutomationError;
@@ -52,6 +74,8 @@ import com.qmetry.qaf.automation.ui.selenium.webdriver.SeleniumDriverFactory;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 import com.qmetry.qaf.automation.ui.webdriver.QAFWebDriverCommandListener;
 import com.qmetry.qaf.automation.util.StringUtil;
+import com.quantum.listeners.DriverInitListener;
+import com.quantum.utils.CloudUtils;
 import com.quantum.utils.ConfigurationUtils;
 import com.quantum.utils.QuantumPatch;
 
@@ -169,6 +193,11 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			Collection<QAFWebDriverCommandListener> listners) {
 		if ((listners != null) && !listners.isEmpty()) {
 			for (QAFWebDriverCommandListener listener : listners) {
+				boolean releaseDevice = "1".equals(ConfigurationManager.getBundle().getString("release.device.before.run", "0"))								? true
+						: false;
+				if(releaseDevice && listener instanceof DriverInitListener) {
+					continue;
+				}
 				listener.beforeInitialize(desiredCapabilities);
 			}
 		}
@@ -480,7 +509,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 					.subset(ApplicationProperties.DRIVER_CAPABILITY_PREFIX.key);
 			Map<?, ?> configMap = new ConfigurationMap(config);
 			configMap.forEach((k, v) -> capabilities.put(String.valueOf(k), v));
-//			capabilities.putAll(new ConfigurationMap(config));
+			//			capabilities.putAll(new ConfigurationMap(config));
 
 			// #332 add default capabilities for standard driver
 			if (!name().equalsIgnoreCase(other.name())) {
@@ -505,7 +534,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 				driverCapConfig.getKeys().forEachRemaining(key -> {
 					config.addProperty(String.valueOf(key), driverCapConfig.getString(String.valueOf(key)));
 				});
-//				capabilities.putAll(new ConfigurationMap(driverCapConfig));
+				//				capabilities.putAll(new ConfigurationMap(driverCapConfig));
 				Map<?, ?> configMap2 = new ConfigurationMap(config);
 				configMap2.forEach((k, v) -> capabilities.put(String.valueOf(k), v));
 			}
@@ -516,7 +545,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			driverCapConfig.getKeys().forEachRemaining(key -> {
 				config.setProperty(String.valueOf(key), driverCapConfig.getString(String.valueOf(key)));
 			});
-			
+
 
 			Map<?, ?> configMap2 = new ConfigurationMap(config);
 			configMap2.forEach((k, v) -> capabilities.put(String.valueOf(k), v));
@@ -524,7 +553,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			config.addProperty("takesScreenshot","0".equals(perfectoScreenShots)?false:true);
 			String perfectoErrorScreenshots = ConfigurationManager.getBundle().getString(ApplicationProperties.PERFECTO_FAILURE_SCREENSHOTS.key, "1");
 			config.addProperty("screenshotOnError","1".equals(perfectoErrorScreenshots)?true:false);
-//			capabilities.putAll(new ConfigurationMap(driverCapConfig));
+			//			capabilities.putAll(new ConfigurationMap(driverCapConfig));
 
 			// ======== Patch for Appium 2.0 and Selenium 4 vendor specific prefix ========
 
@@ -669,6 +698,13 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 					if (className.startsWith("io.appium")) {
 						// Create Driver related to Appium.
+
+						//Stop previous execution to avoid failures.
+						boolean releaseDevice = "1".equals(ConfigurationManager.getBundle().getString("release.device.before.run", "0"))								? true
+								: false;
+						if (releaseDevice) {
+							checkAndReleaseDevice(desiredCapabilities.asMap());
+						}
 						webDriverObject = getAppiumDriverObject(driverClass, desiredCapabilities, seleniumGridURLStr);
 					} else {
 						// Create Driver related to Selenium.
@@ -898,6 +934,105 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 					return "Unknown";
 				}
 			}
+		}
+
+		private void checkAndReleaseDevice(Map<String, Object> caps) {
+			System.out.println(caps);
+			String deviceName = caps.containsKey("perfecto:deviceName") ? String.valueOf(caps.get("perfecto:deviceName")) : "";
+			if(StringUtil.isNotBlank(deviceName)) {
+				logger.info("Releasing device: "+deviceName);
+				String remoteServer = ConfigurationManager.getBundle().getString("remote.server");
+				String cloudName = remoteServer.substring(remoteServer.indexOf("https://"), remoteServer.indexOf(".perfectomobile"));				
+				String stopExecutionUrl = String.format("%s.app.perfectomobile.com/execution-manager/rest/v1/executions/stop", cloudName);	
+				String executionId = getExecutionId(deviceName);
+				if(executionId.isBlank()) {
+					logger.info("No active execution found for device: "+deviceName);
+					return;
+				}else {
+					org.apache.http.client.HttpClient httpClient = HttpClientBuilder.create().build();
+					HttpPost request = new HttpPost(stopExecutionUrl);
+					request.addHeader("Content-Type", "application/json");
+					request.addHeader("Perfecto-Authorization", ConfigurationUtils.getSecurityToken());
+					request.addHeader("perfecto-tenantid", cloudName.replace("https://", "")+"-perfectomobile-com");
+
+					String payload = "{\"fields\":{\"execution.id\":[\"" + executionId + "\"]}}";
+					try {
+						request.setEntity(new StringEntity(payload));
+					} catch (UnsupportedEncodingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+					try {
+						HttpResponse response = httpClient.execute(request);
+
+						if (response.getStatusLine().getStatusCode() == 200) {
+							BufferedReader rd = new BufferedReader(
+									new InputStreamReader(response.getEntity().getContent()));
+
+							StringBuffer result = new StringBuffer();
+							String line = "";
+							while ((line = rd.readLine()) != null) {
+								result.append(line);
+							}
+							JSONObject sessions = new JSONObject(result.toString());
+							System.out.println(sessions);
+
+						} else {
+						}
+
+
+					}	catch (Exception e) {
+						logger.info("Error while releasing device: "+deviceName+" with executionId: "+executionId+" Error: "+e.getMessage());
+						return;
+					}
+				}
+			}
+		}
+		private String getExecutionId(String targetDeviceId) {
+			String remoteServer = ConfigurationManager.getBundle().getString("remote.server");
+			String cloudName = remoteServer.substring(remoteServer.indexOf("https://"), remoteServer.indexOf(".perfectomobile"));				
+			String getExecutionsUrl = String.format("%s.executions.perfectomobile.com/execution-manager/api/v1/executions/search", cloudName);
+			org.apache.http.client.HttpClient httpClient = HttpClientBuilder.create().build();
+			HttpPost request = new HttpPost(getExecutionsUrl);
+			request.addHeader("Content-Type", "application/json");
+			request.addHeader("Perfecto-Authorization", ConfigurationUtils.getSecurityToken());
+			try {
+				HttpResponse response = httpClient.execute(request);
+
+				if (response.getStatusLine().getStatusCode() == 200) {
+					BufferedReader rd = new BufferedReader(
+							new InputStreamReader(response.getEntity().getContent()));
+
+					StringBuffer result = new StringBuffer();
+					String line = "";
+					while ((line = rd.readLine()) != null) {
+						result.append(line);
+					}
+					JSONArray sessions = new JSONArray(result.toString());
+					List<String> matchedIds = IntStream
+							.range(0, sessions.length())
+							.mapToObj(sessions::getJSONObject)
+							.filter(session ->
+							IntStream.range(0, session.getJSONArray("platforms").length())
+							.mapToObj(i -> session.getJSONArray("platforms").getJSONObject(i))
+							.anyMatch(platform ->
+							targetDeviceId.equals(platform.getString("deviceId"))
+									)
+									)
+							.map(session -> session.getString("id"))
+							.collect(Collectors.toList());
+					return matchedIds.isEmpty() ? "" : matchedIds.get(0);
+
+				} else {
+					return "";
+				}
+			} catch (Exception e) {
+				return "";
+			}
+
+
+
 		}
 	}
 
