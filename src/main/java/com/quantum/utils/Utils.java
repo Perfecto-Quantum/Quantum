@@ -124,32 +124,18 @@ public class Utils {
 
 	@SuppressWarnings("unchecked")
 	public static void aiVisualComparison(String baselineId) {
+		String failureCriteria = ConfigurationManager.getBundle().getString("perfecto.visual.comparison.failcriteria","addition,moved,style,error,uncategorized,missing,value");
 		Object rawResponse = DriverUtils.getDriver().executeScript(
 				"perfecto:ai:visual-comparison",
-				Map.of(
-						"baselineId", baselineId,
-						"failCriteria", List.of(
-								"addition",
-								"moved",
-								"style",
-								"error",
-								"uncategorized",
-								"missing",
-								"value"
-								//"device",
-								//"pixelDifference",
-
-								)
-						)
-				);
+				Map.of("baselineId", baselineId,"failCriteria", List.of(failureCriteria.toLowerCase().split(","))));
 		//response extraction
 		Map<String, Object> response = (Map<String, Object>) rawResponse; 
 
 		boolean comparisonExecutedSuccessfully = (Boolean) response.get("success");
 		if (comparisonExecutedSuccessfully) {
-		    logger.info("AI visual comparison executed successfully.");
+			logger.info("AI visual comparison executed successfully.");
 		} else {
-		    logger.error("AI visual comparison execution failed.");
+			logger.error("AI visual comparison execution failed.");
 		}
 		String message = (String) response.get("message");
 		logger.info(message);
@@ -166,14 +152,14 @@ public class Utils {
 		}
 		if(shouldCommandFail) {
 			logger.error("AI visual comparison failed based on the defined fail criteria.");
-			ReportUtils.logAssert("AI visual comparison failed based on the defined fail criteria. Message: " + message, false);
+			ReportUtils.logVerify("AI visual comparison failed based on the defined fail criteria. Message: " + message, false);
 		}else {
 			logger.info("AI visual comparison passed based on the defined fail criteria.");
-			ReportUtils.logAssert("AI visual comparison passed based on the defined fail criteria. Message: " + message, true);
+			ReportUtils.logVerify("AI visual comparison passed based on the defined fail criteria. Message: " + message, true);
 		}
-		
+
 	}
-	
+
 	/**
 	 * Perform AI visual comparison with defined fail criteria.
 	 *
@@ -181,24 +167,18 @@ public class Utils {
 	 * @param failCriteria - List of fail criteria to consider for pass/fail of the
 	 * command.
 	 */
-	
+
 	@SuppressWarnings("unchecked")
 	public static void aiVisualComparison(String baselineId, List<String> failCriteria) {
-		Object rawResponse = DriverUtils.getDriver().executeScript(
-				"perfecto:ai:visual-comparison",
-				Map.of(
-						"baselineId", baselineId,
-						"failCriteria", failCriteria
-						)
-				);
+		Object rawResponse = DriverUtils.getDriver().executeScript("perfecto:ai:visual-comparison",Map.of("baselineId", baselineId,"failCriteria", failCriteria));
 		//response extraction
 		Map<String, Object> response = (Map<String, Object>) rawResponse; 
 
 		boolean comparisonExecutedSuccessfully = (Boolean) response.get("success");
 		if (comparisonExecutedSuccessfully) {
-		    logger.info("AI visual comparison executed successfully.");
+			logger.info("AI visual comparison executed successfully.");
 		} else {
-		    logger.error("AI visual comparison execution failed.");
+			logger.error("AI visual comparison execution failed.");
 		}
 		String message = (String) response.get("message");
 		logger.info(message);
@@ -215,12 +195,12 @@ public class Utils {
 		}
 		if(shouldCommandFail) {
 			logger.error("AI visual comparison failed based on the defined fail criteria.");
-			ReportUtils.logAssert("AI visual comparison failed based on the defined fail criteria. Message: " + message, false);
+			ReportUtils.logVerify("AI visual comparison failed based on the defined fail criteria. Message: " + message, false);
 		}else {
 			logger.info("AI visual comparison passed based on the defined fail criteria.");
-			ReportUtils.logAssert("AI visual comparison passed based on the defined fail criteria. Message: " + message, true);
+			ReportUtils.logVerify("AI visual comparison passed based on the defined fail criteria. Message: " + message, true);
 		}
-		
+
 	}
 
 
