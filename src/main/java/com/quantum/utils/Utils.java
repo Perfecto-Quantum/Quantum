@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -26,10 +27,10 @@ import io.appium.java_client.touch.offset.PointOption;
 public class Utils {
 
 	public static final String KEY_DEVICE_MODEL_IPHONE_11 = "iPhone-11";
-	
+
 	private static final Log logger = LogFactoryImpl.getLog(Utils.class);
-	
-	
+
+
 	/**
 	 * Return response from AI validation command.
 	 *
@@ -39,7 +40,7 @@ public class Utils {
 	public static boolean aiValidation(String aiPrompt) {
 		return aiValidation(aiPrompt, false);
 	}
-	
+
 	/**
 	 * Return response from AI validation command.
 	 *
@@ -70,7 +71,7 @@ public class Utils {
 	public static boolean aiUserAction(String aiPrompt) {
 		return aiUserAction(aiPrompt, false);
 	}
-	
+
 	/**
 	 * Return response from AI User Action  command.
 	 *
@@ -91,7 +92,7 @@ public class Utils {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Return response from AI validation command.
 	 *
@@ -112,6 +113,114 @@ public class Utils {
 			logger.error("Failed to execute command ai:validation: " + e.getMessage());
 			return false;
 		}
+	}
+
+	/**
+	 * Perform AI visual comparison with defined fail criteria with No device/pixelDifference.
+	 *
+	 * @param baselineId   - baseline name of the screen.
+	 * 
+	 */
+
+	@SuppressWarnings("unchecked")
+	public static void aiVisualComparison(String baselineId) {
+		Object rawResponse = DriverUtils.getDriver().executeScript(
+				"perfecto:ai:visual-comparison",
+				Map.of(
+						"baselineId", baselineId,
+						"failCriteria", List.of(
+								"addition",
+								"moved",
+								"style",
+								"error",
+								"uncategorized",
+								"missing",
+								"value"
+								//"device",
+								//"pixelDifference",
+
+								)
+						)
+				);
+		//response extraction
+		Map<String, Object> response = (Map<String, Object>) rawResponse; 
+
+		boolean comparisonExecutedSuccessfully = (Boolean) response.get("success");
+		if (comparisonExecutedSuccessfully) {
+		    logger.info("AI visual comparison executed successfully.");
+		} else {
+		    logger.error("AI visual comparison execution failed.");
+		}
+		String message = (String) response.get("message");
+		logger.info(message);
+		List<Map<String, Object>> differences =
+				(List<Map<String, Object>>) response.get("differences");
+		if(differences != null) {
+			logger.info("Differences found: " + differences);
+		}
+
+		boolean shouldCommandFail = false;
+		if (differences != null) {
+			shouldCommandFail = differences.stream()
+					.anyMatch(d -> Boolean.TRUE.equals(d.get("fail")));
+		}
+		if(shouldCommandFail) {
+			logger.error("AI visual comparison failed based on the defined fail criteria.");
+			ReportUtils.logAssert("AI visual comparison failed based on the defined fail criteria. Message: " + message, false);
+		}else {
+			logger.info("AI visual comparison passed based on the defined fail criteria.");
+			ReportUtils.logAssert("AI visual comparison passed based on the defined fail criteria. Message: " + message, true);
+		}
+		
+	}
+	
+	/**
+	 * Perform AI visual comparison with defined fail criteria.
+	 *
+	 * @param baselineId   - baseline name of the screen.
+	 * @param failCriteria - List of fail criteria to consider for pass/fail of the
+	 * command.
+	 */
+	
+	@SuppressWarnings("unchecked")
+	public static void aiVisualComparison(String baselineId, List<String> failCriteria) {
+		Object rawResponse = DriverUtils.getDriver().executeScript(
+				"perfecto:ai:visual-comparison",
+				Map.of(
+						"baselineId", baselineId,
+						"failCriteria", failCriteria
+						)
+				);
+		//response extraction
+		Map<String, Object> response = (Map<String, Object>) rawResponse; 
+
+		boolean comparisonExecutedSuccessfully = (Boolean) response.get("success");
+		if (comparisonExecutedSuccessfully) {
+		    logger.info("AI visual comparison executed successfully.");
+		} else {
+		    logger.error("AI visual comparison execution failed.");
+		}
+		String message = (String) response.get("message");
+		logger.info(message);
+		List<Map<String, Object>> differences =
+				(List<Map<String, Object>>) response.get("differences");
+		if(differences != null) {
+			logger.info("Differences found: " + differences);
+		}
+
+		boolean shouldCommandFail = false;
+		if (differences != null) {
+			shouldCommandFail = differences.stream()
+					.anyMatch(d -> Boolean.TRUE.equals(d.get("fail")));
+		}
+		if(shouldCommandFail) {
+			logger.error("AI visual comparison failed based on the defined fail criteria.");
+			ReportUtils.logAssert("AI visual comparison failed based on the defined fail criteria. Message: " + message, false);
+		}else {
+			logger.info("AI visual comparison passed based on the defined fail criteria.");
+			ReportUtils.logAssert("AI visual comparison passed based on the defined fail criteria. Message: " + message, true);
+		}
+		
 	}
 
 
@@ -194,7 +303,7 @@ public class Utils {
 		int startY = (height / 2) + y;
 		int endX = (width / 2) + x;
 		AppiumUtils.getTouchAction().press(PointOption.point(startX, startY)).moveTo(PointOption.point(endX, startY))
-				.release().perform();
+		.release().perform();
 		return true;
 	}
 
@@ -545,7 +654,7 @@ public class Utils {
 				int childLocation = elementToFind.getLocation().getY();
 				int parentHeight = parent.getSize().getHeight();
 				if (childLocation > (parentHeight + parentLocation - 100 * scalevalu)) {
-//					Utils.verticalSwipeWithScaleFactorInCart(parent);
+					//					Utils.verticalSwipeWithScaleFactorInCart(parent);
 					Utils.verticalSwipeHalfwayUp(parent);
 				} else if (childLocation < (parentLocation + 30)) {
 					Utils.verticalSwipeHalfwayDown(parent);
@@ -744,7 +853,7 @@ public class Utils {
 				entryFound = true;
 				break;
 			} else {
-//				Utils.verticalSwipeWithScaleFactorTopHalf(parent);
+				//				Utils.verticalSwipeWithScaleFactorTopHalf(parent);
 				Utils.verticalSwipeWithScaleFactor(parent);
 			}
 		}
@@ -926,7 +1035,7 @@ public class Utils {
 		int x = (captureBtnPoint.getX() * scale) + ((width * scale) / 2);
 		int y = 0;
 		if ((KEY_DEVICE_MODEL_IPHONE_11.equalsIgnoreCase(Utils.getDeviceProperty("model")))) {
-//			Assuming 8 pixel of the upper notch of the phone - will need to confirm in the next execution that this has not adversely impacted other cases
+			//			Assuming 8 pixel of the upper notch of the phone - will need to confirm in the next execution that this has not adversely impacted other cases
 			y = captureBtnPoint.getY() * scale + ((height * scale) / 2) + 10;
 		} else {
 			y = captureBtnPoint.getY() * scale + ((height * scale) / 2);
@@ -955,7 +1064,7 @@ public class Utils {
 		DeviceUtils.getQAFDriver().executeScript("mobile:touch:swipe", params);
 	}
 
-//	@SuppressWarnings({ "rawtypes", "unchecked" })
+	//	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static void switchAirPlaneModeOnOff(boolean status) {
 		// if (ConfigurationManager.getBundle().getString("OSType", "not
 		// mentioned").equalsIgnoreCase("iOS")) {
@@ -1070,7 +1179,7 @@ public class Utils {
 	 */
 	public static void scrollDownTillEndOfThePage() {
 		if (DeviceUtils.getQAFDriver().getCapabilities().getBrowserName().equalsIgnoreCase("Internet Explorer")) {
-//            Utils.pauseElement(3000);
+			//            Utils.pauseElement(3000);
 			QAFTestBase.pause(3000);
 			JavascriptExecutor jse = DeviceUtils.getQAFDriver();
 			jse.executeScript("window.scrollBy(0,8000)");

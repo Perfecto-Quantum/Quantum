@@ -22,6 +22,7 @@ import static com.quantum.utils.DeviceUtils.waitForPresentImageVisual;
 import static com.quantum.utils.DeviceUtils.waitForPresentTextVisual;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.qmetry.qaf.automation.step.QAFTestStepProvider;
@@ -856,6 +857,27 @@ public class PerfectoApplicationSteps {
 	@Then("^I install application \"(.*?)\" with secured screen instrumentation")
 	public static void installAppWithSecuredInstrumentation(String application) {
 		DeviceUtils.installApp(application, "noinstrument", "nosensor", "secured_screen_removal", "false");
+	}
+	
+	/**
+	 * Performs AI Visual comparison.
+	 * 
+	 * @param AI Visual Comparison.
+	 */
+	@Then("^I perform AI Visual Comparison with base line id \"(.*?)\"$")
+	public static void performAIVisualComparison(String baselineId) {
+		Utils.aiVisualComparison(baselineId);
+	}
+	
+	/**
+	 * Performs AI Visual comparison.
+	 * 
+	 * @param AI Visual Comparison.
+	 */
+	@Then("^I perform AI Visual Comparison with base line id \"(.*?)\" and failure criteria \"(.*?)\"$")
+	public static void performAIVisualComparisonWithFailureCriteria(String baselineId, String failureCriteria) {
+		
+		Utils.aiVisualComparison(baselineId, List.of(failureCriteria.toLowerCase().split(",")));
 	}
 
 }
