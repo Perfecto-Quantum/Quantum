@@ -34,6 +34,7 @@ import org.apache.commons.lang3.stream.Streams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.LogFactoryImpl;
 import org.openqa.selenium.WebDriverException;
+import org.testng.ITestContext;
 import org.testng.ITestResult;
 import org.testng.Reporter;
 
@@ -490,12 +491,24 @@ public class QAFTestBase {
 		
 		long retryInterval = ApplicationProperties.DRIVER_INIT_INTERVAL_SECONDS.getIntVal(10);
 		
+		ITestContext context =  (ITestContext) ConfigurationManager.getBundle().getProperty("tng.context");
+		Map<String, String> xmlParams = context.getCurrentXmlTest().getAllParameters();
 		
- 		UiDriver uiDriver = new UiDriverInitializer()
+		boolean isVirtulaDevice = xmlParams.containsKey("perfecto.capabilities.useVirtualDevice") || 
+				xmlParams.getOrDefault("perfecto.additional.capabilities","").contains("'perfecto:useVirtualDevice':true");
+		
+		UiDriver uiDriver = null;
+		if(isVirtulaDevice) {
+		
+			uiDriver = new UiDriverFactory().get((ArrayList<LoggingBean>) getLog(), stb);
+		}else {
+		
+ 		uiDriver = new UiDriverInitializer()
 				.withTimeout(waitTimeOutInSecs, TimeUnit.SECONDS)
 				.pollingEvery(retryInterval, TimeUnit.SECONDS).withMessage(driverInitExpectedCondition)
 				.ignoring(WebDriverException.class).until(driverInitExpectedCondition);
 
+		}
 		setUiDriver(uiDriver);
 		logger.info("driver init done");
 	}
