@@ -494,11 +494,11 @@ public class QAFTestBase {
 		ITestContext context =  (ITestContext) ConfigurationManager.getBundle().getProperty("tng.context");
 		Map<String, String> xmlParams = context.getCurrentXmlTest().getAllParameters();
 		
-		boolean isVirtulaDevice = xmlParams.containsKey("perfecto.capabilities.useVirtualDevice") || 
+		boolean isVirtualDevice = xmlParams.containsKey("perfecto.capabilities.useVirtualDevice") || 
 				xmlParams.getOrDefault("perfecto.additional.capabilities","").contains("'perfecto:useVirtualDevice':true");
 		
 		UiDriver uiDriver = null;
-		if(isVirtulaDevice) {
+		if(isVirtualDevice) {
 		
 			uiDriver = new UiDriverFactory().get((ArrayList<LoggingBean>) getLog(), stb);
 		}else {
