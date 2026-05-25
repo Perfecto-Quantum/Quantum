@@ -136,61 +136,18 @@ public class QAFInetrceptableDataProvider {
 	}
 	
 	private static void replaceParameter(Map<String, Object> metadata, ITestContext c) {
-		Map<String, String> testNGParam = c.getCurrentXmlTest().getAllParameters();
+        Map<String, String> testNGParam = c.getCurrentXmlTest().getAllParameters();
 
-		Pattern pattern = Pattern.compile("^\\$\\{(.+)\\}$");
-
-		String dataSheetName = (String) metadata.get("sheetname");
-
-		dataSheetName = dataSheetName == null ? (String) metadata.get("sheetName") : dataSheetName;
-		
-		String dataFileName = (String) metadata.get("datafile");
-		dataFileName = dataFileName == null ? (String) metadata.get("dataFile") : dataFileName;
-		if (null != dataFileName) {
-			Matcher matcher = pattern.matcher(dataFileName);
-
-			if (matcher.find()) {
-				String paramName = matcher.group(1);
-
-				String testNGValue = testNGParam.get(paramName);
-
-				if (null != testNGValue) {
-					String fixedPattern = "\\$\\{[^}]+\\}";
-					String result = dataFileName.replaceFirst(fixedPattern, testNGValue);
-					metadata.put("datafile", result);
-				} else {
-					String bundleValue = (String) getBundle().getProperty(paramName);
-					if (null != bundleValue) {
-						metadata.put("sheetname", testNGValue);
-					} else {
-						throw new DataProviderException("Invalid Key. No Value found for Key - " + paramName);
-					}
-				}
-			}
-		}
-		
-
-		if (null != dataSheetName) {
-			Matcher matcher = pattern.matcher(dataSheetName);
-
-			if (matcher.find()) {
-				String paramName = matcher.group(1);
-
-				String testNGValue = testNGParam.get(paramName);
-
-				if (null != testNGValue) {
-					metadata.put("sheetname", testNGValue);
-				} else {
-					String bundleValue = (String) getBundle().getProperty(paramName);
-					if (null != bundleValue) {
-						metadata.put("sheetname", testNGValue);
-					} else {
-						throw new DataProviderException("Invalid Key. No Value found for Key - " + paramName);
-					}
-				}
-			}
-		}
-	}
+        // ==================== NEW: resolve ${...} in datafile, filter / from / to ====================
+        MetadataParamResolver.resolveString(metadata, "datafile",  testNGParam);
+        MetadataParamResolver.resolveString(metadata, "sheetname", testNGParam);
+        MetadataParamResolver.resolveString(metadata, "dataFile",  testNGParam);
+        MetadataParamResolver.resolveString(metadata, "sheetName", testNGParam);
+        MetadataParamResolver.resolveString(metadata, params.FILTER.name(), testNGParam);
+        MetadataParamResolver.resolveInt   (metadata, params.FROM.name(),   testNGParam);
+        MetadataParamResolver.resolveInt   (metadata, params.TO.name(),     testNGParam);
+        // ==================== END NEW ======================================================
+    }
 	
 	private static List<Object[]> applyFilter(List<Object[]> dataList, String filterExpression){
 		
