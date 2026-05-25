@@ -1,5 +1,7 @@
 package com.qmetry.qaf.automation.ui;
 
+import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -260,6 +262,11 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 		loadDriverResouces(browser);
 
 		DesiredCapabilities desiredCapabilities = browser.getDesiredCapabilities();
+		
+		if(desiredCapabilities.is("perfecto:useVirtualDevice")) {
+			((DesiredCapabilities) desiredCapabilities).setCapability("perfecto:scriptName",
+					getBundle().getString("current.testcase.name", "Virtual Device Test"));
+		}
 
 		Map<String, Object> desiredCapAsMap = desiredCapabilities.asMap();
 
