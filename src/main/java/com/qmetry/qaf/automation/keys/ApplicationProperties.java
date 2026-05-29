@@ -683,8 +683,27 @@ public enum ApplicationProperties {
 	 * @since 2.1.15
 	 * 
 	 */
-	METADATA_FORMTTOR_PREFIX("metadata.formatter");
+	METADATA_FORMTTOR_PREFIX("metadata.formatter"),
+	/**
+	 * <b>key</b>: <code>perfecto.screenshots </code><br/>
+	 * <b>value</b>: set this flag to 1 if you want to capture screen-shots 
+	 * at different points during execution.
+	 */
+	PERFECTO_SCREENSHOTS("perfecto.screenshots"),
+	/**
+	 * <b>key</b>: <code>perfecto.failure.screenshots </code><br/>
+	 * <b>value</b>: set this flag to 1 if you want to capture screen-shots at
+	 * at point where an error status is reported. Default value is 1
+	 */
+	PERFECTO_FAILURE_SCREENSHOTS("perfecto.failure.screenshots"),
 	
+	/**
+	 * <b>key</b>: <code>perfecto.visual.comparison.failcriteria</code><br/>
+	 * <b>value</b>: provide comma seperated criteria for visual comparison failure. 
+	 * Supported criteria are 'value' 'style' 'missing' 'addition' 'moved' 'error' 'uncategorized' 'pixelDifference' 'device'. 
+	 * Default value is 'value,style,missing,addition,moved,error,uncategorized'
+	 */
+	PERFECTOAI_VISUAL_COMPARISON_FAILCRITERIA("perfecto.visual.comparison.failcriteria");
 	
 	
 
