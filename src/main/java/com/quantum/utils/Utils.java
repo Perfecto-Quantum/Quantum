@@ -102,9 +102,34 @@ public class Utils {
 	 */
 	public static boolean aiUserActionWithReturnData(String aiPrompt, Boolean includeReasoning) {
 		try {
-			Map<String, Object> aiOutput = (Map<String, Object>) DriverUtils.getDriver().executeScript("perfecto:ai:user-action", Map.of("validation", aiPrompt, "reasoning", includeReasoning, "outputVariables", true));
+			Object rawOutput = DriverUtils.getDriver().executeScript("perfecto:ai:user-action", Map.of("action", aiPrompt, "reasoning", includeReasoning, "outputVariable", true));
+			Map<String, Object> aiOutput = null;
+			if(rawOutput instanceof Boolean){
+				logger.error("Output variable not returned, please check if the prompt is correct and contains instructions to return output variables.");
+				return (Boolean) rawOutput;
+			}else if(rawOutput instanceof Map){
+				aiOutput = (Map<String, Object>) rawOutput;
+			}else {
+				logger.error("Unexpected output type from AI command, expected Boolean or Map<String,Object> but got: " + rawOutput.getClass().getName());
+				return false;
+			}
+				
 			if(aiOutput.get("result") != null && "true".equalsIgnoreCase(aiOutput.get("result").toString())){
 				ConfigurationManager.getBundle().setProperty("ai.action.return.value", aiOutput.get("outputVariables"));
+				Object outputVariables = aiOutput.get("outputVariables");
+				if(outputVariables instanceof Map) {
+					for(Map.Entry<String, Object> entry : ((Map<String, Object>) outputVariables).entrySet()) {
+						Map<String, Object> variableData = (Map<String, Object>) entry.getValue();
+						if(variableData.containsKey("value")) {
+							ConfigurationManager.getBundle().setProperty("ai.action.return."+entry.getKey(), String.valueOf(variableData.get("value")));
+						}
+						else if(entry.getValue() != null) {
+							ConfigurationManager.getBundle().setProperty("ai.action.return."+entry.getKey(), String.valueOf(entry.getValue()));
+						}
+					}
+				}
+				
+				
 				return true;
 			}else {
 				return false;
