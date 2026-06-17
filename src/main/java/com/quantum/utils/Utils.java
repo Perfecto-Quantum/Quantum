@@ -20,6 +20,7 @@ import org.openqa.selenium.WebElement;
 import com.qmetry.qaf.automation.core.ConfigurationManager;
 import com.qmetry.qaf.automation.core.QAFTestBase;
 import com.qmetry.qaf.automation.ui.webdriver.QAFWebElement;
+import com.quantum.exception.AIException;
 import com.quantum.steps.PerfectoApplicationSteps;
 
 import io.appium.java_client.touch.offset.PointOption;
@@ -30,17 +31,6 @@ public class Utils {
 
 	private static final Log logger = LogFactoryImpl.getLog(Utils.class);
 
-
-	/**
-	 * Return response from AI validation command.
-	 *
-	 * @param aiPrompt   - AI Validation prompt.
-	 * @return - true or false
-	 */
-	public static boolean aiValidation(String aiPrompt) {
-		return aiValidation(aiPrompt, false);
-	}
-
 	/**
 	 * Return response from AI validation command.
 	 *
@@ -48,49 +38,16 @@ public class Utils {
 	 * @param includeReasoning - specify true to allocate additional AI resources for tasks that require multi-step logical processing.
 	 * @return - true or false
 	 */
-	public static boolean aiValidation(String aiPrompt, Boolean includeReasoning) {
-		try {
-			Object result = DriverUtils.getDriver().executeScript("perfecto:ai:validation", Map.of("validation", aiPrompt, "reasoning", includeReasoning ));
-			if("true".equalsIgnoreCase(result.toString())){
-				return true;
-			}else {
-				return false;
+	public static boolean aiValidation(String aiPrompt, Boolean includeReasoning, String onFail) {
+		Object result = DriverUtils.getDriver().executeScript("perfecto:ai:validation", Map.of("validation", aiPrompt, "reasoning", includeReasoning ));
+		if("true".equalsIgnoreCase(result.toString())){
+			return true;
+		}else {
+			if(onFail.equalsIgnoreCase("abort")) {
+				throw new AIException("AI Validation failed for prompt: " + aiPrompt);
 			}
-		} catch (Exception e) {
-			logger.error("Failed to execute command ai:validation: " + e.getMessage());
-			return false;
 		}
-	}
-
-	/**
-	 * Return response from AI User Action command.
-	 *
-	 * @param aiPrompt   - AI Validation prompt.
-	 * @return - true or false
-	 */
-	public static boolean aiUserAction(String aiPrompt) {
-		return aiUserAction(aiPrompt, false);
-	}
-
-	/**
-	 * Return response from AI User Action  command.
-	 *
-	 * @param aiPrompt   - AI Validation prompt.
-	 * @param includeReasoning - specify true to allocate additional AI resources for tasks that require multi-step logical processing.
-	 * @return - true or false
-	 */
-	public static boolean aiUserAction(String aiPrompt, Boolean includeReasoning) {
-		try {
-			Object result = DriverUtils.getDriver().executeScript("perfecto:ai:user-action", Map.of("action", aiPrompt, "reasoning", includeReasoning));
-			if("true".equalsIgnoreCase(result.toString())){
-				return true;
-			}else {
-				return false;
-			}
-		} catch (Exception e) {
-			logger.error("Failed to execute command ai:validation: " + e.getMessage());
-			return false;
-		}
+		return false;
 	}
 
 	/**
@@ -98,44 +55,47 @@ public class Utils {
 	 *
 	 * @param aiPrompt   - AI Validation prompt.
 	 * @param includeReasoning - Specify true to allocate additional AI resources for tasks that require multi-step logical processing.
-	 * @return - Map<String,Object> pushed to config property "ai.action.return.value"
+	 * @param onFail - Specify "abort" to throw an exception if the user action fails, or "ignore" to continue execution.
+	 * @return - true or false
 	 */
-	public static boolean aiUserActionWithReturnData(String aiPrompt, Boolean includeReasoning) {
-		try {
-			Object rawOutput = DriverUtils.getDriver().executeScript("perfecto:ai:user-action", Map.of("action", aiPrompt, "reasoning", includeReasoning, "outputVariable", true));
-			Map<String, Object> aiOutput = null;
-			if(rawOutput instanceof Boolean){
-				logger.error("Output variable not returned, please check if the prompt is correct and contains instructions to return output variables.");
-				return (Boolean) rawOutput;
-			}else if(rawOutput instanceof Map){
-				aiOutput = (Map<String, Object>) rawOutput;
-			}else {
-				logger.error("Unexpected output type from AI command, expected Boolean or Map<String,Object> but got: " + rawOutput.getClass().getName());
-				return false;
-			}
-				
-			if(aiOutput.get("result") != null && "true".equalsIgnoreCase(aiOutput.get("result").toString())){
-				ConfigurationManager.getBundle().setProperty("ai.action.return.value", aiOutput.get("outputVariables"));
-				Object outputVariables = aiOutput.get("outputVariables");
-				if(outputVariables instanceof Map) {
-					for(Map.Entry<String, Object> entry : ((Map<String, Object>) outputVariables).entrySet()) {
-						Map<String, Object> variableData = (Map<String, Object>) entry.getValue();
-						if(variableData.containsKey("value")) {
-							ConfigurationManager.getBundle().setProperty("ai.action.return."+entry.getKey(), String.valueOf(variableData.get("value")));
-						}
-						else if(entry.getValue() != null) {
-							ConfigurationManager.getBundle().setProperty("ai.action.return."+entry.getKey(), String.valueOf(entry.getValue()));
-						}
+	public static boolean aiUserActionWithReturnData(String aiPrompt, Boolean includeReasoning, String onFail) {
+		Object rawOutput = DriverUtils.getDriver().executeScript("perfecto:ai:user-action", Map.of("action", aiPrompt, "reasoning", includeReasoning, "outputVariable", true));
+		Map<String, Object> aiOutput = null;
+		if(rawOutput instanceof Boolean){
+			logger.error("Output variable not returned, please check if the prompt is correct and contains instructions to return output variables.");
+			return (Boolean) rawOutput;
+		}else if(rawOutput instanceof Map){
+			aiOutput = (Map<String, Object>) rawOutput;
+		}else {
+			logger.error("Unexpected output type from AI command, expected Boolean or Map<String,Object> but got: " + rawOutput.getClass().getName());
+			return false;
+		}
+			
+		if(aiOutput.get("output") != null && "true".equalsIgnoreCase(aiOutput.get("output").toString())){
+			ConfigurationManager.getBundle().setProperty("ai.action.return.value", aiOutput.get("outputVariables"));
+			Object outputVariables = aiOutput.get("outputVariables");
+			if(outputVariables instanceof Map) {
+				Map<String, Object> outputData = ((Map<String, Object>) outputVariables);
+				for(Map.Entry<String, Object> entry : outputData.entrySet()) {
+					Map<String, Object> variableData = (Map<String, Object>) entry.getValue();
+					if(variableData.containsKey("value")) {
+						ConfigurationManager.getBundle().setProperty("ai.action.return."+entry.getKey(), String.valueOf(variableData.get("value")));
+					}
+					else if(entry.getValue() != null) {
+						ConfigurationManager.getBundle().setProperty("ai.action.return."+entry.getKey(), String.valueOf(entry.getValue()));
 					}
 				}
-				
-				
-				return true;
-			}else {
-				return false;
 			}
-		} catch (Exception e) {
-			logger.error("Failed to execute command ai:validation: " + e.getMessage());
+			return true;
+		}else {
+			Object validationResponse = aiOutput.get("validationResponse");
+			if(validationResponse instanceof Map) {
+				Map<String, Object> outputData = ((Map<String, Object>) validationResponse);
+				String result = String.valueOf(outputData.get("result"));
+				if(result.equalsIgnoreCase("fail") && onFail.equalsIgnoreCase("abort")) {
+					throw new AIException(String.valueOf(outputData.get("actualValue")));
+				}
+			}
 			return false;
 		}
 	}
