@@ -759,28 +759,6 @@ public class PerfectoApplicationSteps {
 
 	}
 	
-//	/**
-//	 * Performs AI Validation.
-//	 * 
-//	 * @param AI Validation prompt.
-//	 */
-//	@Then("^I perform AI Validation with prompt: \"(.*?)\"$")
-//	public static void performAIValidation(String prompt) {
-//		String onFail = ConfigurationManager.getBundle().getString("ai.validation.onfail", "abort");
-//		Utils.aiValidation(prompt, false, onFail);
-//	}
-//	
-//	/**
-//	 * Performs AI Validation.
-//	 * 
-//	 * @param AI Validation prompt.
-//	 */
-//	@Then("^I perform AI Validation with prompt: \"(.*?)\" and reasoning$")
-//	public static void performAIValidationWithReasoning(String prompt) {
-//		String onFail = ConfigurationManager.getBundle().getString("ai.validation.onfail", "abort");
-//		Utils.aiValidation(prompt, true, onFail);
-//	}
-	
 	/**
 	 * Performs AI User-Action.
 	 * 
@@ -830,7 +808,7 @@ public class PerfectoApplicationSteps {
 	 * 
 	 * @param AI User-Action prompt.
 	 */
-	@Then("^(I perform AI User-Action with prompt: \"([^\"]*)\"(?:\\s+with reasoning)?(?:\\s+and on fail:\\s+(abort|ignore))?)$")
+	@Then("^(I perform AI User-Action with prompt: \"([^\"]*)\"(?:\\s+(?:with|and)\\s+reasoning)?(?:\\s+and on fail:\\s+(abort|ignore))?)$")
 	public static void performAIUserActionWithMultipleOptions(String fullStepText, String prompt, String onFailAction) {
 		boolean withReasoning = fullStepText.contains("with reasoning");
 		String onFail = ConfigurationManager.getBundle().getString("ai.user.action.onfail", "abort"); // default action
@@ -845,7 +823,6 @@ public class PerfectoApplicationSteps {
 	 * 
 	 * @param AI User-Action prompt.
 	 */
-//	@Then("^(I perform AI Validation with prompt: \"([^\"]*)\"(?:\\s+with reasoning)?(?:\\s+and on fail:\\s+(abort|ignore))?)$")
 	@Then("^(I perform AI Validation with prompt: \"([^\"]*)\"(?:\\s+(?:with|and)\\s+reasoning)?(?:\\s+and on fail:\\s+(abort|ignore))?)$")
 	public static void performAIValidation(String fullStepText, String prompt, String onFailAction) {
 		boolean withReasoning = fullStepText.contains("with reasoning") || fullStepText.contains("and reasoning");
