@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.qmetry.qaf.automation.core.ConfigurationManager;
 import com.qmetry.qaf.automation.step.QAFTestStepProvider;
 import com.quantum.utils.DeviceUtils;
 import com.quantum.utils.ReportUtils;
@@ -758,25 +759,27 @@ public class PerfectoApplicationSteps {
 
 	}
 	
-	/**
-	 * Performs AI Validation.
-	 * 
-	 * @param AI Validation prompt.
-	 */
-	@Then("^I perform AI Validation with prompt: \"(.*?)\"$")
-	public static void performAIValidation(String prompt) {
-		ReportUtils.logVerify("AI validation status ", Utils.aiValidation(prompt));
-	}
-	
-	/**
-	 * Performs AI Validation.
-	 * 
-	 * @param AI Validation prompt.
-	 */
-	@Then("^I perform AI Validation with prompt: \"(.*?)\" and reasoning$")
-	public static void performAIValidationWithReasoning(String prompt) {
-		ReportUtils.logVerify("AI validation status ", Utils.aiValidation(prompt, true));
-	}
+//	/**
+//	 * Performs AI Validation.
+//	 * 
+//	 * @param AI Validation prompt.
+//	 */
+//	@Then("^I perform AI Validation with prompt: \"(.*?)\"$")
+//	public static void performAIValidation(String prompt) {
+//		String onFail = ConfigurationManager.getBundle().getString("ai.validation.onfail", "abort");
+//		Utils.aiValidation(prompt, false, onFail);
+//	}
+//	
+//	/**
+//	 * Performs AI Validation.
+//	 * 
+//	 * @param AI Validation prompt.
+//	 */
+//	@Then("^I perform AI Validation with prompt: \"(.*?)\" and reasoning$")
+//	public static void performAIValidationWithReasoning(String prompt) {
+//		String onFail = ConfigurationManager.getBundle().getString("ai.validation.onfail", "abort");
+//		Utils.aiValidation(prompt, true, onFail);
+//	}
 	
 	/**
 	 * Performs AI User-Action.
@@ -785,7 +788,8 @@ public class PerfectoApplicationSteps {
 	 */
 	@Then("^I perform AI User-Action with prompt: \"(.*?)\"$")
 	public static void performAIUserAction(String prompt) {
-		ReportUtils.logVerify("AI user-action status ", Utils.aiUserAction(prompt));
+		String onFail = ConfigurationManager.getBundle().getString("ai.user.action.onfail", "abort"); 
+		Utils.aiUserActionWithReturnData(prompt, false, onFail);
 	}
 	
 	/**
@@ -795,7 +799,8 @@ public class PerfectoApplicationSteps {
 	 */
 	@Then("^I perform AI User-Action with prompt: \"(.*?)\" and reasoning$")
 	public static void performAIUserActionWithReasoning(String prompt) {
-		ReportUtils.logVerify("AI user-action status ", Utils.aiUserAction(prompt, true));
+		String onFail = ConfigurationManager.getBundle().getString("ai.user.action.onfail", "abort"); 
+		Utils.aiUserActionWithReturnData(prompt, true, onFail);
 	}
 	
 	
@@ -806,7 +811,7 @@ public class PerfectoApplicationSteps {
 	 */
 	@Then("^I perform AI User-Action with prompt: \"(.*?)\" including return data$")
 	public static void performAIUserActionWithReturnData(String prompt) {
-		ReportUtils.logVerify("AI user-action status ", Utils.aiUserActionWithReturnData(prompt, false));
+		Utils.aiUserActionWithReturnData(prompt, false, ConfigurationManager.getBundle().getString("ai.user.action.onfail", "abort"));
 	}
 	
 	
@@ -817,8 +822,41 @@ public class PerfectoApplicationSteps {
 	 */
 	@Then("^I perform AI User-Action with prompt: \"(.*?)\" and reasoning including return data$")
 	public static void performAIUserActionWithReasoningAndReturnData(String prompt) {
-		ReportUtils.logVerify("AI user-action status ", Utils.aiUserAction(prompt, true));
+		Utils.aiUserActionWithReturnData(prompt, true, ConfigurationManager.getBundle().getString("ai.user.action.onfail", "abort"));
 	}
+	
+	/**
+	 * Performs AI User-Action.
+	 * 
+	 * @param AI User-Action prompt.
+	 */
+	@Then("^(I perform AI User-Action with prompt: \"([^\"]*)\"(?:\\s+with reasoning)?(?:\\s+and on fail:\\s+(abort|ignore))?)$")
+	public static void performAIUserActionWithMultipleOptions(String fullStepText, String prompt, String onFailAction) {
+		boolean withReasoning = fullStepText.contains("with reasoning");
+		String onFail = ConfigurationManager.getBundle().getString("ai.user.action.onfail", "abort"); // default action
+		if (onFailAction != null) {
+			onFail = onFailAction.toLowerCase();
+		}
+		Utils.aiUserActionWithReturnData(prompt, withReasoning, onFail);
+	}
+	
+	/**
+	 * Performs AI User-Action.
+	 * 
+	 * @param AI User-Action prompt.
+	 */
+//	@Then("^(I perform AI Validation with prompt: \"([^\"]*)\"(?:\\s+with reasoning)?(?:\\s+and on fail:\\s+(abort|ignore))?)$")
+	@Then("^(I perform AI Validation with prompt: \"([^\"]*)\"(?:\\s+(?:with|and)\\s+reasoning)?(?:\\s+and on fail:\\s+(abort|ignore))?)$")
+	public static void performAIValidation(String fullStepText, String prompt, String onFailAction) {
+		boolean withReasoning = fullStepText.contains("with reasoning") || fullStepText.contains("and reasoning");
+		String onFail = ConfigurationManager.getBundle().getString("ai.validation.onfail", "abort");
+		if (onFailAction != null) {
+			onFail = onFailAction.toLowerCase();
+		}
+		Utils.aiValidation(prompt, withReasoning, onFail);
+	}
+	
+	
 	
 	/**
 	 * Installs a single application on the device, with sensor, secured screen instrumentation and
@@ -864,7 +902,7 @@ public class PerfectoApplicationSteps {
 	 * 
 	 * @param AI Visual Comparison.
 	 */
-	@Then("^I perform AI Visual Comparison with base line id \"(.*?)\"$")
+	@Then("^I perform AI Visual Comparison with baseline id \"(.*?)\"$")
 	public static void performAIVisualComparison(String baselineId) {
 		Utils.aiVisualComparison(baselineId);
 	}
@@ -874,9 +912,8 @@ public class PerfectoApplicationSteps {
 	 * 
 	 * @param AI Visual Comparison.
 	 */
-	@Then("^I perform AI Visual Comparison with base line id \"(.*?)\" and failure criteria \"(.*?)\"$")
+	@Then("^I perform AI Visual Comparison with baseline id \"(.*?)\" and failure criteria \"(.*?)\"$")
 	public static void performAIVisualComparisonWithFailureCriteria(String baselineId, String failureCriteria) {
-		
 		Utils.aiVisualComparison(baselineId, List.of(failureCriteria.toLowerCase().split(",")));
 	}
 
