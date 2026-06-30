@@ -21,6 +21,7 @@ import com.qmetry.qaf.automation.core.ConfigurationManager;
 import com.qmetry.qaf.automation.core.QAFTestBase;
 import com.qmetry.qaf.automation.ui.webdriver.QAFWebElement;
 import com.quantum.exception.AIException;
+import com.quantum.exception.AIVisualException;
 import com.quantum.steps.PerfectoApplicationSteps;
 
 import io.appium.java_client.touch.offset.PointOption;
@@ -89,17 +90,19 @@ public class Utils {
 			return true;
 		}else {
 			Object validationResponse = aiOutput.get("validationResponse");
+			String outputError = "Failed to perform AI user action for prompt: " + aiPrompt;
 			if(validationResponse instanceof Map) {
 				Map<String, Object> outputData = ((Map<String, Object>) validationResponse);
-				String result = String.valueOf(outputData.get("result"));
-				if(result.equalsIgnoreCase("fail") && onFail.equalsIgnoreCase("abort")) {
-					throw new AIException(String.valueOf(outputData.get("actualValue")));
-				}
+				outputError = String.valueOf(outputData.get("actualValue"));
+			}
+			String result = String.valueOf(aiOutput.get("result"));
+			if((result.equalsIgnoreCase("false")||result.equalsIgnoreCase("fail")) && onFail.equalsIgnoreCase("abort")) {
+				throw new AIException(outputError);
 			}
 			return false;
 		}
 	}
-
+	
 	/**
 	 * Perform AI visual comparison with defined fail criteria with No device/pixelDifference.
 	 *
@@ -109,6 +112,20 @@ public class Utils {
 
 	@SuppressWarnings("unchecked")
 	public static void aiVisualComparison(String baselineId) {
+		String onFail = ConfigurationManager.getBundle().getString("ai.visual.comparison.onfail", "ignore").toLowerCase();
+		aiVisualComparison(baselineId, onFail);
+	}
+
+	/**
+	 * Perform AI visual comparison with defined fail criteria with No device/pixelDifference.
+	 *
+	 * @param baselineId   - baseline name of the screen.
+	 * @param onFail - Specify "abort" to throw an exception if the visual comparison fails, or "ignore" to continue execution.
+	 * 
+	 */
+
+	@SuppressWarnings("unchecked")
+	public static void aiVisualComparison(String baselineId, String onFail) {
 		String failureCriteria = ConfigurationManager.getBundle().getString("perfecto.visual.comparison.failcriteria","addition,moved,style,error,uncategorized,missing,value");
 		Object rawResponse = DriverUtils.getDriver().executeScript(
 				"perfecto:ai:visual-comparison",
@@ -135,10 +152,14 @@ public class Utils {
 			shouldCommandFail = differences.stream()
 					.anyMatch(d -> Boolean.TRUE.equals(d.get("fail")));
 		}
-		if(shouldCommandFail) {
+		if(shouldCommandFail && onFail.equalsIgnoreCase("abort")) {
 			logger.error("AI visual comparison failed based on the defined fail criteria.");
 			ReportUtils.logVerify("AI visual comparison failed based on the defined fail criteria. Message: " + message, false);
-		}else {
+			throw new AIVisualException(message);
+		}else if(shouldCommandFail && onFail.equalsIgnoreCase("ignore")) {
+			logger.error("AI visual comparison failed based on the defined fail criteria.");
+		}
+		else {
 			logger.info("AI visual comparison passed based on the defined fail criteria.");
 			ReportUtils.logVerify("AI visual comparison passed based on the defined fail criteria. Message: " + message, true);
 		}
@@ -149,12 +170,12 @@ public class Utils {
 	 * Perform AI visual comparison with defined fail criteria.
 	 *
 	 * @param baselineId   - baseline name of the screen.
-	 * @param failCriteria - List of fail criteria to consider for pass/fail of the
-	 * command.
+	 * @param failCriteria - List of fail criteria to consider for pass/fail of the command.
+	 * @param onFail - Specify "abort" to throw an exception if the visual comparison fails, or "ignore" to continue execution.
 	 */
 
 	@SuppressWarnings("unchecked")
-	public static void aiVisualComparison(String baselineId, List<String> failCriteria) {
+	public static void aiVisualComparison(String baselineId, List<String> failCriteria, String onFail){
 		Object rawResponse = DriverUtils.getDriver().executeScript("perfecto:ai:visual-comparison",Map.of("baselineId", baselineId,"failCriteria", failCriteria));
 		//response extraction
 		Map<String, Object> response = (Map<String, Object>) rawResponse; 
@@ -178,10 +199,14 @@ public class Utils {
 			shouldCommandFail = differences.stream()
 					.anyMatch(d -> Boolean.TRUE.equals(d.get("fail")));
 		}
-		if(shouldCommandFail) {
+		if(shouldCommandFail && onFail.equalsIgnoreCase("abort")) {
 			logger.error("AI visual comparison failed based on the defined fail criteria.");
 			ReportUtils.logVerify("AI visual comparison failed based on the defined fail criteria. Message: " + message, false);
-		}else {
+			throw new AIVisualException(message);
+		}else if(shouldCommandFail && onFail.equalsIgnoreCase("ignore")) {
+			logger.error("AI visual comparison failed based on the defined fail criteria.");
+		}
+		else {
 			logger.info("AI visual comparison passed based on the defined fail criteria.");
 			ReportUtils.logVerify("AI visual comparison passed based on the defined fail criteria. Message: " + message, true);
 		}
