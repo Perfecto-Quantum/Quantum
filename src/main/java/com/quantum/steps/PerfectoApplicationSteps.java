@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.qmetry.qaf.automation.core.ConfigurationManager;
+import com.qmetry.qaf.automation.step.QAFTestStep;
 import com.qmetry.qaf.automation.step.QAFTestStepProvider;
 import com.quantum.utils.DeviceUtils;
 import com.quantum.utils.ReportUtils;
@@ -875,23 +876,60 @@ public class PerfectoApplicationSteps {
 	}
 	
 	/**
-	 * Performs AI Visual comparison.
-	 * 
-	 * @param AI Visual Comparison.
+	 * Performs AI Visual comparison using only a baseline id.
+	 * The on-fail action is read from configuration
+	 * (key {@code ai.visual.comparison.onfail}, default {@code ignore}).
+	 *
+	 * @param baselineId baseline image identifier
 	 */
-	@Then("^I perform AI Visual Comparison with baseline id \"(.*?)\"$")
+	@QAFTestStep(description = "I perform AI Visual Comparison with baseline id {0}")
 	public static void performAIVisualComparison(String baselineId) {
-		Utils.aiVisualComparison(baselineId);
+		String onFail = ConfigurationManager.getBundle()
+				.getString("ai.visual.comparison.onfail", "ignore").toLowerCase();
+		Utils.aiVisualComparison(baselineId, onFail);
+	}
+
+	/**
+	 * Performs AI Visual comparison with a baseline id and failure criteria.
+	 * The on-fail action is read from configuration
+	 * (key {@code ai.visual.comparison.onfail}, default {@code ignore}).
+	 *
+	 * @param baselineId      baseline image identifier
+	 * @param failureCriteria comma-separated list of failure criteria
+	 */
+	@QAFTestStep(description = "I perform AI Visual Comparison with baseline id {0} and failure criteria {1}")
+	public static void performAIVisualComparisonWithFailureCriteria(String baselineId, String failureCriteria) {
+		String onFail = ConfigurationManager.getBundle()
+				.getString("ai.visual.comparison.onfail", "ignore").toLowerCase();
+		Utils.aiVisualComparison(baselineId, List.of(failureCriteria.toLowerCase().split(",")), onFail);
+	}
+
+	/**
+	 * Performs AI Visual comparison with a baseline id, failure criteria and
+	 * an explicit on-fail action ({@code abort} or {@code ignore}).
+	 * <p>
+	 * Cucumber regex is used (instead of {@code @QAFTestStep}) so the on-fail
+	 * token can be matched unquoted via {@code (abort|ignore)} alternation.
+	 *
+	 * @param baselineId      baseline image identifier
+	 * @param failureCriteria comma-separated list of failure criteria
+	 * @param onFailAction    either {@code abort} or {@code ignore}
+	 */
+	@When("^I perform AI Visual Comparison with baseline id \"([^\"]*)\" and failure criteria \"([^\"]*)\" and on fail: (abort|ignore)$")
+	public static void performAIVisualComparisonWithFailureCriteriaAndOnFail(String baselineId, String failureCriteria, String onFailAction) {
+		Utils.aiVisualComparison(baselineId, List.of(failureCriteria.toLowerCase().split(",")), onFailAction.toLowerCase());
 	}
 	
 	/**
-	 * Performs AI Visual comparison.
-	 * 
-	 * @param AI Visual Comparison.
+	 * Performs AI Visual comparison with a baseline id and a quoted on-fail
+	 * action (legacy step signature).
+	 *
+	 * @param baselineId   baseline image identifier
+	 * @param onFailAction either {@code "abort"} or {@code "ignore"} (quoted)
 	 */
-	@Then("^I perform AI Visual Comparison with baseline id \"(.*?)\" and failure criteria \"(.*?)\"$")
-	public static void performAIVisualComparisonWithFailureCriteria(String baselineId, String failureCriteria) {
-		Utils.aiVisualComparison(baselineId, List.of(failureCriteria.toLowerCase().split(",")));
+	@Then("^I perform AI Visual Comparison with baseline id \"(.*?)\" and on fail: \"(.*?)\"$")
+	public static void performAIVisualComparisonWithQuotedOnFail(String baselineId, String onFailAction) {
+		Utils.aiVisualComparison(baselineId, onFailAction.toLowerCase());
 	}
 
 }
