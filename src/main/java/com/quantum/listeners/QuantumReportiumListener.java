@@ -360,7 +360,7 @@ implements QAFTestStepListener, ITestListener, ISuiteListener {
 		String stepDescription = getProcessStepDescription(stepExecutionTracker.getStep());
 		String msg = "BEGIN STEP: " + stepDescription;
 		ConsoleUtils.logInfoBlocks(msg, ConsoleUtils.lower_block + " ", 10);
-		boolean isAICommand = msg.contains("AI User-Action") || msg.contains("AI Validation") || msg.contains("AI Visual Comparison");
+		boolean isAICommand = msg.contains("AI User-Action") || msg.contains("AI Validation");
 		if(!isAICommand)
 			logStepStart(stepDescription);
 	}
@@ -369,7 +369,7 @@ implements QAFTestStepListener, ITestListener, ISuiteListener {
 	public void afterExecute(StepExecutionTracker stepExecutionTracker) {
 		
 		String msg = "END STEP: " + stepExecutionTracker.getStep().getDescription();
-		boolean isAICommand = msg.contains("AI User-Action") || msg.contains("AI Validation") || msg.contains("AI Visual Comparison");
+		boolean isAICommand = msg.contains("AI User-Action") || msg.contains("AI Validation");
 		if(!isAICommand)
 			logStepEnd();
 		ConsoleUtils.logInfoBlocks(msg, ConsoleUtils.upper_block + " ", 10);
