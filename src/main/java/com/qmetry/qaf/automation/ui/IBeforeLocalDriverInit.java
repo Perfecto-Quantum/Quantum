@@ -12,6 +12,8 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.AbstractDriverOptions;
 import org.openqa.selenium.safari.SafariOptions;
 
+import com.qmetry.qaf.automation.core.ConfigurationManager;
+
 import io.github.bonigarcia.wdm.WebDriverManager;
 
 public interface IBeforeLocalDriverInit {
@@ -21,7 +23,14 @@ public interface IBeforeLocalDriverInit {
 	public static String EDGE_DRIVER_EXEC_PATH_KEY = "webdriver.edge.driver";
 	
 	default boolean hasLocalDriverExecPath(String key) {
-		return System.getProperty(key)!=null;
+		String chromeExecutablePath = ConfigurationManager.getBundle().getString(key, null);
+		if(chromeExecutablePath==null) {
+			chromeExecutablePath = ConfigurationManager.getBundle().getString("system."+key, null);
+		}
+		if(System.getProperty(key)!=null) {
+			chromeExecutablePath = System.getProperty(key);
+		}
+		return chromeExecutablePath!=null;
 	}
 	
 	default void setUpBrowserExec(Class<? extends WebDriver> of) {
