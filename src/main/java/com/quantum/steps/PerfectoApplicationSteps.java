@@ -782,6 +782,19 @@ public class PerfectoApplicationSteps {
 		Utils.aiUserActionWithReturnData(prompt, true, onFail);
 	}
 	
+	/**
+	 * Performs AI User-Action with variable substitution..
+	 * 
+	 * @param AI User-Action prompt.
+	 */
+	@Then("^I perform AI (User-Action|Validation) with prompt: \"([^\"]*)\" using variables( with reasoning| and reasoning)?(?: and on fail: (abort|ignore))?$")
+	public static void performAIUserActionWithVariables(String actionType, String prompt, String reasoning,String onFailAction) {
+		String onFail = ConfigurationManager.getBundle().getString("ai.user.action.onfail", "abort"); 
+		boolean hasReasoning = (reasoning != null && reasoning.trim().length() > 0) ? true : false;
+	    onFail = (onFailAction != null) ? onFailAction : onFail;
+		Utils.aiUserActionWithVariableSubstitution(prompt, hasReasoning, onFail);
+	}
+	
 	
 	/**
 	 * Performs AI User-Action.
