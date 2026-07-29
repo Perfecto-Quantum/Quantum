@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.LogFactoryImpl;
@@ -103,6 +105,83 @@ public class Utils {
 		}
 	}
 	
+	/**
+	 * Return response from AI validation command.
+	 *
+	 * @param aiPrompt   - AI Validation prompt.
+	 * @param includeReasoning - Specify true to allocate additional AI resources for tasks that require multi-step logical processing.
+	 * @param onFail - Specify "abort" to throw an exception if the user action fails, or "ignore" to continue execution.
+	 * @return - true or false
+	 */
+	public static boolean aiUserActionWithVariableSubstitution(String aiPrompt, Boolean includeReasoning, String onFail) {
+		aiPrompt = parseVariablesInPrompt(aiPrompt);
+		Object rawOutput = DriverUtils.getDriver().executeScript("perfecto:ai:user-action", Map.of("action", aiPrompt, "reasoning", includeReasoning, "outputVariable", true));
+		Map<String, Object> aiOutput = null;
+		if(rawOutput instanceof Boolean){
+			logger.error("Output variable not returned, please check if the prompt is correct and contains instructions to return output variables.");
+			return (Boolean) rawOutput;
+		}else if(rawOutput instanceof Map){
+			aiOutput = (Map<String, Object>) rawOutput;
+		}else {
+			logger.error("Unexpected output type from AI command, expected Boolean or Map<String,Object> but got: " + rawOutput.getClass().getName());
+			return false;
+		}
+			
+		if(aiOutput.get("output") != null && "true".equalsIgnoreCase(aiOutput.get("output").toString())){
+			ConfigurationManager.getBundle().setProperty("ai.action.return.value", aiOutput.get("outputVariables"));
+			Object outputVariables = aiOutput.get("outputVariables");
+			if(outputVariables instanceof Map) {
+				Map<String, Object> outputData = ((Map<String, Object>) outputVariables);
+				for(Map.Entry<String, Object> entry : outputData.entrySet()) {
+					Map<String, Object> variableData = (Map<String, Object>) entry.getValue();
+					if(variableData.containsKey("value")) {
+						ConfigurationManager.getBundle().setProperty("ai.action.return."+entry.getKey(), String.valueOf(variableData.get("value")));
+					}
+					else if(entry.getValue() != null) {
+						ConfigurationManager.getBundle().setProperty("ai.action.return."+entry.getKey(), String.valueOf(entry.getValue()));
+					}
+				}
+			}
+			return true;
+		}else {
+			Object validationResponse = aiOutput.get("validationResponse");
+			String outputError = "Failed to perform AI user action for prompt: " + aiPrompt;
+			if(validationResponse instanceof Map) {
+				Map<String, Object> outputData = ((Map<String, Object>) validationResponse);
+				if(String.valueOf(outputData.get("answer")).isEmpty()) {
+					outputError = String.valueOf(outputData.get("actualValue"));
+				}else {
+					outputError = String.valueOf(outputData.get("answer"));
+				}
+			}
+			String result = String.valueOf(aiOutput.get("result"));
+			if((result.equalsIgnoreCase("false")||result.equalsIgnoreCase("fail")) && onFail.equalsIgnoreCase("abort")) {
+				throw new AIException(outputError);
+			}
+			return false;
+		}
+	}
+	
+	private static String parseVariablesInPrompt(String aiPrompt) {
+        String regex = "\\$\\{([^}]+)\\}|<([^>]+)>";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(aiPrompt);
+
+        StringBuilder result = new StringBuilder();
+        
+        while (matcher.find()) {
+            String varName = (matcher.group(1) != null) ? matcher.group(1) : matcher.group(2);
+            String replacement = ConfigurationManager.getBundle().getString("ai.action.return."+varName, "");
+            if(replacement.isEmpty()) {
+            	logger.error(varName + " variable not found in the configuration. Please check if the variable is returned from a previous AI user action.");
+				replacement = "${" + varName + "}";
+			}
+            matcher.appendReplacement(result, Matcher.quoteReplacement(replacement));
+        }
+        matcher.appendTail(result);
+		return String.valueOf(result);
+	}
+
 	/**
 	 * Perform AI visual comparison with defined fail criteria with No device/pixelDifference.
 	 *

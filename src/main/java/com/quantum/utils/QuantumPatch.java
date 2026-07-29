@@ -46,7 +46,7 @@ public class QuantumPatch {
 
 				VendorPrefixPatch vendorClassInstance = vendorClass.getConstructor().newInstance();
 
-				ConfigurationMap configFromVendor = vendorClassInstance.injectVendorPrefix(config);
+				ConfigurationMap configFromVendor = vendorClassInstance.injectVendorPrefix(config, capabilities);
 				Map<String, Object> capabilitiesMap = new HashMap<>();
 				configFromVendor.keySet().forEach(key -> 
 				    capabilitiesMap.put(String.valueOf(key), configFromVendor.get(key))
