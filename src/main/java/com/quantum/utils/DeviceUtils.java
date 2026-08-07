@@ -6,7 +6,9 @@ package com.quantum.utils;
 
 import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -19,6 +21,7 @@ import org.hamcrest.Matchers;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.Rectangle;
+import org.openqa.selenium.remote.RemoteExecuteMethod;
 import org.openqa.selenium.remote.RemoteWebElement;
 
 //import com.perfectomobile.httpclient.device.DeviceParameter;
@@ -30,24 +33,25 @@ import com.qmetry.qaf.automation.util.Validator;
 import com.quantum.axe.AxeHelper;
 
 import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.MobileCommand;
 
 /**
-* DeviceUtils class contains set of utility methods, which help in interacting with 
-* the test device on Perfecto Continues testing platform.
-*/
+ * DeviceUtils class contains set of utility methods, which help in interacting with 
+ * the test device on Perfecto Continues testing platform.
+ */
 
 public class DeviceUtils {
-	
+
 	private static final Log logger = LogFactoryImpl.getLog(DeviceUtils.class);
 
-//	private static final String REPOSITORY_KEY = "perfecto.repository.folder";
+	//	private static final String REPOSITORY_KEY = "perfecto.repository.folder";
 
 	/**
 	 * Utility method to get {@link com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver}
 	 * 
 	 * @return Instance of {@link com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver}
 	 */
-	
+
 	public static QAFExtendedWebDriver getQAFDriver() {
 		return new WebDriverTestBase().getDriver();
 	}
@@ -64,7 +68,7 @@ public class DeviceUtils {
 		String result = isText(text, null);
 		return Validator.verifyThat(message,result ,Matchers.equalTo("true"));
 	}
-	
+
 	/**
 	 * Utility method Verify Text using Perfecto's Visual testing.
 	 * 
@@ -91,7 +95,7 @@ public class DeviceUtils {
 		String result = isText(text, 60);
 		Validator.assertThat(message,result, Matchers.equalTo("true"));
 	}
-	
+
 	/**
 	 *
 	 *	Install app in the device using Perfecto command
@@ -206,7 +210,7 @@ public class DeviceUtils {
 		String resultStr = (String) getQAFDriver().executeScript("mobile:application:install", params);
 		logger.debug("Install App with instrumentation on Android : " + resultStr);
 	}
-	
+
 	/**
 	 *
 	 *	Internal Utility method to create Map Parameter for app start/stop.
@@ -223,7 +227,7 @@ public class DeviceUtils {
 	}
 
 	// by = "name" or "identifier"
-	
+
 	/**
 	 *
 	 *	Method to app start using Perfecto method.
@@ -250,14 +254,14 @@ public class DeviceUtils {
 	}
 
 	// by = "name" or "identifier"
-		/**
-		 *
-		 *	Method to app stop using Perfecto method with ignoring Exception.
-		 *
-		 * @param app     - App name/identifier value
-		 * @param by  	  - String value representing app identification type : name/identifier.
-		 * @param ignoreExceptions - Boolean value representing whether to ignore exception or not.
-		 */
+	/**
+	 *
+	 *	Method to app stop using Perfecto method with ignoring Exception.
+	 *
+	 * @param app     - App name/identifier value
+	 * @param by  	  - String value representing app identification type : name/identifier.
+	 * @param ignoreExceptions - Boolean value representing whether to ignore exception or not.
+	 */
 	public static void closeApp(String app, String by, boolean ignoreExceptions) {
 
 		try {
@@ -340,7 +344,7 @@ public class DeviceUtils {
 		params.put("property", property);
 		return (String) getQAFDriver().executeScript("mobile:application:info", params);
 	}
-	
+
 	/**
 	 *
 	 *	Utility method to verify app information using Perfecto method.
@@ -353,7 +357,7 @@ public class DeviceUtils {
 	 */
 
 	public static boolean verifyAppInfo(String propertyName, String propertyValue) {
-		
+
 		String message = String.format("%s should be %s", propertyName,propertyValue);
 		String appInfo = getAppInfo(propertyName);
 		return Validator.verifyThat(message, appInfo,Matchers
@@ -375,7 +379,7 @@ public class DeviceUtils {
 		Validator.assertThat(message, appOrientation,Matchers
 				.equalTo(propertyValue));
 	}
-	
+
 	/**
 	 *
 	 *	Utility method to Switch app context using Perfecto method.
@@ -385,26 +389,10 @@ public class DeviceUtils {
 	 */
 
 	public static void switchToContext(String context) {
-		
-		AppiumDriver appiumDriver = AppiumUtils.getAppiumDriver();
-		
-		String className = appiumDriver.getClass().getName();
-		
-		if(className.startsWith("io.appium")) {
-			
-			if(className.contains("AndroidDriver")) {
-				AppiumUtils.getAndroidDriver().context(context);
-			}else {
-				AppiumUtils.getIOSDriver().context(context);
-			}
-			
-		}
-			
-		
-//		RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(getQAFDriver());
-//		Map<String, String> params = new HashMap<String, String>();
-//		params.put("name", context);
-//		executeMethod.execute(DriverCommand.SWITCH_TO_CONTEXT, params);
+		RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(getQAFDriver());
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("name", context);
+		executeMethod.execute(MobileCommand.SWITCH_TO_CONTEXT, params);
 	}
 
 	/**
@@ -417,7 +405,7 @@ public class DeviceUtils {
 	 *
 	 */
 	public static void waitForPresentTextVisual(String text, int seconds) {
-		
+
 		String message = String.format("Text: '%s' should be present within max timeout - %s seconds", text, seconds);
 		String result = isText(text, seconds);
 		Validator.verifyThat(message,result, Matchers.equalTo("true"));
@@ -433,10 +421,10 @@ public class DeviceUtils {
 	 *
 	 */
 	public static void waitForPresentImageVisual(String image, int seconds) {
-		
+
 		String message = String.format("Image: '%s' should be present within max timeout - %s seconds", image, seconds);
 		String result = isImg(image, seconds);
-		
+
 		Validator.verifyThat(message,result, Matchers.equalTo("true"));
 	}
 
@@ -451,7 +439,7 @@ public class DeviceUtils {
 	 *	@return String value representing whether the Image is present or not.
 	 *
 	 */
-	
+
 	public static String isImg(String img, Integer timeout) {
 		String context = getCurrentContext();
 		switchToContext("VISUAL");
@@ -480,7 +468,7 @@ public class DeviceUtils {
 		String result = isImg(img, 180);
 		Validator.assertThat(message,result, Matchers.equalTo("true"));
 	}
-	
+
 	/**
 	 *
 	 *	Utility method to verify visually Image using Perfecto visual method.
@@ -539,66 +527,29 @@ public class DeviceUtils {
 	 * @return the current context - "NATIVE_APP", "WEBVIEW", "VISUAL"
 	 */
 	public static String getCurrentContext() {
-		
-		AppiumDriver appiumDriver = AppiumUtils.getAppiumDriver();
-		
-		String className = appiumDriver.getClass().getName();
-		
-		if(className.startsWith("io.appium")) {
-			
-			if(className.contains("AndroidDriver")) {
-				return AppiumUtils.getAndroidDriver().getContext();
-			}else {
-				return AppiumUtils.getIOSDriver().getContext();
-			}
-			
-		}else {
-			return "";
-		}
-		
-//		RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(getQAFDriver());
-//		return (String) executeMethod.execute(DriverCommand.GET_CURRENT_CONTEXT_HANDLE, null);
+		RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(getQAFDriver());
+		Object context = executeMethod.execute(MobileCommand.GET_CURRENT_CONTEXT_HANDLE);
+		return String.valueOf(context);
 	}
 
 	/**
 	 * @return Get all Available Context Handles - "NATIVE_APP", "WEBVIEW", "VISUAL"
 	 */
 	public static String getCurrentContextHandles() {
-		
-		
-AppiumDriver appiumDriver = AppiumUtils.getAppiumDriver();
-		
-		String className = appiumDriver.getClass().getName();
-		
-		Set<String> contextHandles;
-		
-		if(className.startsWith("io.appium")) {
-			
-			if(className.contains("AndroidDriver")) {
-				contextHandles = AppiumUtils.getAndroidDriver().getContextHandles();
-				return String.join(",", contextHandles);
-			}else {
-				contextHandles = AppiumUtils.getIOSDriver().getContextHandles();
-				return String.join(",", contextHandles);
-			}
-			
-		}else {
-			return "";
-		}
-		
-//		RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(getQAFDriver());
-//		@SuppressWarnings("unchecked")
-//		ArrayList<String> al = (ArrayList<String>) executeMethod.execute(DriverCommand.GET_CONTEXT_HANDLES, null);
-//		StringBuffer sb = new StringBuffer();
-//
-//		for (String s : al) {
-//			sb.append(s);
-//			sb.append(",");
-//		}
-//		String str = sb.toString();
-//		System.out.println(str);
-//
-//		return str;
+		RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(getQAFDriver());
+		@SuppressWarnings("unchecked")
+		ArrayList<String> al = (ArrayList<String>) executeMethod.execute(MobileCommand.GET_CONTEXT_HANDLES, Map.of());
+		return String.join(",", al);
+	}
+
+	/**
+	 * @return Set of all Available Context Handles - "NATIVE_APP", "WEBVIEW", "VISUAL"
+	 */
+	public static Set<String> getContextHandles() {
+		RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(getQAFDriver());
+		@SuppressWarnings("unchecked")
+		ArrayList<String> al = (ArrayList<String>) executeMethod.execute(MobileCommand.GET_CONTEXT_HANDLES, Map.of());
+		return new LinkedHashSet<>(al);
 	}
 
 	// device utils
@@ -725,7 +676,7 @@ AppiumDriver appiumDriver = AppiumUtils.getAppiumDriver();
 		params.put(by, restValue);
 		getQAFDriver().executeScript("mobile:handset:rotate", params);
 	}
-	
+
 	/**
 	 *
 	 *	Utility method to Set location using Perfecto method.
@@ -772,7 +723,7 @@ AppiumDriver appiumDriver = AppiumUtils.getAppiumDriver();
 		return Validator.verifyThat("The device location", deviceLocation, Matchers
 				.equalTo(location));
 	}
-	
+
 	/**
 	 *
 	 *	Utility method to get Device location using Perfecto method.
@@ -973,7 +924,7 @@ AppiumDriver appiumDriver = AppiumUtils.getAppiumDriver();
 	 *	Utility method to Start capturing HAR file on Device using Perfecto method.
 	 *
 	 */
-	
+
 	public static void generateHAR() {
 		Map<String, Object> params = new HashMap<>();
 		params.put("generateHarFile", "true");
@@ -991,7 +942,7 @@ AppiumDriver appiumDriver = AppiumUtils.getAppiumDriver();
 		getQAFDriver().executeScript("mobile:vnetwork:stop", params);
 	}
 
-	
+
 	/**
 	 *
 	 *	Utility method to Inject audio file on Device using Perfecto method.
@@ -1223,8 +1174,8 @@ AppiumDriver appiumDriver = AppiumUtils.getAppiumDriver();
 	 *                help match it to the application screen.
 	 */
 	public static void checkAccessibility(String tagName) {
-		
-		
+
+
 		Map<String, Object> capabilities = DriverUtils.getDriver().getCapabilities().asMap();
 
 		Optional<Entry<String, Object>> browserEntry = capabilities.entrySet().stream().filter(entry -> {return entry.getKey().contains("browserName");}).findFirst();
@@ -1474,7 +1425,7 @@ AppiumDriver appiumDriver = AppiumUtils.getAppiumDriver();
 		Map<String, Object> params = new HashMap<>();
 		getQAFDriver().executeScript("mobile:vitals:stop", params);
 	}
-	
+
 	/**
 	 *
 	 * @param repoKey          - The full repository path, including directory and
