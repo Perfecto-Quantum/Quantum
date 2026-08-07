@@ -812,7 +812,8 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 						Capabilities.class);
 				return constructor.newInstance(url, factory, capabilities);
 			} catch (Exception ex) {
-				return null;
+				logger.error(ex.getMessage());
+				throw new WebDriverException(ex);
 			}
 		}
 
