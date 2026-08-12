@@ -11,14 +11,19 @@ import com.perfecto.reportium.test.TestContext;
 import com.perfecto.reportium.test.result.TestResult;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 import java.util.logging.Logger;
 
 import static com.perfecto.reportium.model.util.ExecutionContextPopulator.EQUALS;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Reportium instance that transmits test data to MCM
@@ -214,17 +219,32 @@ class PerfectoReportiumClient implements ReportiumClient {
             throw new ReportiumException("WebDriver instance is assumed to have Selenium Capabilities");
         }
 
-        Object value = ((HasCapabilities) webDriver).getCapabilities().getCapability(Constants.Capabilities.executionReportUrl);
-        if (value == null) {
-            return null;
-        }
+        Object value = ((HasCapabilities) webDriver).getCapabilities()
+                .getCapability(Constants.Capabilities.executionReportUrl);
 
-        return String.valueOf(value);
+        return value == null ? null : formatReportUrl(String.valueOf(value));
     }
 
     private void executeScript(String script, Map<String, Object> params) {
         // Execute script
         WebDriver webDriver = perfectoExecutionContext.getWebDriver();
         ((JavascriptExecutor) webDriver).executeScript(script, params);
+    }
+
+    private String formatReportUrl(String reportUrl) {
+        try {
+            URI originalUri = new URI(reportUrl);
+            URIBuilder uriBuilder = new URIBuilder()
+                    .setScheme(originalUri.getScheme())
+                    .setHost(originalUri.getHost())
+                    .setPort(originalUri.getPort())
+                    .setPath(originalUri.getPath());
+
+            uriBuilder.setParameters(URLEncodedUtils.parse(originalUri, UTF_8));
+            return uriBuilder.build().toString();
+        } catch (URISyntaxException e) {
+            // Fallback to previous behavior: return the raw capability string
+            return reportUrl;
+        }
     }
 }
