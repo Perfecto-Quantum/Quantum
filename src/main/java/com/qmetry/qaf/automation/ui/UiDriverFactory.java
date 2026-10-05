@@ -624,9 +624,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			for (Browsers browser : Browsers.values()) {
 
 				if(name.startsWith(browser.name())) {
-					//				if (name.contains(browser.name())) {
 					browser.setBrowserName(name);
-//					browser.se
 					return browser;
 				}
 			}
