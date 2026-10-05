@@ -46,13 +46,10 @@ public class CucumberJsonListener implements QAFTestStepListener,ITestListener, 
 			try {
 				scenario = buildScenario(result);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 	        threadLocalScenarios.get().add(scenario);
 	        threadLocalSteps.remove();
-	        Map<String, Object> pars = new HashMap<>();
-	        DriverUtils.getDriver().executeScript("mobile:vnetwork:stop", pars); 
 	    }
 	    
 	    @Override
@@ -113,7 +110,6 @@ public class CucumberJsonListener implements QAFTestStepListener,ITestListener, 
 	    
 	    @Override
 	    public void onStart(ISuite suite) {
-	    	// TODO Auto-generated method stub
 	    	scenariosSuite = new ArrayList<>();
 	    }
 	    

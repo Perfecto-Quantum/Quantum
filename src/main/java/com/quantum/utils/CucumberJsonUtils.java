@@ -52,8 +52,7 @@ public class CucumberJsonUtils {
 		JsonObject step = new JsonObject();
 
 		int stepIndex = stepExecutionTracker.getStepIndex();
-		//       String[] arr = ((String[])((TestNGScenario) Reporter.getCurrentTestResult().getMethod()).getSteps().stream().toArray());
-		//       System.out.println(arr);
+
 		TestStep testStep = stepExecutionTracker.getStep();
 		String stepDesc = testStep.getDescription();
 
@@ -61,7 +60,6 @@ public class CucumberJsonUtils {
 
 		String keyword = stepExecutionTracker.getType();
 		Scenario scn= (Scenario) stepExecutionTracker.getStepCompositer();
-		//        scn.getSteps().forEach(c->(Java)c);
 		StringTestStep strStep = (StringTestStep) scn.getSteps().stream().toArray()[stepIndex];
 		String stepName = stepDesc.replaceAll("^(Given|When|Then)\\s*", "");
 		String glueLocation =fileNameArr[fileNameArr.length-1]+"."+testStep.getName()+"()";
@@ -69,7 +67,6 @@ public class CucumberJsonUtils {
 
 		String status= stepExecutionTracker.isSuccess().booleanValue() ? "passed":"failed";;
 		long durationNano=(stepExecutionTracker.getEndTime() - stepExecutionTracker.getStartTime());
-//		String outputMessage="TestMessage";
 		Throwable error=stepExecutionTracker.getException();
 		// keyword & name
 		step.addProperty("keyword", keyword);
@@ -91,13 +88,6 @@ public class CucumberJsonUtils {
 		}
 		step.add("result", result);
 
-		// output (optional)
-//		if (outputMessage != null) {
-//			JsonArray output = new JsonArray();
-//			output.add(outputMessage);
-//			step.add("output", output);
-//		}
-
 		return step;
 	}
 
@@ -106,7 +96,6 @@ public class CucumberJsonUtils {
 		String id = "feature-name;scenario-e";
 		Scenario dataDrivenScenario = (Scenario)result.getMethod().getInstance();
 		String fileName = dataDrivenScenario.getFileName();
-		//    	dataDrivenScenario.get
 		String featureFile = System.getProperty("user.dir")+File.separator+fileName;
 		String featureTags = "";
 		String featureName = "";
@@ -178,7 +167,6 @@ public class CucumberJsonUtils {
 	JsonArray elementsArr = new JsonArray();
 	elementsArr.add(scenario);
 
-//	JsonObject elements = new JsonObject();
 	feature.add("elements", elementsArr);
 	
 	return feature;
