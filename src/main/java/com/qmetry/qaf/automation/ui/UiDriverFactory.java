@@ -56,6 +56,7 @@ import org.openqa.selenium.remote.HttpCommandExecutor;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.http.ClientConfig;
 import org.openqa.selenium.remote.http.HttpClient;
+import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.safari.SafariOptions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
@@ -70,6 +71,7 @@ import com.qmetry.qaf.automation.core.ConfigurationManager;
 import com.qmetry.qaf.automation.core.DriverFactory;
 import com.qmetry.qaf.automation.core.LoggingBean;
 import com.qmetry.qaf.automation.core.QAFListener;
+import com.qmetry.qaf.automation.core.QAFTestBase;
 import com.qmetry.qaf.automation.core.QAFTestBase.STBArgs;
 import com.qmetry.qaf.automation.keys.ApplicationProperties;
 import com.qmetry.qaf.automation.ui.selenium.webdriver.SeleniumDriverFactory;
@@ -331,7 +333,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 
 			Constructor<? extends WebDriver> constructor = null;
 
-			String className = of.getName().toUpperCase();
+			String className = ConfigurationManager.getBundle().getString("driver.name", "chromedriver").toUpperCase();
 
 			String beforeLocalDriverInitClass = ConfigurationManager.getBundle().getString("local.before.driver.init",
 					"com.qmetry.qaf.automation.ui.DefaultBeforeLocalDriverInit");
@@ -342,18 +344,22 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 			AbstractDriverOptions<?> driverOptions = null;
 
 			if (className.contains("CHROMEDRIVER")) {
+				of = (Class<? extends WebDriver>) Class.forName("" + ChromeDriver.class.getName());
 				constructor = of.getConstructor(ChromeOptions.class);
 			}
 
 			if (className.contains("FIREFOXDRIVER")) {
+				of = (Class<? extends WebDriver>) Class.forName("" + FirefoxDriver.class.getName());
 				constructor = of.getConstructor(FirefoxOptions.class);
 			}
 
 			if (className.contains("EDGEDRIVER")) {
+				of = (Class<? extends WebDriver>) Class.forName("" + EdgeDriver.class.getName());
 				constructor = of.getConstructor(EdgeOptions.class);
 			}
 
 			if(className.contains("SAFARIDRIVER")) {
+				of = (Class<? extends WebDriver>) Class.forName("" + SafariDriver.class.getName());
 				constructor = of.getConstructor(SafariOptions.class);
 			}
 
@@ -620,6 +626,7 @@ public class UiDriverFactory implements DriverFactory<UiDriver> {
 				if(name.startsWith(browser.name())) {
 					//				if (name.contains(browser.name())) {
 					browser.setBrowserName(name);
+//					browser.se
 					return browser;
 				}
 			}

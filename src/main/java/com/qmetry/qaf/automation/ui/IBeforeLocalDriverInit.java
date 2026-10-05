@@ -1,5 +1,6 @@
 package com.qmetry.qaf.automation.ui;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -7,9 +8,11 @@ import java.util.Set;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.chromium.ChromiumOptions;
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.AbstractDriverOptions;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.safari.SafariOptions;
 
 import com.qmetry.qaf.automation.core.ConfigurationManager;
@@ -95,7 +98,21 @@ public interface IBeforeLocalDriverInit {
 			Set<Entry<String, Object>> capEntries = capMap.entrySet();
 			
 			for(Entry<String, Object> entry : capEntries) {
-				driverOptions.setCapability(entry.getKey(), entry.getValue());
+				Object value = entry.getValue();
+				if( value instanceof Map) {
+					Map<String, Object> optionsMap = (Map<String, Object>) entry.getValue();
+					for(String key : optionsMap.keySet()) {
+						if("args".equalsIgnoreCase(key) && optionsMap.get(key) instanceof List) {
+							if (driverOptions instanceof ChromiumOptions) {
+								((ChromiumOptions<?>)driverOptions).addArguments((List<String>) optionsMap.get(key));
+							}
+						}
+					}
+					var options = driverOptions.merge(new DesiredCapabilities(optionsMap));
+					driverOptions.merge(options);
+				}else {
+					driverOptions.setCapability(entry.getKey(), entry.getValue());
+				}
 			}
 			return driverOptions;
 		}
