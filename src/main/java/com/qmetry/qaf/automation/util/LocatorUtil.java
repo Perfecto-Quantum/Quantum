@@ -69,6 +69,11 @@ public class LocatorUtil {
 		Gson gson = new Gson();
 		loc = String.valueOf(props.getInterpolator().interpolate(loc));
 		loc = props.getString(loc, loc);
+		if (loc.length() > 1 && loc.startsWith("\"") && loc.endsWith("\"")) {
+
+			loc = loc.substring(1, loc.length() - 1);
+
+		}
 		JsonElement element = JSONUtil.getGsonElement(loc);
 		if ((null != element) && element.isJsonObject()) {
 			Object obj = gson.fromJson(element, Map.class).get("locator");

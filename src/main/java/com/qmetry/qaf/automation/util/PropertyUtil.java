@@ -384,10 +384,15 @@ public class PropertyUtil extends XMLConfiguration {
 	public void setPropertyInternal(String key, Object value) {
 		// allow List Delimiter for string value
 		if (null != value && value instanceof String) {
-			if (value.toString().indexOf(getListDelimiter()) > 0) {
+			String str = String.valueOf(value);
+			boolean quoted = str.length() > 1 && str.startsWith("\"") && str.endsWith("\"");
+			if (!quoted && str.indexOf(getListDelimiter()) > 0) {
 				DefaultListDelimiterHandler handler = new DefaultListDelimiterHandler(getListDelimiter());
 				value = handler.split(value.toString(), true);
 //				value = PropertyConverter.split(value.toString(), getListDelimiter());
+			}
+			if(quoted) {
+				value = str.substring(1, str.length() - 1);
 			}
 			
 		}
