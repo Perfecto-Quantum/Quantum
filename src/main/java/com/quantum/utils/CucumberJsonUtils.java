@@ -1,50 +1,24 @@
 package com.quantum.utils;
 
 
-import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.testng.IClass;
-import org.testng.ITestResult;
-import org.testng.Reporter;
-import org.testng.annotations.Test;
-
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.qmetry.qaf.automation.core.ConfigurationManager;
 import com.qmetry.qaf.automation.step.StepExecutionTracker;
 import com.qmetry.qaf.automation.step.StringTestStep;
 import com.qmetry.qaf.automation.step.TestStep;
-import com.qmetry.qaf.automation.step.client.DataDrivenScenario;
 import com.qmetry.qaf.automation.step.client.Scenario;
-import com.qmetry.qaf.automation.step.client.TestNGScenario;
-import com.qmetry.qaf.automation.step.client.text.BDDDefinitionHelper.ParamType;
+import org.testng.ITestResult;
 
-import io.cucumber.core.backend.ObjectFactory;
-import io.cucumber.core.options.RuntimeOptions;
-import io.cucumber.core.options.RuntimeOptionsBuilder;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import static com.qmetry.qaf.automation.core.ConfigurationManager.getBundle;
 
 public class CucumberJsonUtils {
 
@@ -65,7 +39,7 @@ public class CucumberJsonUtils {
 		String glueLocation =fileNameArr[fileNameArr.length-1]+"."+testStep.getName()+"()";
 
 
-		String status= stepExecutionTracker.isSuccess().booleanValue() ? "passed":"failed";;
+		String status= stepExecutionTracker.isSuccess() ? "passed":"failed";;
 		long durationNano=(stepExecutionTracker.getEndTime() - stepExecutionTracker.getStartTime());
 		Throwable error=stepExecutionTracker.getException();
 		// keyword & name
@@ -137,7 +111,15 @@ public class CucumberJsonUtils {
 	
 	
 	JsonObject scenario = new JsonObject();
-	ArrayList<JsonObject> stepQueue=(ArrayList) getBundle().getProperty("stepObjects");
+	Object storedStepObjects = getBundle().getProperty("stepObjects");
+	List<JsonObject> stepQueue = new ArrayList<>();
+	if (storedStepObjects instanceof Collection<?>) {
+		for (Object stepObject : (Collection<?>) storedStepObjects) {
+			if (stepObject instanceof JsonObject) {
+				stepQueue.add((JsonObject) stepObject);
+			}
+		}
+	}
 	scenario.addProperty("id", result.getTestName().replaceAll(" ", "-"));
 	scenario.addProperty("keyword", "Scenario");
 	scenario.addProperty("name", result.getTestName()+ (result.getParameters().length > 0 ? " [" + result.getParameters()[0] + "]" : ""));
@@ -175,4 +157,3 @@ public class CucumberJsonUtils {
 
 
 }
-

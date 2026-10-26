@@ -36,12 +36,12 @@ public class CucumberJsonListener implements QAFTestStepListener,ITestListener, 
 	    @Override
 	    public void onTestStart(ITestResult result) {
 	        getBundle().setProperty("test_start_timestamp", Instant.now().toString());
-	        getBundle().setProperty("stepObjects", threadLocalSteps.get());
+	        getBundle().setProperty("stepObjects", new ArrayList<>(threadLocalSteps.get()));
 	    }
 	    
 	    @Override
 	    public void onTestSuccess(ITestResult result) {
-	    	getBundle().setProperty("stepObjects", threadLocalSteps.get());
+	    	getBundle().setProperty("stepObjects", new ArrayList<>(threadLocalSteps.get()));
 	        JsonObject scenario = null;
 			try {
 				scenario = buildScenario(result);
@@ -54,7 +54,7 @@ public class CucumberJsonListener implements QAFTestStepListener,ITestListener, 
 	    
 	    @Override
 	    public void onTestFailure(ITestResult result) {
-	    	getBundle().setProperty("stepObjects", threadLocalSteps.get());
+	    	getBundle().setProperty("stepObjects", new ArrayList<>(threadLocalSteps.get()));
 	        JsonObject scenario = null;
 			try {
 				scenario = buildScenario(result);
@@ -67,7 +67,7 @@ public class CucumberJsonListener implements QAFTestStepListener,ITestListener, 
 	    
 	    @Override
 	    public void onTestSkipped(ITestResult result) {
-	    	getBundle().setProperty("stepObjects", threadLocalSteps.get());
+	    	getBundle().setProperty("stepObjects", new ArrayList<>(threadLocalSteps.get()));
 	        JsonObject scenario = null;
 			try {
 				scenario = buildScenario(result);
