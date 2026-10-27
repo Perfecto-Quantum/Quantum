@@ -27,107 +27,117 @@ public class CucumberJsonListener implements QAFTestStepListener,ITestListener, 
 	private static final ThreadLocal<List<JsonObject>> threadLocalSteps =
 	        ThreadLocal.withInitial(ArrayList::new);
 	    private ConcurrentLinkedQueue<JsonObject> scenariosSuite = null;
-	    
-	    @Override
-	    public void onTestStart(ITestResult result) {
-	        getBundle().setProperty("test_start_timestamp", Instant.now().toString());
-	        threadLocalSteps.set(new ArrayList<>());
-	    }
-	    
-	    @Override
-	    public void onTestSuccess(ITestResult result) {
-	    	List<JsonObject> steps = threadLocalSteps.get();
-	        JsonObject scenario = null;
-			try {
-				scenario = buildScenario(result, steps);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-	        scenariosSuite.add(scenario);
-	        threadLocalSteps.remove();
-	    }
-	    
-	    @Override
-	    public void onTestFailure(ITestResult result) {
-	    	List<JsonObject> steps = threadLocalSteps.get();
-	        JsonObject scenario = null;
-			try {
-				scenario = buildScenario(result, steps);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-	        scenariosSuite.add(scenario);
-	        threadLocalSteps.remove();
-	    }
-	    
-	    @Override
-	    public void onTestSkipped(ITestResult result) {
-	    	List<JsonObject> steps = threadLocalSteps.get();
-	        JsonObject scenario = null;
-			try {
-				scenario = buildScenario(result, steps);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-	        scenariosSuite.add(scenario);
-	        threadLocalSteps.remove();
-	    }
+    private File runFolder;
 
-	    @Override
-	    public void onFailure(StepExecutionTracker stepExecutionTracker) {
-	        stepExecutionTracker.setSuccess(false);
-	    }
+    @Override
+    public void onTestStart(ITestResult result) {
+        getBundle().setProperty("test_start_timestamp", Instant.now().toString());
+        threadLocalSteps.set(new ArrayList<>());
+    }
 
-	    @Override
-	    public void beforExecute(StepExecutionTracker stepExecutionTracker) {
-	        stepExecutionTracker.setSuccess(true);
-	    }
+    @Override
+    public void onTestSuccess(ITestResult result) {
+    	List<JsonObject> steps = threadLocalSteps.get();
+        JsonObject scenario = null;
+		try {
+			scenario = buildScenario(result, steps);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        if (scenario != null) {
+            writeScenario(result, scenario);
+        }
+        threadLocalSteps.remove();
+    }
 
-	    @Override
-	    public void afterExecute(StepExecutionTracker stepExecutionTracker) {
-	        JsonObject obj = buildStep(stepExecutionTracker);
-	        List<JsonObject> stepObjects = threadLocalSteps.get();
-	        stepObjects.add(obj);
-	    }
-	    
-	    @Override
-	    public void onStart(ITestContext context) {
-	        threadLocalSteps.set(new ArrayList<>());
-	    }
-	    
-	    @Override
-	    public void onFinish(ITestContext context) {
-	        // no-op; suite-level accumulation is done in per-test listeners
-	    }
-	    
-	    @Override
-	    public void onStart(ISuite suite) {
-	    	scenariosSuite = new ConcurrentLinkedQueue<>();
-	    }
-	    
-	    @Override
-	    public void onFinish(ISuite suite) {
-	    	JsonArray array = new JsonArray();
-	        if (scenariosSuite != null) {
-	            for (JsonObject scenario : scenariosSuite) {
-	                if (scenario != null) {
-	                    array.add(scenario);
-	                }
-	            }
-	        }
+    @Override
+    public void onTestFailure(ITestResult result) {
+    	List<JsonObject> steps = threadLocalSteps.get();
+        JsonObject scenario = null;
+		try {
+			scenario = buildScenario(result, steps);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        if (scenario != null) {
+            writeScenario(result, scenario);
+        }
+        threadLocalSteps.remove();
+    }
 
-	        String reportRoot = getBundle().getString("jsonReport.dir", "json-reports");
-	        String timestampFolder = "run_" + Instant.now().toString().replace(":", "-").replace(".", "-");
-	        File runFolder = new File(reportRoot, timestampFolder);
-	        if (!runFolder.exists() && !runFolder.mkdirs()) {
-	            System.err.println("Unable to create report directory: " + runFolder.getAbsolutePath());
-	            return;
-	        }
+    @Override
+    public void onTestSkipped(ITestResult result) {
+    	List<JsonObject> steps = threadLocalSteps.get();
+        JsonObject scenario = null;
+		try {
+			scenario = buildScenario(result, steps);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        if (scenario != null) {
+            writeScenario(result, scenario);
+        }
+        threadLocalSteps.remove();
+    }
 
-	        String fileName = new File(runFolder, "result.json").getAbsolutePath();
-	        System.out.println("Writing to file: " + fileName + " with " + array.size() + " scenarios");
-	        JSONUtil.writeJsonObjectToFile(fileName, array);
-	    	
-	    }
+    @Override
+    public void onFailure(StepExecutionTracker stepExecutionTracker) {
+        stepExecutionTracker.setSuccess(false);
+    }
+
+    @Override
+    public void beforExecute(StepExecutionTracker stepExecutionTracker) {
+        stepExecutionTracker.setSuccess(true);
+    }
+
+    @Override
+    public void afterExecute(StepExecutionTracker stepExecutionTracker) {
+        JsonObject obj = buildStep(stepExecutionTracker);
+        List<JsonObject> stepObjects = threadLocalSteps.get();
+        stepObjects.add(obj);
+    }
+
+    @Override
+    public void onStart(ITestContext context) {
+        threadLocalSteps.set(new ArrayList<>());
+    }
+
+    @Override
+    public void onFinish(ITestContext context) {
+        // no-op; suite-level accumulation is done in per-suite listener
+    }
+
+    @Override
+    public void onStart(ISuite suite) {
+    	scenariosSuite = new ConcurrentLinkedQueue<>();
+        String reportRoot = getBundle().getString("jsonReport.dir", "json-reports");
+        String timestampFolder = "run_" + Instant.now().toString().replace(":", "-").replace(".", "-");
+        runFolder = new File(reportRoot, timestampFolder);
+        if (!runFolder.exists() && !runFolder.mkdirs()) {
+            System.err.println("Unable to create run directory: " + runFolder.getAbsolutePath());
+        }
+    }
+
+    @Override
+    public void onFinish(ISuite suite) {
+        // per-test files are written when each test completes; no suite-level aggregation here
+    }
+
+    private void writeScenario(ITestResult result, JsonObject scenario) {
+        if (runFolder == null) {
+            return;
+        }
+
+        String testName = result.getName();
+        String safeName = testName.replaceAll("[^a-zA-Z0-9._-]", "_");
+        File testFolder = new File(runFolder, safeName);
+        if (!testFolder.exists() && !testFolder.mkdirs()) {
+            System.err.println("Unable to create test directory: " + testFolder.getAbsolutePath());
+            return;
+        }
+
+        String fileName = new File(testFolder, "result.json").getAbsolutePath();
+        JSONUtil.writeJsonObjectToFile(fileName, scenario);
+    }
 
 }
