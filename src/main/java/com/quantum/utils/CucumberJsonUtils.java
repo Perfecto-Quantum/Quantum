@@ -65,95 +65,78 @@ public class CucumberJsonUtils {
 		return step;
 	}
 
-	@SuppressWarnings("unchecked")
-	public static JsonObject buildScenario(ITestResult result) throws IOException {
+	public static JsonObject buildScenario(ITestResult result, List<JsonObject> stepQueue) throws IOException {
 		String id = "feature-name;scenario-e";
 		Scenario dataDrivenScenario = (Scenario)result.getMethod().getInstance();
 		String fileName = dataDrivenScenario.getFileName();
-		String featureFile = System.getProperty("user.dir")+File.separator+fileName;
+		String featureFile = System.getProperty("user.dir") + File.separator + fileName;
 		String featureTags = "";
 		String featureName = "";
 		try (BufferedReader reader = new BufferedReader(new FileReader(featureFile))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
-				if(line.contains("@")) {
-					featureTags = line.trim();					
+				if (line.contains("@")) {
+					featureTags = line.trim();
 				}
-				if(line.contains("Feature:")) {
+				if (line.contains("Feature:")) {
 					featureName = line.replace("Feature:", "").trim();
 					break;
 				}
 			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		catch (IOException e) {e.printStackTrace();}
-	String featureId = featureName.toLowerCase().replaceAll(" ", "-");
-	int lineNumber = (int)dataDrivenScenario.getMetadata().get("lineNo");
-	
-	JsonObject feature = new JsonObject();
-	feature.addProperty("id", featureId);
-	feature.addProperty("uri", featureFile);
-	feature.addProperty("keyword", "Feature");
-	feature.addProperty("name", featureName);
-	feature.addProperty("line", 3);
-	
+		String featureId = featureName.toLowerCase().replaceAll(" ", "-");
+		int lineNumber = (int) dataDrivenScenario.getMetadata().get("lineNo");
 
+		JsonObject feature = new JsonObject();
+		feature.addProperty("id", featureId);
+		feature.addProperty("uri", featureFile);
+		feature.addProperty("keyword", "Feature");
+		feature.addProperty("name", featureName);
+		feature.addProperty("line", 3);
 
-	if(featureTags != null && !featureTags.isEmpty()) {
-		JsonArray ftagsArray = new JsonArray();
-		String[] tags = featureTags.split(" ");
+		if (featureTags != null && !featureTags.isEmpty()) {
+			JsonArray ftagsArray = new JsonArray();
+			String[] tags = featureTags.split(" ");
+			for (String tag : tags) {
+				var tagObj = new JsonObject();
+				tagObj.addProperty("name", tag);
+				ftagsArray.add(tagObj);
+			}
+			feature.add("tags", ftagsArray);
+		}
+
+		JsonObject scenario = new JsonObject();
+		scenario.addProperty("id", result.getTestName().replaceAll(" ", "-"));
+		scenario.addProperty("keyword", "Scenario");
+		scenario.addProperty("name", result.getTestName() + (result.getParameters().length > 0 ? " [" + result.getParameters()[0] + "]" : ""));
+		scenario.addProperty("line", lineNumber);
+		scenario.addProperty("type", "scenario");
+		scenario.addProperty("start_timestamp", ConfigurationManager.getBundle().getPropertyValueOrNull("test_start_timestamp"));
+
+		JsonArray stepArray = new JsonArray();
+		for (JsonObject step : stepQueue) {
+			stepArray.add(step);
+		}
+		scenario.add("steps", stepArray);
+		JsonArray tagsArray = new JsonArray();
+		String[] tags = dataDrivenScenario.getM_groups();
 		for (String tag : tags) {
 			var tagObj = new JsonObject();
 			tagObj.addProperty("name", tag);
-			ftagsArray.add(tagObj);
+			tagsArray.add(tagObj);
 		}
-		feature.add("tags", ftagsArray);
+		scenario.add("tags", tagsArray);
+
+		JsonArray elementsArr = new JsonArray();
+		elementsArr.add(scenario);
+		feature.add("elements", elementsArr);
+		return feature;
 	}
-	
-	
-	JsonObject scenario = new JsonObject();
-	Object storedStepObjects = getBundle().getProperty("stepObjects");
-	List<JsonObject> stepQueue = new ArrayList<>();
-	if (storedStepObjects instanceof Collection<?>) {
-		for (Object stepObject : (Collection<?>) storedStepObjects) {
-			if (stepObject instanceof JsonObject) {
-				stepQueue.add((JsonObject) stepObject);
-			}
-		}
+
+	public static JsonObject buildScenario(ITestResult result) throws IOException {
+		return buildScenario(result, new ArrayList<>());
 	}
-	scenario.addProperty("id", result.getTestName().replaceAll(" ", "-"));
-	scenario.addProperty("keyword", "Scenario");
-	scenario.addProperty("name", result.getTestName()+ (result.getParameters().length > 0 ? " [" + result.getParameters()[0] + "]" : ""));
-	scenario.addProperty("line", lineNumber);
-	scenario.addProperty("type", "scenario");
-	scenario.addProperty("start_timestamp", ConfigurationManager.getBundle().getPropertyValueOrNull("test_start_timestamp"));
-	
-	
-	
-	
-	JsonArray stepArray = new JsonArray();
-	for (JsonObject step : stepQueue) {
-		stepArray.add(step);
-	}
-	scenario.add("steps", stepArray);
-	JsonArray tagsArray = new JsonArray();
-
-
-	String[] tags = dataDrivenScenario.getM_groups();
-	for (String tag : tags) {
-		var tagObj = new JsonObject();
-		tagObj.addProperty("name", tag);
-		tagsArray.add(tagObj);
-	}
-	scenario.add("tags", tagsArray);
-
-	JsonArray elementsArr = new JsonArray();
-	elementsArr.add(scenario);
-
-	feature.add("elements", elementsArr);
-	
-	return feature;
-}
-
-
 
 }
