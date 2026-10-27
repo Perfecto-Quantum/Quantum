@@ -24,7 +24,7 @@ import static com.quantum.utils.CucumberJsonUtils.*;
 
 public class CucumberJsonListener implements QAFTestStepListener,ITestListener, ISuiteListener {
 
-	private static final ThreadLocal<List<JsonObject>> threadLocalSteps = 
+	private static final ThreadLocal<List<JsonObject>> threadLocalSteps =
 	        ThreadLocal.withInitial(ArrayList::new);
 	    private ConcurrentLinkedQueue<JsonObject> scenariosSuite = null;
 	    
@@ -108,11 +108,23 @@ public class CucumberJsonListener implements QAFTestStepListener,ITestListener, 
 	    @Override
 	    public void onFinish(ISuite suite) {
 	    	JsonArray array = new JsonArray();
-	        for (JsonObject scenario : scenariosSuite) {
-	            array.add(scenario);
+	        if (scenariosSuite != null) {
+	            for (JsonObject scenario : scenariosSuite) {
+	                if (scenario != null) {
+	                    array.add(scenario);
+	                }
+	            }
 	        }
-	        
-	        String fileName = getBundle().getString("jsonReport.dir", "json-reports")+File.separator+suite.getName() +"_"+ System.currentTimeMillis()+File.separator + "result.json";
+
+	        String reportRoot = getBundle().getString("jsonReport.dir", "json-reports");
+	        String timestampFolder = "run_" + Instant.now().toString().replace(":", "-").replace(".", "-");
+	        File runFolder = new File(reportRoot, timestampFolder);
+	        if (!runFolder.exists() && !runFolder.mkdirs()) {
+	            System.err.println("Unable to create report directory: " + runFolder.getAbsolutePath());
+	            return;
+	        }
+
+	        String fileName = new File(runFolder, "result.json").getAbsolutePath();
 	        System.out.println("Writing to file: " + fileName + " with " + array.size() + " scenarios");
 	        JSONUtil.writeJsonObjectToFile(fileName, array);
 	    	
