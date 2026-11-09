@@ -73,26 +73,15 @@ public class VendorPrefixPatchPerfecto implements VendorPrefixPatch {
 		}
 		
 		// By default Appium Version is set to latest version if explicitly not mentioned
-//		if(!perfectoCaps.containsKey("perfecto:appiumVersion")) {
-			try {
-				perfectoCaps.clearProperty("perfecto:appiumVersion");
-			} catch (Exception e) {
-				e.printStackTrace();
+		if(capabilities.containsKey("perfecto:useVirtualDevice")) {
+			if(!perfectoCaps.containsKey("perfecto:appiumVersion")) {
+				perfectoCaps.addProperty("perfecto:appiumVersion", "3.6.0");
 			}
-			if(capabilities.containsKey("perfecto:useVirtualDevice")) {
-				perfectoCaps.addProperty("perfecto:appiumVersion", "2.19");
-			}
-			else
+		}else {
+			if(!perfectoCaps.containsKey("perfecto:appiumVersion")) {
 				perfectoCaps.addProperty("perfecto:appiumVersion", "latest");
-//		}else {
-//			
-//			String appiumVersion = perfectoCaps.getString("perfecto:appiumVersion");
-//			Map<String, Object> stringKeyMap = new HashMap<>();
-//			config.getKeys().forEachRemaining(key -> stringKeyMap.put(key, config.getProperty(key)));
-//			if(capabilities.containsKey("perfecto:useVirtualDevice")) {
-//				stringKeyMap.put("appiumVersion", capabilities.get("appiumVersion"));
-//			}
-//		}
+			}
+		}
 
 		return new ConfigurationMap(perfectoCaps);
 	}

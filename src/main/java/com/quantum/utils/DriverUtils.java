@@ -2,7 +2,6 @@ package com.quantum.utils;
 
 import java.util.Map;
 
-import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
@@ -13,7 +12,6 @@ import com.qmetry.qaf.automation.core.TestBaseProvider;
 import com.qmetry.qaf.automation.ui.WebDriverTestBase;
 import com.qmetry.qaf.automation.ui.webdriver.QAFExtendedWebDriver;
 
-import io.appium.java_client.TouchAction;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
 
@@ -79,19 +77,6 @@ public class DriverUtils {
 			return (IOSDriver) driver;
 		}
 		return null ;
-	}
-
-	/**
-	 * <p>Method to create TouchAction Object instance.
-	 * </p>
-	 * @return Instance of type  {@link io.appium.java_client.TouchAction}
-	 * 
-	 */
-	@Deprecated
-	public static TouchAction getTouchAction() {
-
-		return AppiumUtils.getTouchAction();
-//		return new TouchAction(getAppiumDriver());
 	}
 
 	/**

@@ -116,18 +116,6 @@ public class QuantumPatch {
 			}else {
 				propValue = config.getProperty(key);
 			}
-			
-//			try {
-//				propValue = Double.valueOf(propValueStr);
-//			}catch(Exception e) {
-//				try {
-//					
-//					
-//					
-//				}catch(Exception e1) {
-//					propValue = config.getProperty(key);
-//				}
-//			}
 			capabilities.put(key, propValue);
 		}
 		

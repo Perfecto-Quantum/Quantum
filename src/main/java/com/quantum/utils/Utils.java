@@ -371,8 +371,12 @@ public class Utils {
 		int startX = (width / 4);
 		int startY = (height / 2) + y;
 		int endX = (width / 2) + x;
-		AppiumUtils.getTouchAction().press(PointOption.point(startX, startY)).moveTo(PointOption.point(endX, startY))
-		.release().perform();
+		
+		Map<String, Object> params = new HashMap<>();
+		params.put("start", startX + "," + startY);
+		params.put("end", endX + "," + startY);
+		params.put("duration", 2);
+		DeviceUtils.getQAFDriver().executeScript("mobile:touch:swipe", params);
 		return true;
 	}
 
@@ -1051,14 +1055,15 @@ public class Utils {
 	}
 
 	public static boolean tapCenterOfElement(QAFWebElement ele) {
-
 		int eleX = ele.getLocation().getX();
 		int eleY = ele.getLocation().getY();
 		int height = ele.getSize().getHeight();
 		int width = ele.getSize().getWidth();
 		int X = eleX + (width / 2);
 		int Y = eleY + (height / 2);
-		AppiumUtils.getTouchAction().press(PointOption.point(X, Y)).release().perform();
+		Map<String, Object> params = new HashMap<>();
+		params.put("location", X+","+Y);
+		DriverUtils.getDriver().executeScript("mobile:touch:tap", params);
 		return true;
 	}
 
