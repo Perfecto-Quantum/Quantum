@@ -40,8 +40,8 @@ public final class AppiumUtils {
 	 */
 	public static void swipeUp() {
 		Map<String, Object> params = new HashMap<>();
-		params.put("start", "50%,80%");
-		params.put("end", "50%,20%");
+		params.put("start", "50%,70%");
+		params.put("end", "50%,30%");
 		params.put("duration", "2");
 		DriverUtils.getDriver().executeScript("mobile:touch:swipe", params);
 	}
@@ -51,8 +51,8 @@ public final class AppiumUtils {
 	 */
 	public static void swipeDown() {
 		Map<String, Object> params = new HashMap<>();
-		params.put("start", "50%,20%");
-		params.put("end", "50%,80%");
+		params.put("start", "50%,30%");
+		params.put("end", "50%,70%");
 		params.put("duration", "2");
 		DriverUtils.getDriver().executeScript("mobile:touch:swipe", params);
 	}
@@ -61,10 +61,9 @@ public final class AppiumUtils {
 	 * Swipe from Right to Left.
 	 */
 	public static void swipeLeft() {
-		Point[] points = getXYtoHSwipe();
 		Map<String, Object> params = new HashMap<>();
-		params.put("start", points[0].x + "," + points[0].y);
-		params.put("end", points[1].x + "," + points[1].y);
+		params.put("start", "70%,50%");
+		params.put("end", "30%,50%");
 		params.put("duration", "2");
 		DriverUtils.getDriver().executeScript("mobile:touch:swipe", params);
 	}
@@ -73,48 +72,11 @@ public final class AppiumUtils {
 	 * Swipe from Left to Right
 	 */
 	public static void swipeRight() {
-		Point[] points = getXYtoHSwipe();
 		Map<String, Object> params = new HashMap<>();
-		params.put("start", points[1].x + "," + points[1].y);
-		params.put("end", points[0].x + "," + points[0].y);
+		params.put("start", "30%,50%");
+		params.put("end", "70%,50%");
 		params.put("duration", "2");
 		DriverUtils.getDriver().executeScript("mobile:touch:swipe", params);
-	}
-
-	/**
-	 *
-	 * @return start and end points for vertical(top-bottom) swipe
-	 */
-	private static Point[] getXYtoVSwipe() {
-		// Get screen size.
-		Dimension size = getAppiumDriver().manage().window().getSize();
-
-		// Find x which is in middle of screen width.
-		int startEndx = size.width / 2;
-		// Find starty point which is at bottom side of screen.
-		int starty = (int) (size.height * 0.70);
-		// Find endy point which is at top side of screen.
-		int endy = (int) (size.height * 0.30);
-
-		return new Point[] { new Point(startEndx, starty), new Point(startEndx, endy) };
-	}
-
-	/**
-	 *
-	 * @return start and end points for horizontal(left-right) swipe
-	 */
-	private static Point[] getXYtoHSwipe() {
-		// Get screen size.
-		Dimension size = getAppiumDriver().manage().window().getSize();
-
-		// Find starting point x which is at right side of screen.
-		int startx = (int) (size.width * 0.70);
-		// Find ending point x which is at left side of screen.
-		int endx = (int) (size.width * 0.30);
-		// Find y which is in middle of screen height.
-		int startEndy = size.height / 2;
-
-		return new Point[] { new Point(startx, startEndy), new Point(endx, startEndy) };
 	}
 
 	// IOS Implementation
