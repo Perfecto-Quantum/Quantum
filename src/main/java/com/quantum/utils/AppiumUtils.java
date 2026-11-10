@@ -40,8 +40,8 @@ public final class AppiumUtils {
 	 */
 	public static void swipeUp() {
 		Map<String, Object> params = new HashMap<>();
-		params.put("start", "50%,80%");
-		params.put("end", "50%,20%");
+		params.put("start", "50%,70%");
+		params.put("end", "50%,30%");
 		params.put("duration", "2");
 		DriverUtils.getDriver().executeScript("mobile:touch:swipe", params);
 	}
@@ -51,8 +51,8 @@ public final class AppiumUtils {
 	 */
 	public static void swipeDown() {
 		Map<String, Object> params = new HashMap<>();
-		params.put("start", "50%,20%");
-		params.put("end", "50%,80%");
+		params.put("start", "50%,30%");
+		params.put("end", "50%,70%");
 		params.put("duration", "2");
 		DriverUtils.getDriver().executeScript("mobile:touch:swipe", params);
 	}
