@@ -4,9 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.testng.ISuite;
@@ -21,7 +19,6 @@ import static com.qmetry.qaf.automation.core.ConfigurationManager.*;
 import com.qmetry.qaf.automation.step.QAFTestStepListener;
 import com.qmetry.qaf.automation.step.StepExecutionTracker;
 import com.qmetry.qaf.automation.util.JSONUtil;
-import com.quantum.utils.DriverUtils;
 import static com.quantum.utils.CucumberJsonUtils.*;
 
 public class CucumberJsonListener implements QAFTestStepListener,ITestListener, ISuiteListener {
@@ -36,15 +33,15 @@ public class CucumberJsonListener implements QAFTestStepListener,ITestListener, 
 	    @Override
 	    public void onTestStart(ITestResult result) {
 	        getBundle().setProperty("test_start_timestamp", Instant.now().toString());
-	        getBundle().setProperty("stepObjects", threadLocalSteps.get());
 	    }
 	    
 	    @Override
 	    public void onTestSuccess(ITestResult result) {
-	    	getBundle().setProperty("stepObjects", threadLocalSteps.get());
+	    	ConcurrentLinkedQueue<JsonObject> localSteps = threadLocalSteps.get();
+//	    	getBundle().setProperty("stepObjects", threadLocalSteps.get());
 	        JsonObject scenario = null;
 			try {
-				scenario = buildScenario(result);
+				scenario = buildScenario(result, new ArrayList<>(localSteps));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -54,10 +51,11 @@ public class CucumberJsonListener implements QAFTestStepListener,ITestListener, 
 	    
 	    @Override
 	    public void onTestFailure(ITestResult result) {
-	    	getBundle().setProperty("stepObjects", threadLocalSteps.get());
+	    	ConcurrentLinkedQueue<JsonObject> localSteps = threadLocalSteps.get();
+//	    	getBundle().setProperty("stepObjects", threadLocalSteps.get());
 	        JsonObject scenario = null;
 			try {
-				scenario = buildScenario(result);
+				scenario = buildScenario(result, new ArrayList<>(localSteps));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -67,10 +65,11 @@ public class CucumberJsonListener implements QAFTestStepListener,ITestListener, 
 	    
 	    @Override
 	    public void onTestSkipped(ITestResult result) {
-	    	getBundle().setProperty("stepObjects", threadLocalSteps.get());
+	    	ConcurrentLinkedQueue<JsonObject> localSteps = threadLocalSteps.get();
+//	    	getBundle().setProperty("stepObjects", threadLocalSteps.get());
 	        JsonObject scenario = null;
 			try {
-				scenario = buildScenario(result);
+				scenario = buildScenario(result, new ArrayList<>(localSteps));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -91,8 +90,7 @@ public class CucumberJsonListener implements QAFTestStepListener,ITestListener, 
 	    @Override
 	    public void afterExecute(StepExecutionTracker stepExecutionTracker) {
 	        JsonObject obj = buildStep(stepExecutionTracker);
-	        ConcurrentLinkedQueue<JsonObject> stepObjects = threadLocalSteps.get();
-	        stepObjects.add(obj);
+	        threadLocalSteps.get().add(obj);
 	    }
 	    
 	    @Override

@@ -10,18 +10,14 @@ import org.apache.commons.logging.impl.LogFactoryImpl;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 //import com.perfectomobile.selenium.WebElement;
 import com.qmetry.qaf.automation.ui.WebDriverTestBase;
 
 import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.PerformsTouchActions;
-import io.appium.java_client.TouchAction;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
-import io.appium.java_client.touch.offset.PointOption;
 
 public final class AppiumUtils {
 	
@@ -39,84 +35,48 @@ public final class AppiumUtils {
 		return checkType(AndroidDriver.class);
 	}
 
-	public static TouchAction getTouchAction() {
-		WebDriver driver = new WebDriverTestBase().getDriver().getUnderLayingDriver();
-		return new TouchAction<>((PerformsTouchActions)driver);
-		
-		// TouchAction constructor with AppiumDriver argument is deprecated
-//		return new TouchAction(getAppiumDriver());
-	}
-
 	/**
 	 * Swipe from Bottom to Top.
 	 */
 	public static void swipeUp() {
-		Point[] points = getXYtoVSwipe();
-		getTouchAction().press(PointOption.point(points[0].x, points[0].y))
-				.moveTo(PointOption.point(points[1].x, points[1].y)).release().perform();
+		Map<String, Object> params = new HashMap<>();
+		params.put("start", "50%,70%");
+		params.put("end", "50%,30%");
+		params.put("duration", "2");
+		DriverUtils.getDriver().executeScript("mobile:touch:swipe", params);
 	}
 
 	/**
 	 * Swipe from Top to Bottom.
 	 */
 	public static void swipeDown() {
-		Point[] points = getXYtoVSwipe();
-		getTouchAction().press(PointOption.point(points[1].x, points[1].y))
-				.moveTo(PointOption.point(points[0].x, points[0].y)).release().perform();
+		Map<String, Object> params = new HashMap<>();
+		params.put("start", "50%,30%");
+		params.put("end", "50%,70%");
+		params.put("duration", "2");
+		DriverUtils.getDriver().executeScript("mobile:touch:swipe", params);
 	}
 
 	/**
 	 * Swipe from Right to Left.
 	 */
 	public static void swipeLeft() {
-		Point[] points = getXYtoHSwipe();
-		getTouchAction().press(PointOption.point(points[0].x, points[0].y))
-				.moveTo(PointOption.point(points[1].x, points[1].y)).release().perform();
+		Map<String, Object> params = new HashMap<>();
+		params.put("start", "70%,50%");
+		params.put("end", "30%,50%");
+		params.put("duration", "2");
+		DriverUtils.getDriver().executeScript("mobile:touch:swipe", params);
 	}
 
 	/**
 	 * Swipe from Left to Right
 	 */
 	public static void swipeRight() {
-		Point[] points = getXYtoHSwipe();
-		getTouchAction().press(PointOption.point(points[1].x, points[1].y))
-				.moveTo(PointOption.point(points[0].x, points[0].y)).release().perform();
-	}
-
-	/**
-	 *
-	 * @return start and end points for vertical(top-bottom) swipe
-	 */
-	private static Point[] getXYtoVSwipe() {
-		// Get screen size.
-		Dimension size = getAppiumDriver().manage().window().getSize();
-
-		// Find x which is in middle of screen width.
-		int startEndx = size.width / 2;
-		// Find starty point which is at bottom side of screen.
-		int starty = (int) (size.height * 0.70);
-		// Find endy point which is at top side of screen.
-		int endy = (int) (size.height * 0.30);
-
-		return new Point[] { new Point(startEndx, starty), new Point(startEndx, endy) };
-	}
-
-	/**
-	 *
-	 * @return start and end points for horizontal(left-right) swipe
-	 */
-	private static Point[] getXYtoHSwipe() {
-		// Get screen size.
-		Dimension size = getAppiumDriver().manage().window().getSize();
-
-		// Find starting point x which is at right side of screen.
-		int startx = (int) (size.width * 0.70);
-		// Find ending point x which is at left side of screen.
-		int endx = (int) (size.width * 0.30);
-		// Find y which is in middle of screen height.
-		int startEndy = size.height / 2;
-
-		return new Point[] { new Point(startx, startEndy), new Point(endx, startEndy) };
+		Map<String, Object> params = new HashMap<>();
+		params.put("start", "30%,50%");
+		params.put("end", "70%,50%");
+		params.put("duration", "2");
+		DriverUtils.getDriver().executeScript("mobile:touch:swipe", params);
 	}
 
 	// IOS Implementation
@@ -220,33 +180,6 @@ public final class AppiumUtils {
 		params3.put("operation", "up");
 		driver.executeScript("mobile:touch:tap", params3);
 	}
-
-	// Android Implementation
-
-	// Generic scroll using send keys
-	// Pass in values to be selected as a String array to the list parameter
-	// Method will loop through looking for scroll wheels based on the number of
-	// values you supply
-	// For instance Month, Day, Year for a birthday would have this loop 3 times
-	// dynamically selecting each scroll wheel
-	// Code here shouldn't be modified
-//	@SuppressWarnings("rawtypes")
-//	public static void androidScrollKeys(String[] list) {
-//		AndroidDriver driver = getAndroidDriver();
-//		for (int i = 0; i < list.length; i++) {
-//
-//			By meX = By.xpath("//android.widget.NumberPicker[" + (i + 1) + "]/android.widget.EditText[1]");
-//			fluentWait(driver, meX);
-//			WebElement me = driver.findElement(meX);
-//
-//			TouchAction touchAction6 = new TouchAction(driver);
-//			touchAction6.longPress(LongPressOptions.longPressOptions().withElement(ElementOption.element(me)))
-//					.release();
-//			driver.performTouchAction(touchAction6);
-//
-//			driver.pressKey(convertAndroidMonthName(list[i]) + "");
-//		}
-//	}
 
 	// Used to get the integer for a month based on the string of the month
 	private static int getMonthInt(String month) {
